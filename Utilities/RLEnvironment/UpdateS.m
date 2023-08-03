@@ -31,6 +31,10 @@ if s.fl.rtTask==1
     S=[S w.rtTask.percieveTouch];
 end
 
+if s.act.eatRew == 1
+    S = [S w.lmb.holdingReward];
+end
+
 if s.fl.extraInput==1
     S = [S w.xtra.currV];
 end

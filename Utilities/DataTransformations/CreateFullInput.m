@@ -63,6 +63,12 @@ if s.fl.rtTask== 1
 end
 
 % -------------------------------------------------------------------------
+% Add 'holding object' information if necessary
+if s.act.eatRew == 1
+    inpAll = [inpAll; s.plt.holdingRew.*ones(size(allGoalC(:)))'];%$$$
+end
+
+% -------------------------------------------------------------------------
 % Add extra input if necessary $$$$$ STILL WORK IN PROGRESS
 if s.fl.extraInput==1
     inpAll=[inpAll; nan([size(allGoalC(:),1) size(extraInput,5)] )'];

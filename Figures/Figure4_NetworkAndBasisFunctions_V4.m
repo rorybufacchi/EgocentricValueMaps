@@ -39,7 +39,7 @@ f.ChAct.cb.TickLabels = {'Towards','Away'};
 
 %% Separability of network
 
-for iM = 6 % 53 FOR BIG NETWORK, 53 is nice
+for iM = [6 9] % 53 FOR BIG NETWORK, 53 is nice
     
     iM
     

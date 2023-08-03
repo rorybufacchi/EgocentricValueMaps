@@ -2,6 +2,7 @@ function [] = ShadedPlot(xVals,yValsMean,yValsMin,yValsMax,opts)
 %[] = ShadedPlot(xVals,yValsMean,yValsMin,yValsMax,opts)
 %   opts.c = colours
 %   opts.FaceAlpha is alphaness of the shade
+%   opts.PlotMean is a boolean for plotting the mean line
 
 if ~exist('opts','var')
     opts.c = [0.7 0.7 0.7];

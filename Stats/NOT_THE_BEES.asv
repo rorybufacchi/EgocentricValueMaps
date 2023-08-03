@@ -1,0 +1,1096 @@
+
+% Set gammas and stuff
+allGammas = 0.7;
+
+% % % % settings for plot
+% % % sFP.plt.lmbRow = s.wrld.size(1)-2;
+% % % sFP.plt.rowLims=[6.5 s.wrld.size(1)-1.5];
+% % % sFP.plt.colLims=[3.5 s.wrld.size(2)-3.5];
+% % % sFP.plt.cBarFl=0;
+% % % sFP.plt.meanLimbCols=1;
+% % % sFP=DefaultSettings(sFP);
+% % % sFP.plt.axesVis=0;
+
+% figure settings
+fS.gridXstart = -4.5;
+fS.gridXstep = 1;
+fS.gridYstart = 3.5;
+fS.gridYstep = 1;
+
+
+%% -------------------------------------------------------------------------
+% The bees
+
+s.wrld.size = [61 61 31];
+s.clc.nearPos = [s.wrld.size(1)-6 ceil(s.wrld.size(2)./2) ceil(s.wrld.size(3)./2)]';
+
+s.clc.nReps = 1;
+
+
+allQ = table();
+
+s.clc.gammaVal   = 0.8;
+s.clc.baseVel    = [4 0 0]; 
+
+% % % % x y z, Deterministic stimulus dynamics
+% % % s.clc.stimDynams =     @(pos) pos + [0 0 0]; % For approaching, set speed positive
+% % % s.clc.randSpread =     {[0 1] [-1   0  1] [-1  0  1]}; % Put a little biit of x and z variability in? Kind of arbitrary
+% % % s.clc.spreadProb =     {[.5 .5] [0.2 .6 0.2]  [ .2 .6 .2]}; % x y z, probabilities of spread
+
+% Random stimulus dynamics
+rSpr = [-2 -1 0 1 2]; % row Spread
+rSprPr = gaussmf(rSpr,[1 0]) ./ sum(gaussmf(rSpr,[1 0])); % row Spread prob
+cSpr = [-2 -1 0 1 2]; %%% cSpr = [ -1 0 1 ];
+cSprPr = gaussmf(cSpr,[1 0]) ./ sum(gaussmf(cSpr,[1 0]));
+zSpr = [0]; %%% zSpr = [ -1 0 1 ];
+zSprPr = gaussmf(zSpr,[1 0]) ./ sum(gaussmf(zSpr,[1 0]));
+
+% x y z, Deterministic stimulus dynamics
+s.clc.stimDynams =     @(pos) pos + s.clc.baseVel; % For approaching, set speed positive
+s.clc.randSpread =     {rSpr cSpr zSpr}; % Put a little biit of x and z variability in? Kind of arbitrary
+s.clc.spreadProb =     {rSprPr cSprPr  zSprPr}; % x y z, probabilities of spread
+
+
+% NOTE: If the limb can move at different speeds, BOTH speeds have to be
+% put in as potential actions, because the model doesn't have any collision
+% calculation that takes into account overshoot
+
+% FIRST CALCULATE FOR BODY - moves more slowly than limb, let's say. Also
+% ONLY has negative potential rewards
+sBdy = s;
+sBdy.clc.actConsequence = [ 0  0  0 ; ... % action 1 stay
+    0  1  0 ; ... % action 2：body left
+    0 -1  0 ; ... % action 3: body right
+    0  0 -1 ; ... % action 4: hand $left$
+    0  0  1];     % action 5: hand $right$
+    
+
+% Location and size of limb, and where the Q-values are calculated FROM
+sBdy.clc.startSR = []; sBdy.clc.startSC = []; sBdy.clc.startSZ = [];
+
+
+bdyRs = s.clc.nearPos(1) + [2 1 1 0 0 0 1 1 2];
+bdyCs = s.clc.nearPos(2) + [-4:4];
+bdyZs = s.clc.nearPos(3) + [-floor(s.wrld.size(3)./2):floor(s.wrld.size(3)./2)];
+iRew = 0; % Initialise rewarded block counter
+sBdy.clc.rewSplitInd(1) = 1;
+for  iZ = 1:length(bdyZs)
+    for  iC = 1:length(bdyCs)
+        iRew = iRew + 1;
+        sBdy.clc.startSR(iRew) =  bdyRs(iC);
+        sBdy.clc.startSC(iRew) =  bdyCs(iC);
+        sBdy.clc.startSZ(iRew) =  bdyZs(iZ);
+    end
+end
+sBdy.clc.rewSplitInd(2) = iRew + 1;
+
+% Add in sliding 'hand'
+baseDisplace = s.clc.nearPos(2) - ceil(length(bdyZs)./2);
+sBdy.handWidth = 5;
+for  iZ = 1:length(bdyZs)
+    handCenter = baseDisplace + (iZ - 1);
+
+        cRew = iRew + [1:sBdy.handWidth];
+        sBdy.clc.startSR(cRew) =  min(bdyRs) - 1; % Hand should be in front of body
+        sBdy.clc.startSC(cRew) =  handCenter + [1:sBdy.handWidth] - floor(sBdy.handWidth./2);
+        sBdy.clc.startSZ(cRew) =  bdyZs(iZ);
+        iRew = max(cRew);
+end
+sBdy.clc.rewSplitInd(3) = iRew + 1;
+
+%% Run the model
+
+% -----------------------------
+% DON't allow the body to move directly away, show it a FAST wasp
+cQ = 1;
+sBdy.clc.startRew = [-2 -1] ; % Body, then limb
+[newQ ] = CalcQDirect(sBdy);
+% store q values and attributes
+allQ.qVals{cQ}       = newQ;
+allQ.dir(cQ)         = 1; %s.clc.stimDynams([0 0 0]); % towards
+allQ.rew(cQ,:)       = sBdy.clc.startRew; % towards
+allQ.bodyPart{cQ}    = 'No Body Move, Fast Wasp'; 
+allQ.centerpos{cQ}   = sBdy.clc.nearPos; % x y z position of this plot in the OVERALL space --> trunk is central
+
+
+% DO allow the body to move directly away, show it a FAST wasp
+cQ = 2;
+sBdyAWAY = sBdy;
+sBdyAWAY.clc.actConsequence = [ 0  0  0 ; ... % action 1 stay
+    0  1  0 ; ... % action 2：body left
+    0 -1  0 ; ... % action 3: body right
+    0  0 -1 ; ... % action 4: hand $left$
+    0  0  1 ; ... % action 5: hand $right$
+    -2  0  0];     % action 6: Body AWAY
+[newQ ] = CalcQDirect(sBdyAWAY);
+% store q values and attributes
+allQ.qVals{cQ}       = newQ;
+allQ.dir(cQ)         = 1; %s.clc.stimDynams([0 0 0]); % towards
+allQ.rew(cQ,:)       = sBdyAWAY.clc.startRew; % towards
+allQ.bodyPart{cQ}    = 'No Body Move, Fast Wasp'; 
+allQ.centerpos{cQ}   = sBdyAWAY.clc.nearPos; % x y z position of this plot in the OVERALL space --> trunk is central
+
+
+% DO allow the body to move directly away, show it a SLOW wasp
+cQ = 3;
+sBdyAWAYslowwasp = sBdyAWAY;
+% Set slow wasp move speed
+sBdyAWAYslowwasp.clc.baseVel    = [1 0 0]; 
+sBdyAWAYslowwasp.clc.stimDynams =     @(pos) pos + sBdyAWAYslowwasp.clc.baseVel;
+[newQ ] = CalcQDirect(sBdyAWAYslowwasp);
+% store q values and attributes
+allQ.qVals{cQ}       = newQ;
+allQ.dir(cQ)         = 1; %s.clc.stimDynams([0 0 0]); % towards
+allQ.rew(cQ,:)       = sBdyAWAYslowwasp.clc.startRew; % towards
+allQ.bodyPart{cQ}    = 'No Body Move, Fast Wasp'; 
+allQ.centerpos{cQ}   = sBdyAWAYslowwasp.clc.nearPos; % x y z position of this plot in the OVERALL space --> trunk is central
+
+
+save('F:\Projects\DPPS\DefenseAgent\Data\The_BEES_plus_AWAYoption_v2.mat')
+
+%% Plot 2D 
+
+newQ = allQ.qVals{2};
+sTmp = sBdy;
+iAct = 1:size(newQ,1);
+
+[newQ2 optAct] = max(newQ(iAct,:,:,:),[],1); % Max value
+% newQ2 = mean(newQ(iAct,:,:,:),1); % avg value
+
+newQ2 = optAct;
+
+f.TwoDimPlot.f        = figure('Position',[20 20 1200 600]);
+f.TwoDimPlot.ax{1}    = axes('Position',[.05 .1 .4 .8]);
+
+
+zPos = sTmp.clc.nearPos(3) - 1; % 7;% POSITION OF SLICE
+imagesc(squeeze(-newQ2(1,:,:,zPos )) );
+% colormap(whitetocol(100,[0 0 0.7]))
+colormap(redbluecmapRory)
+GridOverImage(fS,f.TwoDimPlot.ax{1});
+caxis([-1 1])
+colorbar
+% Show where the hand and the body are
+hold on
+plSymb = {'xk','ok'};
+inSlice = find(sBdy.clc.startSZ == zPos);
+for cVol = inSlice
+for iSplitInd = 1:length(sBdy.clc.rewSplitInd)
+    if cVol >= sBdy.clc.rewSplitInd(iSplitInd) & cVol < sBdy.clc.rewSplitInd(iSplitInd+1)
+        plot(sBdy.clc.startSC(cVol),sBdy.clc.startSR(cVol),plSymb{iSplitInd},'LineWidth',2) 
+    end
+end
+end
+hold off;
+
+% caxis auto
+caxis([-6 -1])
+
+
+% % % 
+% % % f.TwoDimPlot.ax{2}    = axes('Position',[.55 .1 .4 .8]);
+% % % colPos = sTmp.clc.nearPos(2);
+% % % imagesc(squeeze(-newQ2(1,:,colPos,:))' );
+% % % hold on; axis xy
+% % % % colormap(whitetocol(100,[0 0 0.7]))
+% % % colormap(redbluecmapRory)
+% % % GridOverImage(fS,f.TwoDimPlot.ax{2});
+% % % caxis([-6 -1]);
+
+
+% ------------------------------------------
+% Create a custom colormap with 'stay still' as white
+custom_colormap = jet;
+% Replace the color for the specific value with white
+custom_colormap(end, :) = [1, 1, 1];
+colormap(custom_colormap);
+% ------------------------------------------
+
+% Show where the hand and the body are
+hold on
+plSymb = {'xk','ok'};
+inSlice = find(sBdy.clc.startSC == colPos);
+for cVol = inSlice
+for iSplitInd = 1:length(sBdy.clc.rewSplitInd)
+    if cVol >= sBdy.clc.rewSplitInd(iSplitInd) & cVol < sBdy.clc.rewSplitInd(iSplitInd+1)
+        plot(sBdy.clc.startSR(cVol),sBdy.clc.startSZ(cVol),plSymb{iSplitInd},'LineWidth',2) 
+    end
+end
+end
+
+hold off
+
+%%  3D plot
+figure('Position',[500 20 600 600])
+tmpQ = -newQ2;
+% % % tmpQ(abs(tmpQ) < prctile(abs(newQ(:)),90) ) = 0;
+tmpQ(abs(tmpQ) < 0.2 ) = 0;
+voxelSurf(squeeze(tmpQ(1,:,:,:)),true,[0.1 0.8 0.1 0.8 0.1 0.8],.3);
+% voxelSurf(squeeze(tmpQ(1,:,:,:)),true,[0.8 0.1 0.8 0.1 0.8 0.1 ],.4);
+% colormap(whitetocol(100,[0 0 0.7]))
+colormap(redbluecmapRory)
+view([-2 2 2])
+caxis([-1 1])
+colorbar
+hold off
+
+
+
+% % % figure,plot(squeeze(-newQ2(:,:,sTmp.clc.nearPos(2),sTmp.clc.nearPos(3)))' )
+
+% figure,plot(squeeze(-newQ2(:,:,sHnd.clc.nearPos(2),sHnd.clc.nearPos(3)))' )
+% figure,plot(squeeze(-newQ2(:,:,sHndSide.clc.nearPos(2),sHndSide.clc.nearPos(3)))' )
+
+
+
+
+
+%% Save figures
+
+
+allFields = fields(f);
+for iF = 1:length(allFields)
+    cF = allFields{iF};
+
+    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.eps'] , 'epsc')
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.pdf'] , 'pdf')
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.tif'] , 'tif')
+end
+
+
+%% Make figures showing body part surfaces
+
+f.Model3DBase.f = figure('Position',[20 20 1400 1200]);
+
+lims3D   = [105 365 ; -20 120 ; 0 150];
+sizePlot = [0 300 0 130 0 150]; % [0.1 0.8 0.1 0.8 0.1 0.8]
+
+s.plt.vidFl = 0;
+
+% ------------------------------------------------------
+% First skin for all body parts
+
+% HAND
+sFPl = sHndSide ;
+plQ = allQ(13,:);
+sFPl.clc.startRew       = 1;
+sFPl.clc.plS.iAct       = 1:43;
+sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 2; % semi-arbitrary offset to get around how voxelsurf.m deals with negative numbers
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.plSkin     = 'Y';
+sFPl.clc.plS.plField    = 'N'; %
+
+% [1 sY 1 sX 1 sZ]
+sFPl.clc.plS.volSettings= {true,sizePlot,1};
+
+[newQ, f] = PlotQMaps(sFPl,plQ,f); hold on
+
+ylim(lims3D(1,:));
+xlim(lims3D(2,:));
+zlim(lims3D(3,:));
+
+% set(gca,'XTick',[0.2 0.4 0.6 0.8])
+% set(gca,'YTick',[0.2 0.4 0.6 0.8])
+% set(gca,'ZTick',[0.2 0.4 0.6 0.8])
+% set(gca,'XTickLabels',{''})
+% set(gca,'YTickLabels',{''})
+% set(gca,'ZTickLabels',{''})
+caxis([1 4])
+
+
+% BODY
+sFPl = sBdy;
+plQ = allQ(2,:);
+sFPl.clc.startRew       = -1;
+sFPl.clc.plS.iAct       = 1:7;
+sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 3; 
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.plSkin     = 'Y';
+sFPl.clc.plS.plField    = 'N';
+
+sFPl.clc.plS.volSettings= {true,sizePlot,1};
+[newQ, f] = PlotQMaps(sFPl,plQ,f);
+
+caxis([1 4])
+
+% HEAD
+sFPl = sHed;
+plQ = allQ(6,:);
+sFPl.clc.startRew       = -1;
+sFPl.clc.plS.iAct       = 1:7;
+sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 3; 
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.plSkin     = 'Y';
+sFPl.clc.plS.plField    = 'N';
+
+sFPl.clc.plS.volSettings= {true,sizePlot,1};
+[newQ, f] = PlotQMaps(sFPl,plQ,f);
+
+caxis([1 4])
+
+% MapsColourBar();
+
+view([30 25])
+axis off
+
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if s.plt.vidFl == 1
+    % Video without fields
+
+    s.plt.vidFileName = 'F:\Projects\DPPS\DefenseAgent\Results\Videos\RotateWithWIthoutFields.avi';
+
+    s.plt.vidFR = 36;
+    s.plt.addVidAngs = linspace(0,360 .* 1.5,s.plt.vidFR * 6)
+
+    v = RotateAndFilm(gcf,s,[]);
+end
+
+title('Body Surface')
+
+
+
+% ------------------------------------------------------
+% Next FIELDS for all body parts
+
+% Make copy of figure
+cAx = gca;
+f.Model3DFields.f = figure('Position',[20 20 1400 1200]);
+cAx = copyobj(cAx,f.Model3DFields.f);
+
+title('')
+
+
+% BODY
+sFPl = sBdy;
+plQ = allQ(2,:);
+sFPl.clc.startRew       = -1;
+sFPl.clc.plS.iAct       = 1:7;
+sFPl.clc.plS.ActFun     = @(x) x(1,:,:,:,:);
+% sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+% sFPl.clc.plS.ActFun     = @(x) median(x,1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 3; 
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45;
+sFPl.clc.plS.plSkin     = 'N';
+sFPl.clc.plS.plField    = 'Y';
+
+sFPl.clc.plS.volSettings= {true,sizePlot,.25};
+[newQ, f] = PlotQMaps(sFPl,plQ,f);
+
+% MapsColourBar();
+% title('Trunk PPS')
+
+ylim(lims3D(1,:));
+xlim(lims3D(2,:));
+zlim(lims3D(3,:));
+
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if s.plt.vidFl == 1
+    % Video with body field
+    s.plt.addVidAngs = linspace(0,360 .* 1,s.plt.vidFR * 4)
+    v = RotateAndFilm(gcf,s,v);
+end
+
+
+
+% HEAD
+sFPl = sHed;
+plQ = allQ(6,:);
+sFPl.clc.startRew       = -1;
+sFPl.clc.plS.iAct       = 1:7;
+sFPl.clc.plS.ActFun     = @(x) x(1,:,:,:,:);
+% sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+% sFPl.clc.plS.ActFun     = @(x) median(x,1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 3; 
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45;
+sFPl.clc.plS.plSkin     = 'N';
+sFPl.clc.plS.plField    = 'Y';
+
+sFPl.clc.plS.volSettings= {true,sizePlot,.25};
+[newQ, f] = PlotQMaps(sFPl,plQ,f);
+
+% MapsColourBar();
+
+% title('Trunk + Head PPS')
+
+ylim(lims3D(1,:));
+xlim(lims3D(2,:));
+zlim(lims3D(3,:));
+
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if s.plt.vidFl == 1
+    s.plt.addVidAngs = linspace(0,360 .* 1,s.plt.vidFR * 4)
+    v = RotateAndFilm(gcf,s,v);
+end
+
+
+% HAND
+sFPl = sHndSide ;
+plQ = allQ(13,:);
+sFPl.clc.startRew       = 1;
+sFPl.clc.plS.iAct       = 1:43;
+sFPl.clc.plS.ActFun     = @(x) x(1,:,:,:,:);
+% sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+% sFPl.clc.plS.ActFun     = @(x) median(x,1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 2; 
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45
+sFPl.clc.plS.plSkin     = 'N';
+sFPl.clc.plS.plField    = 'Y'; %
+
+sFPl.clc.plS.volSettings= {true,sizePlot,.25};
+[newQ, f] = PlotQMaps(sFPl,plQ,f); hold on
+
+caxis([1 4])
+colormap(BlueWhiteRedDavide3)
+
+% MapsColourBar();
+
+ylim(lims3D(1,:));
+xlim(lims3D(2,:));
+zlim(lims3D(3,:));
+
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if s.plt.vidFl == 1
+    s.plt.addVidAngs = linspace(0,360 .* 2.5 ,s.plt.vidFR * 10)
+    v = RotateAndFilm(gcf,s,v);
+    close(v)
+end
+
+title('Trunk + Head + Hand PPS')
+
+
+
+%%
+
+
+sFPl = sHnd;
+plQ = allQ(9,:);
+sFPl.clc.plS.iAct       = 1:43;
+
+% sFPl = sHndSide ;
+% plQ = allQ(13,:);
+% sFPl.clc.plS.iAct       = 1:43;
+
+
+% sFPl = sBdy;
+% plQ = allQ(2,:);
+% sFPl.clc.plS.iAct       = 1:7;
+
+
+sFPl = sHed;
+plQ = allQ(6,:);
+sFPl.clc.plS.iAct       = 1:7;
+
+% plot settings
+sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+% sFPl.clc.plS.ActFun = @(x) mean(x,1);
+sFPl.clc.plS.plDim      = 3;
+% sFPl.clc.plS.excl3D     = @(x) abs(x) < 00;
+sFPl.clc.plS.excl3D     = @(x) abs(x) < 0.1;
+sFPl.clc.plS.plSkin     = 'Y';
+sFPl.clc.plS.plField    = 'Y'; % If this is no, do not plot ANY of the field
+
+% sFPl.clc.plS.volSettings= {true,[0.1 0.8 0.1 0.8 0.1 0.8],.3};
+% sFPl.clc.plS.volSettings= {true,[0.7 0.8 0.7 0.8 0.7 0.8],.3};
+% sFPl.clc.plS.volSettings= {true};
+
+sFPl.clc.plS.volSettings= {true,[0.1 0.8 0.1 0.8 0.1 0.8],.5};
+
+[newQ, f] = PlotQMaps(sFPl,plQ,f);
+
+
+
+function [cb] = MapsColourBar()
+    cLims   = caxis;
+    cb      = colorbar
+    cb.Ticks= cLims;
+    cb.TickLabels = {'Pos','Neg'};
+end
+
+% -------------------------------------------------------------------------
+function [v] = RotateAndFilm(h,s,v)
+% Rotates and films a 3d plot, given by handle
+    
+    if isempty(v)
+        v = VideoWriter(s.plt.vidFileName);
+        v.FrameRate=s.plt.vidFR;
+        v.Quality = 100;
+        open(v)
+    end
+    
+    [baseAz baseEl] = view;
+
+    axis vis3d
+
+    for iAng = 1:numel(s.plt.addVidAngs)
+
+        view([baseAz + s.plt.addVidAngs(iAng), baseEl])
+
+        frame=getframe(h);
+
+        writeVideo(v,frame);
+    end
+
+end
+
+% -------------------------------------------------------------------------
+function [allQ, f] = PlotQMaps(s,allQ,f)
+% Plots q values. Best not to feed the entirety of allQ at the same time,
+% but rather specific rows
+
+iAct = s.clc.plS.iAct;
+
+for iQ = 1:size(allQ,1)
+    cQ = allQ(iQ,:);
+
+    plQ = s.clc.plS.ActFun(cQ.qVals{1}(iAct,:,:,:));
+
+    % Switch between 1D, 2D and 3D plots
+    switch s.clc.plS.plDim
+        case 1
+            plot(squeeze(-plQ(:,:,s.clc.nearPos(2),s.clc.nearPos(3)))' )
+
+        case 2
+            % 2D figure settings
+            fS.gridXstart = -4.5;
+            fS.gridXstep = 1;
+            fS.gridYstart = 3.5;
+            fS.gridYstep = 1;
+
+
+            ax{1}    = axes('Position',[.05 .1 .4 .8]);
+            imagesc(squeeze(-plQ(1,:,:,s.clc.nearPos(3))) );
+            % colormap(whitetocol(100,[0 0 0.7]))
+            colormap(redbluecmapRory)
+            GridOverImage(fS,ax{1});
+            caxis([-1 1])
+            colorbar
+
+
+            ax{2}    = axes('Position',[.55 .1 .4 .8]);
+            imagesc(squeeze(-plQ(1,:,s.clc.nearPos(2),:))' );
+            hold on; axis xy
+            % colormap(whitetocol(100,[0 0 0.7]))
+            colormap(redbluecmapRory)
+            GridOverImage(fS,ax{2});
+            caxis([-1 1])
+
+
+        case 3
+            %  3D plot
+            switch s.clc.plS.plField
+                case 'Y'
+                    tmpQ = -plQ;
+                case 'N'
+                    tmpQ = zeros(size(plQ));
+            end
+
+            switch s.clc.plS.plSkin
+                case 'Y'
+                    % Set the the 'skin surface' to a particular value
+                    % [hence the startSR:end in the 2nd dimension]
+                    for iVol = 1:length(s.clc.startSZ)
+                        tmpQ(:,s.clc.startSR(iVol),s.clc.startSC(iVol),s.clc.startSZ(iVol)) = -s.clc.startRew;
+                    end
+
+                    if isfield(s.clc,'toolSR')
+                        for iVol = 1:length(s.clc.toolSR)
+                            newQ(:,s.clc.toolSR(iVol),s.clc.toolSC(iVol),s.clc.toolSZ(iVol)) = -s.clc.startRew;
+                        end
+                    end
+            end
+
+
+
+            % Have to set tmpQ to all positive, becasue voxelsurf is weird
+            % with negative numbers
+            tmpQ = tmpQ + s.clc.plS.offset;
+
+            tmpQ( s.clc.plS.excl3D(tmpQ) ) = 0;
+            
+            voxelSurf(squeeze(tmpQ(1,:,:,:)),s.clc.plS.volSettings{:});
+
+            % colormap(whitetocol(100,[0 0 0.7]))
+            % colormap(redbluecmapRory)
+            colormap(BlueWhiteRedDavide3)
+
+            
+
+    end
+
+    % --> AND add option for video
+end
+
+end
+% -------------------------------------------------------------------------
+
+
+
+
+%% FUNCTIONS
+
+% -------------------------------------------------------------------------
+function [newPos,s] = TrackDynamics(pos,s)
+% Simulates the dynamics of the track spider and butterfly experiment
+
+pos = pos(:);
+
+% Define the points at which the butterflies and spiders can appear,
+% relative to the hand
+allStimPos = [  0  0 0 ; ... L7, collision course: HAND IS HIT!
+               -2  2 0 ; ... L6, collision course: 10 cm from hand in x and y
+               -5  2 0 ; ... L5, collision course
+               -8  2 0 ; ... L4, collision course
+                0 -4 0 ; ... L7, non-coll course: HAND IS MISSED!
+               -2 -2 0 ; ... L6, non-coll course: 10 cm from hand in x and y
+               -5 -2 0 ; ... L5, non-coll course
+               -8 -2 0 ; ... L4, non-collision course
+              -11  0 0 ; ... L3
+              -14  0 0 ; ... L2
+              -17  0 0 ];  % L1
+
+allStimPos = flipud(allStimPos);
+
+allStimPos = allStimPos + s.clc.nearPos';
+
+% If the current position is not on the trajectory, just return the current
+% position
+if ~any(all( pos == allStimPos' ))
+    newPos = pos;
+
+% But if it IS on the trajectory, update the trajectory accordingly
+else
+    posOnTraj = find(all( pos == allStimPos' ));
+
+    % If on the deterministic parts, just update to the next position
+    if posOnTraj ~= 3 
+        newPos = allStimPos(posOnTraj + 1 , :);
+    else
+        % Otherwise update to the collision track, BUT I HAVE TO SET THE
+        % RANDOM SPREAD TO ALLOW IT TO GO ONTO THE NON-COLLISION TRACK
+        % AS WELL
+        newPos = allStimPos(8 , :);
+    end
+    
+end
+
+s.clc.specialTraject = allStimPos;
+
+
+end
+% -------------------------------------------------------------------------
+
+
+% -------------------------------------------------------------------------
+function [psi psiLines lineDescr] = MakePsi(allQ, d)
+% Return a successor representation specific to the dataset
+
+[psiLines lineDescr]   = FindPsiLines(allQ, d.psiSplit{1});
+
+% Add to psi in manner dependent on the settings
+psi =[];
+for iPsi = 1:numel(psiLines)
+
+
+    % q values for all actions of a particular [iPsi] bodypart
+    if ~iscell(d.cmPos{1})
+        tmpPsi         = abs(ExtractQ(allQ.qVals(psiLines{iPsi} ),d.binPos{1}));
+    end
+
+    switch d.psiSettings{1,3}
+        case 'avOverRows'
+    
+
+            cBinPos = d.binPos{1};
+            
+
+            % If stimulus poisiont is defined as a cell, average over each
+            % entry within a give cell
+            if iscell(d.cmPos{1})
+
+                % Initialise to NaN so that different lengths can be used
+                tmpTmpPsi = nan([max(cellfun(@(x) numel(x), d.binPos{1}),[],'all')  ...
+                    size(allQ.qVals{psiLines{iPsi} },1) size(d.cmPos{1},2)]);
+
+                for iTraj = 1:size(d.cmPos{1},2) % loop through trajectories
+
+
+                    avRows = d.binPos{1}{1,iTraj};
+
+                    for iRow = 1:numel(avRows)
+                        cRow = avRows(iRow);
+
+                        cBinPos = [d.binPos{1}{1,iTraj}(iRow) d.binPos{1}{2,iTraj}(iRow) d.binPos{1}{3,iTraj}(iRow)]';
+
+
+                        % rows within trajectory, then actions, then positions,
+                        % i.e. trajectories
+                        tmpTmpPsi(iRow,:,iTraj)         = abs(ExtractQ(allQ.qVals(psiLines{iPsi} ),cBinPos));
+
+
+                    end
+                end
+
+            % If no further indication is give, loop over 1m [100cm], stricly along
+            % the row dimension
+            else
+                avRows = min(d.binPos{1}(1,:)) : -1 : (min(d.binPos{1}(1,:)) - 20);
+                for iRow = 1:numel(avRows)
+                    cRow = avRows(iRow);
+
+                    cBinPos(1,:) = cRow;
+
+                    tmpTmpPsi(iRow,:,:,:,:,:,:)         = abs(ExtractQ(allQ.qVals(psiLines{iPsi} ),cBinPos));
+
+
+                end
+
+                
+            end
+
+            % Take into account possibility of only 1 possible action
+            if size(tmpTmpPsi,2) == 1
+                tmpPsi(1,:) = squeeze(nanmean(tmpTmpPsi,1));
+            else
+                tmpPsi = squeeze(nanmean(tmpTmpPsi,1));
+            end
+
+            
+    end
+    
+
+    
+    % Placeholder for relative action probability to 'stay still' action
+    switch d.psiSettings{1,2}
+        case 'rel_still_norm'
+            stayPsi = tmpPsi(1,:);
+            tmpPsi = tmpPsi - stayPsi;
+
+    end
+
+
+    switch d.psiSettings{1,1}
+        case {'average', 'average_all'}
+            tmpPsi = mean(tmpPsi,1);
+        case {'max','max_all','max_then_avg'}
+            tmpPsi = max(tmpPsi,[],1);
+        case 'raw'
+    end
+    psi = [psi ; tmpPsi];
+end
+
+
+
+switch d.psiSettings{1,1}
+    case {'average_all','max_then_avg'}
+        psi = mean(psi,1);
+    case 'max_all'
+        psi = mean(psi,1);
+end
+
+% Normalise across successor features --> simulates mutual inhibition, for
+% example
+switch d.psiSettings{1,2}
+    case 'sum_norm'
+        psi = psi ./ (sum(psi,1));
+    case 'diff_from_mean_norm'
+        psi = psi - mean(psi,1);
+    case 'diff_from_mean_divmean_norm'
+        psi = (psi - mean(psi,1))./ mean(psi,1);
+    case 'no_norm'
+end
+% Adjust for case where everything dividing by zero
+psi(isnan(psi)) = 0;
+
+end
+% -------------------------------------------------------------------------
+
+% -------------------------------------------------------------------------
+function [allLines lineDescr] = FindPsiLines(allQ, psiSplit)
+% Finds the lines in allQ of the Psi features that will be included
+% Also returns a description of what those lines entail
+elements = {};
+% Create list of elements: cell array with N vectors to combine
+for iSC = 1:numel(psiSplit) % loop through split conditions
+    elements = [elements, {psiSplit{iSC}{2}}];
+end
+
+combinations        = cell(1, numel(elements)); %set up the varargout result
+[combinations{:}]   = ndgrid(elements{:}); % feed each element as separate input
+combinations        = cellfun(@(x) x(:), combinations,'uniformoutput',false); %Transform into vectors
+
+allSplits = arrayfun(@(ind) psiSplit{ind}{1},1:numel(psiSplit),'UniformOutput',false);
+
+% Loop through combinations to create logical indexes
+allLines = [];
+for iSS = 1:numel(combinations{1}) % sub split index
+
+    % Make a Boolean specifying which lines of allQ correspond to this
+    % combination of conditions
+    inclLines = ones([size(allQ,1) 1]);
+    lineDescr{iSS} = '';
+    for iSC = 1:numel(allSplits)
+        currSpl = allSplits{iSC}; % current split
+
+        % Find the lines in allQ that should be included
+        inclLines = inclLines & IsEqual(allQ.(currSpl),{combinations{iSC}{iSS}});
+        % Only add to the description if the current split also has
+        % alternative options. Otherwise just consider it an effect that
+        % Psi naturally takes into account - i.e.e there ren't multiple
+        % psis for that effect
+        if numel(psiSplit{iSC}{2}) == 1
+        else
+            lineDescr{iSS} = [lineDescr{iSS} currSpl ' == ' num2str(combinations{iSC}{iSS}) '. '];
+        end
+    end
+
+    allLines = [allLines; {find( inclLines )}];
+%     lineDescr{iSS} = 
+end
+end
+% -------------------------------------------------------------------------
+
+
+% -------------------------------------------------------------------------
+function [eqBool] = IsEqual(d1,d2)
+% Compares any input, whether a string or a number. Takes CELL input. Note
+% at least one of the entries must only contain one value
+
+% Convert EVERYTHING to strings inside cells
+if ~ iscell(d1)
+    d1 = num2cell(d1);
+end
+if ~ iscell(d2)
+    d1 = num2cell(d2);
+end
+d1 = cellfun(@(subD) num2str(subD), d1, 'UniformOutput', false);
+d2 = cellfun(@(subD) num2str(subD), d2, 'UniformOutput', false);
+
+% Make sure they are the same shape
+d1 = d1(:);
+d2 = d2(:);
+
+% Compare the strings
+eqBool = strcmp(d1,d2);
+end
+% -------------------------------------------------------------------------
+
+
+% -------------------------------------------------------------------------
+function [d] = InsertModelledDat(d,dFitFinal,allDat)
+% Takes modelled data and puts it back into the data structure for easier
+% plotting
+    cP = 0; % current point
+    for iD = 1:size(d,1)
+        nP = numel(d.realDat{iD}); % number of points
+        d.fittedDat{iD} = dFitFinal(cP + [1:nP]);
+        cP = cP + nP;
+    end
+end
+% -------------------------------------------------------------------------
+
+
+% -------------------------------------------------------------------------
+function [psiMat allDat psiLabels] = MakePsiMat(d)
+% Makes a successor state matrix that allows faster fitting of the data,
+% assuming different multipliers for each tactile location
+
+allTacts = unique(d.tact);
+numTacts = numel(allTacts);
+numFeats = size(d.psi{1},1);
+
+allDat   = [d.realDat{:}];
+numDats  = numel(allDat);
+
+psiMat = zeros([numFeats .* numTacts, numDats]);
+
+% Current Row
+cRow  = 0;
+cRow2 = 0;
+doneTacts = [];
+for iD = 1:size(d,1)
+
+    cTact = d.tact{iD};
+
+    % Stick the psi in the appropriate tactile zone [the rest is 0]
+    tactRow = find(strcmp(allTacts,cTact));
+    tactRow = ((tactRow - 1) .* numFeats) + 1;
+
+    % Current data
+    cDat    = d.realDat{iD};
+    cDLen   = numel(cDat);
+
+    if iD == 11
+        disp('Test')
+    end
+    psiMat(tactRow:tactRow + numFeats - 1, [1:cDLen] + cRow) = d.psi{iD};
+    
+    % Store the description of the features that the weight refers to
+    if ~ismember(cTact, doneTacts)
+        for iPsi = 1:numFeats
+            doneTacts = [doneTacts {cTact}];
+            % --> DO I NEED TO PUT SOMETHING IN HERE THAT TAKES INTO
+            % ACCOUNT HOW MANY SUBFEATURES THERE ARE?? OR do I do it above,
+            % in FindPsiLines?
+            psiLabels{cRow2 + iPsi} = ['Tact Loc: ' cTact '. ' d.psiLineDescr{iD}{iPsi}];
+        end
+        cRow2 = cRow2 + iPsi;
+    end
+
+    cRow = cRow + cDLen;
+end
+end
+% -------------------------------------------------------------------------
+
+% -------------------------------------------------------------------------
+% Calculate fit quality and return best modelled data
+function [sSqErr, dFit] = ErrorFun(psiMat,allDat,d,p)
+% % %     % 'fitted' data: estimated values
+% % %     dFit = sum( psiMat .* p(1:size(psiMat,1)) ) + p(size(psiMat,1) + 1);
+
+    % With an offset for each experiment
+    currInd = 0;
+% % %     allExps = unique(d.exp);
+% % %     expCol = [d.exp{:}];
+% % %     for iExp = 1:numel(allExps)
+% % %         expDat = [d.realDat{d.exp == iExp}];
+% % %         expOffset(currInd + [1:numel(expDat)]) = p(size(psiMat,1) + iExp);
+% % %         currInd = numel(expOffset);
+% % %     end
+
+    allExps = unique(d.exp);
+    % Make a list of experiment numbers for each entry in the d table
+    expCol = [];
+    for iD = 1:size(d,1)
+        expCol = [expCol, d.exp(iD) .* ones(size(d.realDat{iD})) ];
+    end
+    for iExp = 1:numel(allExps)
+        expPos = expCol == iExp;
+        expOffset(expPos) = p(size(psiMat,1) + iExp);
+    end
+
+
+
+    % Add a separate offset for stimuli moving away direction
+    if numel(p) > size(psiMat,1) + iExp
+        currInd = 0;
+        for iD = 1:size(d,1)
+            dDat = [d.realDat{iD}];
+            if d.dir(iD) == -1
+                dirOffset(currInd + [1:numel(dDat)]) = p(size(psiMat,1) + iExp + 1);
+            else
+                dirOffset(currInd + [1:numel(dDat)]) = 0;
+            end
+            currInd = numel(dirOffset);
+        end
+    else
+        dirOffset = 0;
+    end
+
+    % 'fitted' data: estimated values
+    dFit = sum( psiMat .* p(1:size(psiMat,1)) ) + expOffset + dirOffset;
+
+
+    sSqErr = sum((dFit - allDat).^2);
+end
+% -------------------------------------------------------------------------
+
+% -------------------------------------------------------------------------
+function d = AddbinPos(d,s,dNums)
+for iFitD = dNums
+
+    % If there are multiple entries per 'location' adjust accordingly
+    if iscell(d.cmPos{iFitD})
+
+        d.binPos{iFitD} = cell(size(d.cmPos{iFitD}));
+        tmpCmPos = d.cmPos{iFitD};
+
+
+        for iTraj = 1:size(d.cmPos{iFitD},2) % loop through trajectories
+
+            % The rows have to be flipped, because small == far
+            tmpCmPos{1,iTraj} = -d.cmPos{iFitD}{1,iTraj};
+            for iDim = 1:size(d.cmPos{iFitD},1)
+                % Convert real positions to voxels
+                d.binPos{iFitD}{iDim,iTraj} = round(s.clc.nearPos(iDim) + tmpCmPos{iDim,iTraj} ./ s.clc.binW);
+            end
+
+        end
+    else
+
+        tmpCmPos = d.cmPos{iFitD};
+
+        % The rows have to be flipped, because small == far
+        tmpCmPos(1,:) = -d.cmPos{iFitD}(1,:);
+        % Convert real positions to voxels
+        d.binPos{iFitD} = round(s.clc.nearPos + tmpCmPos ./ s.clc.binW);
+        % But for rows, use FLOOR so that the closest position isn't IN the bodypart
+        d.binPos{iFitD}(1,:) = floor(s.clc.nearPos(1,:) + tmpCmPos(1,:) ./ s.clc.binW);
+    end
+end
+end
+% -------------------------------------------------------------------------
+
+% -------------------------------------------------------------------------
+% Extract appropriate q values using the d.bin positions
+function outQ = ExtractQ(allqVals, binPos)
+outQ = [];
+for iQ = 1:numel(allqVals)
+% % %     if iQ == 9
+% % %         disp('test')
+% % %     end
+    qVals = allqVals{iQ};
+    
+    outQ = [outQ ; cell2mat(arrayfun(@(pos)  qVals(:,binPos(1,pos),binPos(2,pos),binPos(3,pos)),...
+    [1:size(binPos,2)], 'UniformOutput', false))];
+end
+end
+% -------------------------------------------------------------------------
+
+
+% -------------------------------------------------------------------------
+function [rr cc zz] = FindLinePixels(dR,dC,dZ)
+% Finds pixels on a particular line starting at 0
+
+nSamp = 2 .* max ([dR dC dZ]);
+rr = round(linspace(0,dR,nSamp));
+cc = round(linspace(0,dC,nSamp));
+zz = round(linspace(0,dZ,nSamp));
+
+% Find and remove duplicates
+duplNs = [0; sum(diff([rr' cc' zz']),2) == 0] == 1;
+rr(duplNs) = [];
+cc(duplNs) = [];
+zz(duplNs) = [];
+end
+% -------------------------------------------------------------------------
+
+
+
+function [ gofScore chiSq pVal1 pVal2 ] = GoFFun( errSq, stdDevSq, k )
+%GoFFun Calculates the Goodness of Fit scores
+
+chiSq = nansum(errSq(:)./stdDevSq(:));
+
+gofScore = (chiSq - k) ./sqrt(2.*k);
+
+pVal1=1-chi2cdf(chiSq,k);
+pVal2=1-normcdf(gofScore);
+end
+
+
+
+

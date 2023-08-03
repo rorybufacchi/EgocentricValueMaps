@@ -70,11 +70,18 @@ end
 % $$$ covVal here
 [GL_THR_diff_cov GL_THR_rat_cov GLorTHR_cov]=DiffRat(covGl,covThr);
 
-% $$$ TEMP:
-GL_THR_diff = GL_THR_diff_cov;
-GL_THR_rat = GL_THR_rat_cov;
+% Replace zeros inside the network with NaNs, and select correct metrics
+GL_THR_diff = NanToZero(GL_THR_diff_cov); 
+GL_THR_rat = NanToOne(GL_THR_rat_cov,0.5);
 GLorTHR = GLorTHR_cov; 
 rGl=covGl; rThr=covThr;
+
+% Set everything that isn't a neuron back to NaN
+for iL = 1:numel(s.lp.netS)
+    GL_THR_diff(iL, s.lp.netS(iL)+1:end) = NaN;
+    GL_THR_rat(iL, s.lp.netS(iL)+1:end) = NaN;
+end
+
 
 % Set everything before startlayer to NaN
 if s.plt.startLayer > 1
@@ -149,23 +156,23 @@ for iL=s.plt.startLayer:s.plt.stopLayer
 
         wghtByGl(iL+1,1:size(net.LW{iL+1,iL},1))=sum( ... 
             abs(useWght) .* ... Weights between layers
-            GLorTHR(iL,1:size(useWght,2))  ... == 1 if neuron prefers goals
+            NanToZero(GLorTHR(iL,1:size(useWght,2)))  ... == 1 if neuron prefers goals
             ,2);
         wghtByThr(iL+1,1:size(useWght,1))=sum( ...
             abs(useWght) .* ...
-            ~GLorTHR(iL,1:size(useWght,2)) ... == 1 if neuron prefers threats
+            ~NanToOne(GLorTHR(iL,1:size(useWght,2))) ... == 1 if neuron prefers threats
             ,2);
         wghtByClass(iL+1,1:size(useWght,1))=sum( ...
             abs(useWght) .* ...
-            (GLorTHR(iL,1:size(useWght,2))-.5).*2 ... == -1 neuron prefers threats, 1 if neuron prefers goals
+            NanToZero(GLorTHR(iL,1:size(useWght,2))-.5).*2 ... == -1 neuron prefers threats, 1 if neuron prefers goals
             ,2);
         wghtByDiff(iL+1,1:size(useWght,1))=sum( ... 
             abs(useWght) .* ... Weights between layers
-            GL_THR_diff(iL,1:size(useWght,2))  ... == +ve if neuron prefers goals
+            NanToZero(GL_THR_diff(iL,1:size(useWght,2)))  ... == +ve if neuron prefers goals
             ,2);
         wghtByRat(iL+1,1:size(useWght,1))=sum( ... 
             abs(useWght) .* ... Weights between layers
-            GL_THR_rat(iL,1:size(useWght,2))  ... > 1 if neuron prefers goals
+            NanToOne(GL_THR_rat(iL,1:size(useWght,2)),0.5)  ... > 1 if neuron prefers goals, 0 if threats
             ,2);
                
         prvS=max(src);
@@ -242,14 +249,16 @@ dThrMn=nanmedian(dThr,1);
 
 % Correlation between median path length leading to neuron (from threat and
 % goal neurons), and the amount of threat/goalness of a neuron
+figure,
 distDiff=dThrMn-dGlMn;
 tmpBl=~isnan(dThrMn);
 [difdistR difdistP]=corrcoef(GL_THR_diff_fl(tmpBl),distDiff(tmpBl));
 [ddPl] = MakeEvenMatrix({distDiff(GLorTHR_fl==1),distDiff(GLorTHR_fl==0)});
-[classdistP h stats] = ranksum(ddPl(1,:),ddPl(2,:));
+try
+    [classdistP h stats] = ranksum(ddPl(1,:),ddPl(2,:));
+    
 classdistZ = stats.zval;
 % if s.plt.ON == 1
-    figure,
     subplot(1,2,1)
     plot(GL_THR_diff_fl(tmpBl),distDiff(tmpBl),'x')
     title(['Difference vs gl thr dist diff. r=' num2str(difdistR(2)) '. p=' num2str(difdistP(2))]);
@@ -262,6 +271,17 @@ classdistZ = stats.zval;
     ylabel('median goal dist - median thr dist');
     title(['RS p= ' num2str(classdistP)]);
 % end
+
+catch exception
+    warning('Problem when running the ranksum test:')
+    disp(exception.message)
+    warning('Putting in dummy variables for correlation tests')
+    difdistP = [1 1];
+    difdistR = [0 0];
+    classdistZ = 0;
+    classdistP = 1;
+
+end
 
 
 % Display the network
@@ -283,6 +303,7 @@ netAR.AorB      = GLorTHR;
 netAR.wht       = wht;
 netAR.whtMat    = whtMat;
 
+try
 netAR.difdifR   = difdifR(2);
 netAR.ratratR   = ratratR(2);
 netAR.difdistR  = difdistR(2);
@@ -291,6 +312,9 @@ netAR.difdifP   = difdifP(2);
 netAR.ratratP   = ratratP(2);
 netAR.difdistP  = difdistP(2);
 netAR.classdistP= classdistP;
+catch
+    warning('Some results not returned because statistical tests didnt complete')
+end
 
 
 
@@ -370,6 +394,16 @@ function [AB_diff AB_rat AorB]=DiffRat(A,B)
 %calculate the difference and or ratio between quantities A and B, remove
 %NaNs and flatten
 
+% Put in a caveat in case just one is nan:
+% In case one of the covariances is NaN and the other isn't, that means the
+% nan covariance was probably run on all 0 neural activity data, which means it is
+% definitely NOT sensitive to that stimulus type. SO, we cnan adjust
+% accordingly
+onlyAnan = isnan(A) & ~isnan(B);
+A(onlyAnan) = 0;
+onlyBnan = isnan(B) & ~isnan(A);
+B(onlyBnan) = 0;
+
 % make sure AorB has the right NaNs
 AorB=nan(size(A));
 tmpLog=~isnan(A) & ~isnan(B);
@@ -377,6 +411,9 @@ AorB(tmpLog)=abs(A(tmpLog))>abs(B(tmpLog));
 
 AB_diff=abs(A)-abs(B);
 AB_rat=(((abs(A)-abs(B))./(abs(A)+abs(B)))+1)./2;
+
+
+
 end
 
 function [outVar]= NanRemFlatten(inVar)

@@ -38,6 +38,7 @@ end
 
 if s.fl.newNet==1
     net=feedforwardnet(s.lp.netS);
+    net=ChangeNeuronType(net,s); % Change neuron types
     net.performFcn= 'mse';
     net=init(net);
     net.trainFcn = s.lp.TrnFn;
@@ -94,10 +95,23 @@ for kBatch=1:s.rl.maxRetr
         toolInd = find(tmpS(:,4) == 1,1);
         bTrls(1) = toolInd;
     end
+    % Likewise, ensure that the first batch includes a held object,if
+    % appropriate
+    if kBatch == 1 && s.act.eatRew == 1 && s.fl.hist == 0
+        tmpS=cell2mat(storedEps.S);
+        holdInd = find(tmpS(:,4 + s.fl.ToolChange) == 1,1);
+        bTrls(2) = holdInd;
+    end
     batchEps.prvS = storedEps.prvS(bTrls,: );
     batchEps.S = storedEps.S(bTrls,: );
     batchEps.A = storedEps.A(bTrls,: );
     batchEps.R = storedEps.R(bTrls,: );
+
+    % Store the actions in the next state, in case of on-policy (e.g. SARSA) learning
+    if strcmp(s.lp.alg,'SARSA')
+        nextTrl         = min(bTrls + 1,size(storedEps.prvS,1));
+        batchEps.nextA  = storedEps.A(nextTrl); 
+    end
     
     if s.fl.os==1
         if firstPass==1
@@ -115,6 +129,12 @@ for kBatch=1:s.rl.maxRetr
             batchEps.S(~highRewSamps) = storedEps.S(bTrls,: );
             batchEps.A(~highRewSamps) = storedEps.A(bTrls,: );
             batchEps.R(~highRewSamps) = storedEps.R(bTrls,: );
+
+            if strcmp(s.lp.alg,'SARSA')
+                nextTrl                        = min(bTrls + 1,size(storedEps.prvS,1));
+                batchEps.nextA(~highRewSamps)  = storedEps.A(nextTrl);
+            end
+
         end
     end
     
@@ -194,8 +214,17 @@ for kBatch=1:s.rl.maxRetr
                     yy(:,kAction) = net([xx kAction*ones(size(xx,1),1)]')';
                 end
             end
-            % maximum Q-value for each poststate
-            yymax = max(yy, [], 2);
+            
+% % %             % $$$ PUT THIS HERE:
+% % %             s.lp.alg = 'Q'; %Options: 'Q','SARSA'
+            switch s.lp.alg
+                case 'Q'
+                    % maximum Q-value for each poststate
+                    yynext = max(yy, [], 2);
+                case 'SARSA'
+                    % Q-value of next action that was taken
+                    yynext = yy(sub2ind(size(yy), (1:size(yy, 1))', batchEps.nextA));
+            end
         end
         
         % -----------------------------------------------------------------
@@ -207,10 +236,10 @@ for kBatch=1:s.rl.maxRetr
                 for kAct=1:s.act.numA
                     y(~isnan(R(:,kAct)),kAct) = y(~isnan(R(:,kAct)),kAct) + ...
                         alpha.* ...
-                        (R(~isnan(R(:,kAct)),kAct) + s.lp.gamma.* yymax(~isnan(R(:,kAct))) - y(~isnan(R(:,kAct)),kAct) );
+                        (R(~isnan(R(:,kAct)),kAct) + s.lp.gamma.* yynext(~isnan(R(:,kAct))) - y(~isnan(R(:,kAct)),kAct) );
                 end
             else
-                y = y + alpha.*(R + s.lp.gamma.* yymax -y );
+                y = y + alpha.*(R + s.lp.gamma.* yynext -y );
             end
         end
         

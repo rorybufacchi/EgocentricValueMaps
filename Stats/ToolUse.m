@@ -126,7 +126,7 @@ for iM = 1:length(olRS)
     sFP.plt.DistFromTool = 0;
     sFP.plt.stimRow = [size(w.world2D,1)-6:size(w.world2D,1)-3]; % $$$ THIS IS TEST !!! $$$
     % ---------------------------------------------------------------------
-    % Output form network which has NOT trained on tool use - tool NOT present
+    % Output from network which has NOT trained on tool use - tool NOT present
     net = olRS(iM).net;
     sFP.plt.ToolPresent = 0;
     [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
@@ -140,7 +140,7 @@ for iM = 1:length(olRS)
     nAall(:,:,:,:,:,1:size(allNeurAct,6),iM,1) = permute(allNeurAct,[3 4 1 2 5 6]);
     
     % ---------------------------------------------------------------------
-    % Output form network which has NOT trained on tool use - tool present
+    % Output from network which has NOT trained on tool use - tool present
     net = olRS(iM).net;
     sFP.plt.ToolPresent = 1;
     [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
@@ -151,7 +151,7 @@ for iM = 1:length(olRS)
     nAall(:,:,:,:,:,1:size(allNeurAct,6),iM,2) = permute(allNeurAct,[3 4 1 2 5 6]);
     
     % ---------------------------------------------------------------------
-    % Output form network which HAS trained on tool use - tool NOT present
+    % Output from network which HAS trained on tool use - tool NOT present
     net = ytRS(iM).net;
     sFP.plt.ToolPresent = 0;
     [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
@@ -162,7 +162,7 @@ for iM = 1:length(olRS)
     nAall(:,:,:,:,:,1:size(allNeurAct,6),iM,3) = permute(allNeurAct,[3 4 1 2 5 6]);
     
     % ---------------------------------------------------------------------
-    % Output form network which HAS trained on tool use - tool present
+    % Output from network which HAS trained on tool use - tool present
     net = ytRS(iM).net;
     sFP.plt.ToolPresent = 1;
     [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
@@ -178,7 +178,7 @@ for iM = 1:length(olRS)
 	sFP.plt.DistFromTool = 1;
     sFP.plt.stimRow = [3:size(w.world2D,1)-8]; % $$$ THIS IS TEST !!! $$$
     % ---------------------------------------------------------------------
-    % Output form network which has NOT trained on tool use - tool NOT present
+    % Output from network which has NOT trained on tool use - tool NOT present
     net = olRS(iM).net;
     sFP.plt.ToolPresent = 0;
     [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
@@ -187,7 +187,7 @@ for iM = 1:length(olRS)
     [olRS_ntp_tf(iM).npks olRS_ntp_tf(iM).pks olRS_ntp_tf(iM).pkLocs] = RowPeakFind(sFP,Q);
     
     % ---------------------------------------------------------------------
-    % Output form network which has NOT trained on tool use - tool present
+    % Output from network which has NOT trained on tool use - tool present
     net = olRS(iM).net;
     sFP.plt.ToolPresent = 1;
     [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
@@ -196,7 +196,7 @@ for iM = 1:length(olRS)
     [olRS_tp_tf(iM).npks olRS_tp_tf(iM).pks olRS_tp_tf(iM).pkLocs] = RowPeakFind(sFP,Q);
     
     % ---------------------------------------------------------------------
-    % Output form network which HAS trained on tool use - tool NOT present
+    % Output from network which HAS trained on tool use - tool NOT present
     net = ytRS(iM).net;
     sFP.plt.ToolPresent = 0;
     [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
@@ -205,7 +205,7 @@ for iM = 1:length(olRS)
     [ytRS_ntp_tf(iM).npks ytRS_ntp_tf(iM).pks ytRS_ntp_tf(iM).pkLocs] = RowPeakFind(sFP,Q);
     
     % ---------------------------------------------------------------------
-    % Output form network which HAS trained on tool use - tool present
+    % Output from network which HAS trained on tool use - tool present
     net = ytRS(iM).net;
     sFP.plt.ToolPresent = 1;
     [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
@@ -478,16 +478,3 @@ disp(rMat_pre.rDistQ)
 disp('Q correlation with proximity to tool AFTER training with tool')
 disp(rMat_post.pDistQ)
 disp(rMat_post.rDistQ)
-
-%% Functions
-
-function [npks pks locs] = RowPeakFind(s,Q)
-    Qr = RecenterQNA(s,Q);
-    Qline = squeeze(nanmean(Qr(1,:,:,:,:,:),[4]));
-    for iLC = 2:size(Qline,2)-1
-%         [pks{iLC-1} locs{iLC-1}] = findpeaks(Qline(iLC,:,3));
-        [pks{iLC-1} locs{iLC-1}] = findpeaks(nanmean(Qline(iLC,:,:),3));
-        npks(iLC-1) = length(locs{iLC-1});
-    end
-    
-end

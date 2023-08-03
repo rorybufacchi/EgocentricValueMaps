@@ -15,7 +15,7 @@ end
 
 if s.plt.sequentialLimbCols == 1
     % current Hand Column
-    for iiHC = 1:length(s.plt.lmbCol
+    for iiHC = 1:length(s.plt.lmbCol)
 
         cHC = s.plt.lmbCol(iiHC);
 
@@ -133,7 +133,7 @@ end
 
                 % Neural Activation
                 if strcmp(s.plt.pltType,'Binned')
-                    nA=squeeze(allNeurAct(:,:,handRow,cHC,cL,cN));
+                    nA=squeeze(allNeurAct(:,:,handRow,cHC,cL,cN)); % $$$ Neuron 1 is giving no activity for some reason
 
                     [Y,E] = discretize(distanceVals(:),s.plt.nBins);
                     for iBin=1:s.plt.nBins
@@ -203,8 +203,8 @@ end
                 end
                 try
                     [r1,p1,rL,rU] = corrcoef(distanceVals(:),nAtemp(:));
-                    cov1 = cov(distanceVals(:),nAtemp(:));
-                    covVal(cL,cN)=cov1(2);
+                    cov1 = nancov(distanceVals(:),nAtemp(:));
+                    covVal(cL,cN)=cov1(2); % $$$ HERE covariance
                     r2(cL,cN)=r1(2);
                     p2(cL,cN)=p1(2);
                 catch

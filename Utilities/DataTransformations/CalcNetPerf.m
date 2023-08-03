@@ -30,8 +30,8 @@ for iRep=1:s.prf.nRep
 
     [~, ~, sE, ~, ~] = RunRLfun(s2,net,[],[],extraInput);
     
-    rewSums(iRep,1)=sum(sE.R(sE.R>1)); % sum of all positive rewards when changing goal neurons
-    rewSums(iRep,2)=sum(sE.R(sE.R<-1));% sum of all negative rewards when changing goal neurons
+    rewSums(iRep,1)=sum(sE.R(sE.R>0)); % sum of all positive rewards
+    rewSums(iRep,2)=sum(sE.R(sE.R<0)); % sum of all negative rewards
 end
 
 

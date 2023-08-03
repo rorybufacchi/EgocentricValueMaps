@@ -15,13 +15,88 @@ if w.mvBdy==1
 elseif s.fl.bdyMov==1
     usPs = find(s.act.Name{action}=='_');
     actName = s.act.Name{action}(4:usPs-1);
+    bdyActName = s.act.Name{action}(usPs+4:end);
 else
     actName = s.act.Name{action};
 end
 
+
+% Change the movement effects for the limb if the body constrains the limb's
+% movements
+if s.act.bdyMovesLimb == 1 & w.mvBdy == 0 & s.fl.bdyMov == 1
+
+    % Check the difference between the limb and the body, and use
+    % that to decide whether the limb will move extra or not
+    % Also account for the infinite boundary conditions
+    bdyLmbDiff = w.bdy.col - w.lmb.col + [s.wrld.size(2)-2, 0, -s.wrld.size(2)+2];
+    [minDiff minLoc] = min(abs(bdyLmbDiff));
+    bdyLmbDiff = bdyLmbDiff(minLoc);
+
+    % For debugging
+% % %     if abs(bdyLmbDiff) > 4
+% % %         disp('whoops')
+% % %     end
+
+
+    % Ensure the limb cannot move far away from the body
+    % When the limb is much further right than the body, moving right should be impossible
+    if bdyLmbDiff <= -abs(s.act.bdyLimbProx)
+        switch actName
+            case {'LEFT','LEFTBUTTON','STAY','BUTTON'}
+                extraMove = 0; % don't change the movement : limb moves with body
+            case {'RIGHT','RIGHTBUTTON'}
+                extraMove = -1;
+        end
+        % ensure  that the limb can't go too far away, if it is more than 2 away
+        extraMove = extraMove + (bdyLmbDiff + abs(s.act.bdyLimbProx) );
+
+    % When the limb is much further left than the body, moving left should be impossible
+    elseif bdyLmbDiff >= abs(s.act.bdyLimbProx)
+        switch actName
+            case {'RIGHT','RIGHTBUTTON','STAY','BUTTON'}
+                extraMove = 0; % don't change the movement : limb moves with body
+            case {'LEFT','LEFTBUTTON'}
+                extraMove = 1;
+        end
+        % ensure  that the limb can't go too far away, if it is more than 2 away
+        extraMove = extraMove + (bdyLmbDiff - abs(s.act.bdyLimbProx) );
+        
+    else
+        extraMove = 0;
+    end
+
+
+    switch bdyActName
+        case {'LEFT','LEFTBUTTON'}
+            extraMove = extraMove - 1;
+        case {'STAY','BUTTON'}
+            extraMove = extraMove + 0;
+        case {'RIGHT','RIGHTBUTTON'}
+            extraMove = extraMove + 1;
+    end
+else
+    extraMove = 0;
+end
+
+
+
+switch actName
+    case {'LEFT','LEFTBUTTON'}
+        intendedCol = col - 1 + extraMove;
+    case {'STAY','BUTTON'}
+        intendedCol = col + extraMove;
+    case {'RIGHT','RIGHTBUTTON'}
+        intendedCol = col + 1 + extraMove;
+end
+
 % based on the current direction check whether next location is space or
 % bump and get information of use below
-[val,valid,w] = LookLR(s,w,row,col,actName);
+try
+    [val,valid,w] = LookLR(s,w,row,col,actName,intendedCol);
+catch
+    disp('whoops')
+    A = 1
+end
 
 % check if next location for moving is space
 % other wise set the status
@@ -31,14 +106,15 @@ if valid == 1
     % this is for walls inside the world
     if val > 0
         oldRow = row; oldCol = col;
-        switch actName
-            case {'LEFT','LEFTBUTTON'}
-                col = col - 1;
-            case {'STAY','BUTTON'}
-                col = col;
-            case {'RIGHT','RIGHTBUTTON'}
-                col = col + 1;
-        end
+        col = intendedCol;
+% % %         switch actName
+% % %             case {'LEFT','LEFTBUTTON'}
+% % %                 col = col - 1 + extraMove;
+% % %             case {'STAY','BUTTON'}
+% % %                 col = col + extraMove;
+% % %             case {'RIGHT','RIGHTBUTTON'}
+% % %                 col = col + 1 + extraMove;
+% % %         end
         status = 1;
         
         if w.limbTeleLR==1
@@ -70,3 +146,9 @@ else
     status = 2;
 
 end
+
+
+% % % % FOR DEBUGGING: check difference between new body positions
+% % % newBbdyLmbDiff = w.bdy.col - w.lmb.col + [s.wrld.size(2)-2, 0, -s.wrld.size(2)+2];
+% % %     [minDiff minLoc] = min(abs(bdyLmbDiff));
+% % %     bdyLmbDiff = bdyLmbDiff(minLoc);

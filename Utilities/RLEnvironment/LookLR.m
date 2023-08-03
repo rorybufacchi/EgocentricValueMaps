@@ -1,4 +1,4 @@
-function [val,valid,w] = LookLR(s,w,row,col,actName)
+function [val,valid,w] = LookLR(s,w,row,col,actName,intendedCol)
 global world2D;
 global tempworld2D;
 
@@ -7,26 +7,38 @@ w.limbTeleLR=0;
 
 if strcmp(s.wrld.resetType,'BottomTop_InfLR')
     valid = 1;
-    switch actName
-        case {'LEFT','LEFTBUTTON'} % move left
-            if col-1 >= 2 & col-1 <= size(world2D,2)-1
-                val = tempworld2D(row,col-1);
-            elseif col-1 < 2
-                val = tempworld2D(row,end-1);
-                w.limbTeleLR=1;
-            end
-        case {'STAY','BUTTON'} % stay still
-            if col >= 2 & col <= size(world2D,2)-1
-                val = tempworld2D(row,col);
-            end
-        case {'RIGHT','RIGHTBUTTON'} % move right
-            if col+1 >= 2 & col+1 <= size(world2D,2)-1
-                val = tempworld2D(row,col+1);
-            elseif col+1 > size(world2D,2)-1
-                val = tempworld2D(row,2);
-                w.limbTeleLR=-1;
-            end
+
+    if intendedCol >= 2 & intendedCol <= size(world2D,2)-1
+        val = tempworld2D(row,intendedCol);
+    elseif intendedCol < 2
+        val = tempworld2D(row,end-1);
+        w.limbTeleLR=1;
+    elseif intendedCol > size(world2D,2)-1
+        val = tempworld2D(row,2);
+        w.limbTeleLR=-1;
     end
+
+
+% % %     switch actName
+% % %         case {'LEFT','LEFTBUTTON'} % move left
+% % %             if col-1 >= 2 & col-1 <= size(world2D,2)-1
+% % %                 val = tempworld2D(row,col-1);
+% % %             elseif col-1 < 2
+% % %                 val = tempworld2D(row,end-1);
+% % %                 w.limbTeleLR=1;
+% % %             end
+% % %         case {'STAY','BUTTON'} % stay still
+% % %             if col >= 2 & col <= size(world2D,2)-1
+% % %                 val = tempworld2D(row,col);
+% % %             end
+% % %         case {'RIGHT','RIGHTBUTTON'} % move right
+% % %             if col+1 >= 2 & col+1 <= size(world2D,2)-1
+% % %                 val = tempworld2D(row,col+1);
+% % %             elseif col+1 > size(world2D,2)-1
+% % %                 val = tempworld2D(row,2);
+% % %                 w.limbTeleLR=-1;
+% % %             end
+% % %     end
     
 else
     

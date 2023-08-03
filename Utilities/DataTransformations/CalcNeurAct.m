@@ -21,7 +21,7 @@ else
     x1=inpAll;
     % IF there is only 0 input for x1, then add in a 1 somewhere so
     % that there are actual values going through instead of Infs
-    % and resulting NaNs --> CHECK THIS IS Reasonable $$$$$
+    % and resulting NaNs
     x1(min(x1==0,[],2),end)=1;
     % ^ Check above
     
@@ -45,13 +45,15 @@ else
         warning('It looks like some variables had no variance in the training data.')
         xp1All([net.inputs{1}.processSettings{1}.remove],:)=[];
     end
-    tempNeurAct(1:s.lp.netS(1),:,1)=TanSigApply(net.iw{1}*xp1All+net.b{1});
+    tempNeurAct(1:s.lp.netS(1),:,1) = ApplyTransferFcn(s,net,1,xp1All,[]);
+% % %     tempNeurAct(1:s.lp.netS(1),:,1)=TanSigApply(net.iw{1}*xp1All+net.b{1});
     for kNeur=1:s.lp.netS(1)
         %                     neurAct2(:,:,:,1,kNeur,:)=permute(reshape(tempNeurAct(kNeur,:,1),[s.wrld.size(1) s.wrld.size(2) s.wrld.size(2) ]),[2 3 4 1]);
         neurAct2(:,:,:,1,kNeur,:)=reshape(tempNeurAct(kNeur,:,1),[s.wrld.size(1) s.wrld.size(2) s.wrld.size(2) ]);
     end
     for kLay=2:size(s.lp.netS,2)
-        tempNeurAct(1:s.lp.netS(kLay),:,kLay)=TanSigApply(net.lw{kLay,kLay-1}*tempNeurAct(1:s.lp.netS(kLay-1),:,kLay-1)+net.b{kLay});
+        tempNeurAct(1:s.lp.netS(kLay),:,kLay) = ApplyTransferFcn(s,net,kLay,xp1All,tempNeurAct);
+% % %         tempNeurAct(1:s.lp.netS(kLay),:,kLay)=TanSigApply(net.lw{kLay,kLay-1}*tempNeurAct(1:s.lp.netS(kLay-1),:,kLay-1)+net.b{kLay});
         for kNeur=1:s.lp.netS(kLay)
             %                         neurAct2(:,:,:,kLay,kNeur,:)=permute(reshape(tempNeurAct(kNeur,:,kLay),[s.wrld.size(1) s.wrld.size(2) s.wrld.size(2) ]),[2 3 4 1]);
             neurAct2(:,:,:,kLay,kNeur,:)=reshape(tempNeurAct(kNeur,:,kLay),[s.wrld.size(1) s.wrld.size(2) s.wrld.size(2) ]);
@@ -59,6 +61,20 @@ else
     end
 end
 
+
+
+end
+
+
+function [actOut] = ApplyTransferFcn(s,net,kLay,xp1All,tempNeurAct)
+
+if kLay == 1
+    actIn = net.iw{1}*xp1All+net.b{1};
+else
+    actIn = net.lw{kLay,kLay-1}*tempNeurAct(1:s.lp.netS(kLay-1),:,kLay-1)+net.b{kLay};
+end
+
+actOut = feval(net.layers{kLay}.transferFcn,actIn);
 
 
 end

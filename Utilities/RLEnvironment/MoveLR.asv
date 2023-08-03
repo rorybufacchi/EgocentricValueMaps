@@ -1,0 +1,154 @@
+% status = 1 then move ahead successful
+% status = 2 then bump into wall or boundary
+% status = 3 then goal achieved
+% status = 4 then bump into threat
+% Move the robot to the next location if no bump
+function [row,col,status] = MoveLR(s,w,row,col,action)
+global tempworld2D;
+
+% in case there the other body-part moves, use the appropriate move type
+% if s.fl.bdyMov==1
+if w.mvBdy==1
+    % find the underscore Position first to split the name
+    usPs = find(s.act.Name{action}=='_');
+    actName = s.act.Name{action}(usPs+4:end);
+elseif s.fl.bdyMov==1
+    usPs = find(s.act.Name{action}=='_');
+    actName = s.act.Name{action}(4:usPs-1);
+    bdyActName = s.act.Name{action}(usPs+4:end);
+else
+    actName = s.act.Name{action};
+end
+
+
+% Change the movement effects for the limb if the body constrains the limb's
+% movements
+if s.act.bdyMovesLimb == 1 & w.mvBdy == 0 & s.fl.bdyMov == 1
+
+    % Check the difference between the limb and the body, and use
+    % that to decide whether the limb will move extra or not
+    % Also account for the infinite boundary conditions
+    bdyLmbDiff = w.bdy.col - w.lmb.col + [s.wrld.size(2)-2, 0, -s.wrld.size(2)+2];
+    [minDiff minLoc] = min(abs(bdyLmbDiff));
+    bdyLmbDiff = bdyLmbDiff(minLoc);
+
+    % For debugging
+% % %     if abs(bdyLmbDiff) > 4
+% % %         disp('whoops')
+% % %     end
+
+
+    % Ensure the limb cannot move far away from the body
+    % When the limb is much further right than the body, moving right should be impossible
+    if bdyLmbDiff <= -abs(s.act.bdyLimbProx)
+        switch actName
+            case {'LEFT','LEFTBUTTON','STAY','BUTTON'}
+                extraMove = 0; % don't change the movement : limb moves with body
+            case {'RIGHT','RIGHTBUTTON'}
+                extraMove = -1;
+        end
+        % ensure  that the limb can't go too far away, if it is more than 2 away
+        extraMove = extraMove + (bdyLmbDiff + abs(s.act.bdyLimbProx) );
+
+    % When the limb is much further left than the body, moving left should be impossible
+    elseif bdyLmbDiff >= abs(s.act.bdyLimbProx)
+        switch actName
+            case {'RIGHT','RIGHTBUTTON','STAY','BUTTON'}
+                extraMove = 0; % don't change the movement : limb moves with body
+            case {'LEFT','LEFTBUTTON'}
+                extraMove = 1;
+        end
+        % ensure  that the limb can't go too far away, if it is more than 2 away
+        extraMove = extraMove + (bdyLmbDiff - abs(s.act.bdyLimbProx) );
+        
+    else
+        extraMove = 0;
+    end
+
+
+    switch bdyActName
+        case {'LEFT','LEFTBUTTON'}
+            extraMove = extraMove - 1;
+        case {'STAY','BUTTON'}
+            extraMove = extraMove + 0;
+        case {'RIGHT','RIGHTBUTTON'}
+            extraMove = extraMove + 1;
+    end
+else
+    extraMove = 0;
+end
+
+
+
+switch actName
+    case {'LEFT','LEFTBUTTON'}
+        intendedCol = col - 1 + extraMove;
+    case {'STAY','BUTTON'}
+        intendedCol = col + extraMove;
+    case {'RIGHT','RIGHTBUTTON'}
+        intendedCol = col + 1 + extraMove;
+end
+
+% based on the current direction check whether next location is space or
+% bump and get information of use below
+try
+    [val,valid,w] = LookLR(s,w,row,col,actName,intendedCol);
+catch
+    disp('whoops')
+    A = 1
+end
+
+% check if next location for moving is space
+% other wise set the status
+% this checks the collision with boundary of world
+if valid == 1
+    % now check if the next location for space or bump
+    % this is for walls inside the world
+    if val > 0
+        oldRow = row; oldCol = col;
+        col = intendedCol;
+% % %         switch actName
+% % %             case {'LEFT','LEFTBUTTON'}
+% % %                 col = col - 1 + extraMove;
+% % %             case {'STAY','BUTTON'}
+% % %                 col = col + extraMove;
+% % %             case {'RIGHT','RIGHTBUTTON'}
+% % %                 col = col + 1 + extraMove;
+% % %         end
+        status = 1;
+        
+        if w.limbTeleLR==1
+            col=size(w.world2D,2)-1;
+        elseif w.limbTeleLR==-1
+            col=2;
+        end
+        
+        if val == 100
+            % goal achieved
+            status = 3;
+        end
+        
+        if val ==10
+            % Bumped into the threat
+            status=4;
+        end
+        
+        % update the current position of the robot in world for display
+        tempworld2D(oldRow,oldCol) = 50;
+        tempworld2D(row,col) = 60;
+    elseif val == 0
+        % bump into wall
+        status = 2;
+    end
+else
+
+    % return a bump signal if valid is 0
+    status = 2;
+
+end
+
+
+% % % % FOR DEBUGGING: check difference between new body positions
+% % % newBbdyLmbDiff = w.bdy.col - w.lmb.col + [s.wrld.size(2)-2, 0, -s.wrld.size(2)+2];
+% % %     [minDiff minLoc] = min(abs(bdyLmbDiff));
+% % %     bdyLmbDiff = bdyLmbDiff(minLoc);

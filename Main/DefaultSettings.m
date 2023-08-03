@@ -30,6 +30,8 @@ s.fl.rtTask = 0; % If this is 1, the agent will perform a "Reaction Time" task i
 s.fl.extraInput = 0; % If == 1, the extra input is used as input to the network
 s.fl.perfWhileLearn = 0; % Set to calculate network performance after every s.prf.skipBatches batches
 s.fl.deepNet = 0; % set to 1 if training to be done using deep learning toolbox
+s.fl.grabAndEat = 0; % set to 1 if the goal needs to be moved to a specific location to receive reward
+s.fl.defendZone = 0; % set to 1 if the agent needs to prevent the stimulus from touching a particular block
 
 % -------------------------------------------------------------------------
 % 'Stimulus' Properties
@@ -49,6 +51,7 @@ s.rtt.std = 1;
 s.rtt.NoiseFun = @(mu,std) normrnd(mu,std,1,1); % This is the noise in the 'tactile' input. 
 % This is for the extra info fed into the neural network
 s.xtra.useThr = 0;
+
 
 % -------------------------------------------------------------------------
 % World Properties
@@ -77,7 +80,43 @@ s.lmb.size = 1;
 s.lmb.ToolRows = [0];
 s.lmb.ToolProb = 0.5; % Probability of tool on each trial, if toolsswitching present
 
+
 % -------------------------------------------------------------------------
+% Learning parameters
+s.lp.alg = 'Q'; %Options: 'Q','SARSA'
+s.lp.epsilon = 0.1;
+s.lp.alpha = 0.6;%; 0.3;
+s.lp.gamma = 0.5;
+% Network learning parameters................................
+s.lp.netS = [6 5 4 3];
+s.lp.TrnFn = 'trainlm'; % Training function
+s.lp.TrnEp = 100; % Number of training epochs
+s.lp.ShwW = 0; % Show training window
+s.lp.mxF = 5; % Maximum number of fails (per epoch?)
+s.lp.n1stTr = 1000; % Number of gradient descents to do 1st time round
+s.lp.neurTypes = 'tansig'; % types of neurons for use in default Matlab network
+                 % Options: purelin, poslin [i.e. relu], tansig, logsig, softmax, hardlim, tribas, radbas
+% Batch learning parameters..................................
+s.lp.bSiz = 7e4; % Normal batch size
+s.lp.b1Siz =  7e4; % Size of first batch
+s.lp.rcSiz = s.lp.bSiz; % If using only recent data to learn, set that batch size
+s.lp.retr = 2e4;% Number of actions to take before network is retrained (1 for every step)
+s.lp.nOs = 30; % Number of times to oversample, if flag is set
+s.lp.nOsBatch = 1; % Number of batches to oversample
+s.lp.hiRewDef = 1.1; % Definition of what a 'high reward to oversample' is
+% Running learning parameters..................................
+s.lp.minExp = 2e6; % Minimum number of epochs before first training starts $$$ 2e6 is def better
+s.lp.sWs = s.lp.minExp*2;%s.lp.minExp+1; % number of steps to take before saving workspace
+s.lp.dispA = 2e4; % number of steps to take before displaying how many steps have been taken
+s.lp.dispW = 1;% number of steps to take before displaying the world
+s.lp.plQ = s.lp.minExp+2; % number of steps to take before plotting Q values
+s.lp.maxRetrainSteps = 1000; % number of times to retrani the network while learing
+
+
+% -------------------------------------------------------------------------
+% Action parameters
+% Policy: epsilon-greedy
+s.act.pi = @(optimal_action, n_actions, randNum) (randNum > s.lp.epsilon) * optimal_action + (randNum <= s.lp.epsilon) * randi(n_actions);
 % Action types
 s.act.Name = {'LEFT','STAY','RIGHT'}; %  names of actions
 % Set status message for goal and bump
@@ -96,43 +135,19 @@ s.act.bdyThreatRew = -4;
 s.act.bdyMoveRew =  -0.001;
 s.act.bdyStayRew =  0;
 s.act.rtRew = 0;
+s.act.eatRew = 0;
+s.act.shieldRew = 0;
 % Value approximation function. 
 % If this is table, it will use the table to find the optimum action. If it
 % is 'Net', it will use a network
 s.act.ValAprFun = 'Net' ; 
+s.act.bdyMovesLimb = 0; % Defines whether the limb is constrained by the body's location
+s.act.bdyLimbProx  = 2; % max distance between body and limb
 
 % -------------------------------------------------------------------------
 % Runtime parameters
 s.rp.numIter = 1; % change this value to set max iterations
 s.rp.maxActions = 2e6 ; % Maximum number of action taken before instance ends. 2e6 2e5 forr quick
-
-% -------------------------------------------------------------------------
-% Learning parameters
-s.lp.epsilon = 0.1;
-s.lp.alpha = 0.6;%; 0.3;
-s.lp.gamma = 0.5;
-% Network learning parameters................................
-s.lp.netS = [6 5 4 3];
-s.lp.TrnFn = 'trainlm'; % Training function
-s.lp.TrnEp = 100; % Number of training epochs
-s.lp.ShwW = 0; % Show training window
-s.lp.mxF = 5; % Maximum number of fails (per epoch?)
-s.lp.n1stTr = 1000; % Number of gradient descents to do 1st time round
-% Batch learning parameters..................................
-s.lp.bSiz = 7e4; % Normal batch size
-s.lp.b1Siz =  7e4; % Size of first batch
-s.lp.rcSiz = s.lp.bSiz; % If using only recent data to learn, set that batch size
-s.lp.retr = 2e4;% Number of actions to take before network is retrained (1 for every step)
-s.lp.nOs = 30; % Number of times to oversample, if flag is set
-s.lp.nOsBatch = 1; % Number of batches to oversample
-s.lp.hiRewDef = 1.1; % Definition of what a 'high reward to oversample' is
-% Running learning parameters..................................
-s.lp.minExp = 2e6; % Minimum number of epochs before first training starts $$$ 2e6 is def better
-s.lp.sWs = s.lp.minExp*2;%s.lp.minExp+1; % number of steps to take before saving workspace
-s.lp.dispA = 2e4; % number of steps to take before displaying how many steps have been taken
-s.lp.dispW = 1;% number of steps to take before displaying the world
-s.lp.plQ = s.lp.minExp+2; % number of steps to take before plotting Q values
-s.lp.maxRetrainSteps = 1000; % number of times to retrani the network while learing
 
 % -------------------------------------------------------------------------
 % Re-learning parameters
@@ -176,6 +191,7 @@ s.plt.rowLims = [1.5 s.wrld.size(1)-0.5]; % limits of rows to make Imagesc of
 s.plt.colLims = [1.5 s.wrld.size(2)-1.5]; % limits of rows to make Imagesc of
 s.plt.ToolPresent = 0;
 s.plt.rtTouchVal = 0; % touch value for the reaction time task
+s.plt.holdingRew = 0; % holding object value for rewarded eating
 s.plt.axesVis = 1; % If zero, don't show axes
 s.plt.fitSigmoid = 0; % Fit a sigmoid to Q- or Neural activity values
 s.plt.DistFromTool = 0; % if 1, all correlations and plots will be done in a tool-tip centric manner
@@ -183,6 +199,7 @@ s.plt.fitSigmLow = [-Inf,0, 0, 0]; % Lower values of parameters for the sigmoid 
 s.plt.fitSigmUp = [Inf, Inf, Inf, Inf]; % Upper values of parameters for the sigmoid fitting function
 s.plt.fitSigmStart = [-1, .5, 0, 1]; % Starting values of parameters for the sigmoid fitting function
 s.plt.fitSigmDistTypes = {'aD','rD','cD','rDabs','cDabs'};
+s.plt.nPm = 100; % number of perumtations for fpermutation tests
 
 % -------------------------------------------------------------------------
 % For newer figure settings
@@ -217,6 +234,37 @@ s.prf.skipBatches = 1;
 % -------------------------------------------------------------------------
 % Video plot variables
 % % % s.vid.fancyPlot = 0;
+
+
+% -------------------------------------------------------------------------
+% Data fitting variables
+s.clc.startRew =  1;
+s.clc.nearPos = [s.wrld.size(1)-12 11 13]';
+s.clc.nReps = 1; 
+s.clc.stepUpdateFl = 0; % Whether to update in timesteps - especially important for hitprob and multisens integration
+s.clc.nSteps = 1; 
+s.clc.gammaVal   = 0.8;
+s.clc.baseVel    = [4 0 0]; 
+s.clc.actConsequence = [0  0  0];
+% Random stimulus dynamics
+rSpr = [-1 0 1];
+rSprPr = gaussmf(rSpr,[1 0]) ./ sum(gaussmf(rSpr,[1 0]));
+cSpr = [-1 0 1]; %%% cSpr = [ -1 0 1 ];
+cSprPr = gaussmf(cSpr,[1 0]) ./ sum(gaussmf(cSpr,[1 0]));
+zSpr = [-1 0 1]; %%% zSpr = [ -1 0 1 ];
+zSprPr = gaussmf(zSpr,[1 0]) ./ sum(gaussmf(zSpr,[1 0]));
+% x y z, Deterministic stimulus dynamics
+s.clc.stimDynams =     @(pos) pos + s.clc.baseVel; % For approaching, set speed positive
+s.clc.randSpread =     {rSpr cSpr zSpr}; % Put a little biit of x and z variability in? Kind of arbitrary
+s.clc.spreadProb =     {rSprPr cSprPr  zSprPr}; % x y z, probabilities of spread
+% Random sensory uncertainties
+s.clc.sensSpread = {[0] , [0] , [0]}; 
+s.clc.sensProb   = {[1] , [1] , [1]}; 
+
+
+
+
+
 
 % $$ STILL EXPERIMENTAL
 s.plt.stimRow = [];

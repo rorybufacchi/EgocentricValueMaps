@@ -177,7 +177,7 @@ for iM = 1:length(rS)
     Q(:,:,:,:,iM) = nanmean(Q,5);
 end
 
-s.plt.intrpFact=1;%.2; % NEXT PUT GRID OVER IMAGE
+s.plt.intrpFact=1;%.2; 
 s.plt.OneActFl=1;
 s.plt.plAct = 2;
 s.plt.meanLimbCols = 1;

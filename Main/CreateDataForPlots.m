@@ -20,17 +20,7 @@
 %
 %
 
-msgbox('Please select folder that will serve as the base file path');
-pause(0.5)
-basePath = uigetdir([],'Please select BASE FOLDER to set path');
-
-addpath(genpath([foldName '\Utilities']));
-addpath(genpath([foldName '\GeneratedData']));
-addpath(genpath([foldName '\Stats']));
-addpath(genpath([foldName '\Figures']));
-addpath(genpath([foldName '\Main']));
-
-cd foldName
+[basePath addedPaths] = SetPathEgocentricMaps();
 
 
 %% $$$ HERE HERE
@@ -1214,11 +1204,11 @@ end
 %% VERSION ORIGINAL)) -- Data for plot $5$ about valence - all POSNEG, with large moving cost
 clear s rS ntRS rtRS ytRS olRS
 
-addpath('F:\Projects\DPPS\DefenseAgent\Scripts\TESTCHECK - from supercomputer')
+% addpath('F:\Projects\DPPS\DefenseAgent\Scripts\TESTCHECK - from supercomputer')
 
 % -------------------------------------------------------------------------
 % Base settings
-for iRep = 9:15 %100
+for iRep = 1:15 %9:15 %100 % $$$ HERE 2023: ADD IN WHICH UNIT TYPES ARE USED
     
     clear rS
 
@@ -1252,7 +1242,7 @@ s.fl.hist = 0;
 
 s.fl.perfWhileLearn = 1;
 s.prf.nRep = 10;
-s.prf.skipBatches=25;
+s.prf.skipBatches=50;
 
 % $$$ I'm trying the bigger net sizes now
 % netSizes={[6 8 10 12 14 16 18], [12 12 12 12 12 12 12], [18 16 14 12 10 8 6]};
@@ -1260,6 +1250,10 @@ netSizes={[6 10 14 18], [12 12 12 12 ], [18 14 10 6]};
 
 
 % Run the model and learn Q
+s.lp.neurTypes = 'tribas'; %'logsig'; %'radbas'; % 'tribas'; %'tansig';  %'hardlim'; %'softmax'; %poslin'; % 'purelin' 
+% s.lp.TrnFn = 'trainlmL1';
+s.lp.TrnFn = 'trainlm';
+s = DefaultSettings(s);
 [s w storedEps net Qtable] = RunRLfun(s);
 
 % Run each type of model
@@ -1270,7 +1264,7 @@ for iM = 1:length(netSizes)
     s.fl.trainNet = 1;
     s.act.numA = 3;
     s.act.Name = {'LEFT','STAY','RIGHT'};
-    
+%     
     % Change specific settings of the model
     s.lp.netS = netSizes{iM};
     
@@ -1281,13 +1275,15 @@ for iM = 1:length(netSizes)
     
     % Relearn Q with different netsizes
 %     [net Qtable perf] = RelearnNNFun(s,w,storedEps,net,Qtable);
-    [net Qtable perf] = RelearnNNFunSC(s,w,storedEps,net,Qtable);
+    [net Qtable perf] = RelearnNNFun(s,w,storedEps,net,Qtable);
     % Store network results Structure
     rS(iM).s=s; rS(iM).Qtable=Qtable; rS(iM).w=w; rS(iM).net=net;
     rS(iM).perf = perf;
     
     bFld = 'F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Valence\';
-    svNm = [bFld 'Valence_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_SmallNetRelearn_B_V' num2str(iRep)];
+
+    svNm = [bFld 'Valence_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_' s.lp.neurTypes '_B_V' num2str(iRep)];
+% % %     svNm = [bFld 'Valence_L1_Regularization_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_' s.lp.neurTypes '_B_V' num2str(iRep)];
     save(svNm,'rS','-v7.3');
 
     iM
@@ -1360,7 +1356,481 @@ for iM=1:length(netSizes)
     save(svNm,'rS','-v7.3');
 end
 
-%% Make videos showing what;s happening during training
+%% Data for response to reviewer: wasp example
+% INCLUDES 2 speeds, and limb being bound to body
+% $$$ make sure the move costs happen at the right times
+
+clear s rS ntRS rtRS ytRS olRS
+
+% -------------------------------------------------------------------------
+% Base settings
+
+
+s.gol.alSpC = [0 0];
+s.gol.randSpr = [0 0];
+s.lp.b1Siz = 1e4;
+s.lp.minExp = 4e7; % minumum number of actions before training sarts (big here so no training)
+s.lp.dispA = 1e6; % only show action count very infreequently
+s.wrld.size = [10 15];
+% % % s.wrld.size = [10 21]; % $$$ DOING THIS ONE for simplicity
+s.wrld.resetType = 'BottomTop_InfLR';
+s.rp.maxActions = 4e6 ;
+s.act.GoalRew = 2; 
+s.act.bdyGoalRew = 0; % Only reward the agent for grabbing a goal with its hands
+s.lmb.startCol=8;
+s.fl.trainTable=1; s.fl.trainNet=1;
+s.rl.maxRetr=100;
+s.fl.bdyMov = 1;
+
+% ---------------------------
+% NEW BITS
+s.fl.hist = 1;
+s.act.bdyMovesLimb = 1;
+s.act.bdyLimbProx  = 1;
+
+s.act.DefaultMoveRew = -1e-2;
+s.act.bdyMoveRew     = -5e-2;
+
+s.gol.alSpR = [1 2];
+% % % netSizes={[8 9 10 11 12 13 14 15 16], 12.*ones(1,9), [16 15 14 13 12 11 10 9 8]};
+% % % netSizes={12.*ones(1,9), 12.*ones(1,12)};
+% % % % % % netSizes={12.*ones(1,12)};
+
+% netSizes={15.*ones(1,15), 20.*ones(1,20), 30.*ones(1,30)};
+
+netSizes={15.*ones(1,20)};
+
+s.rl.maxRetr=21;
+s.fl.perfWhileLearn = 1;
+s.prf.nRep = 10;
+s.prf.skipBatches= 5;
+
+
+s.fl.dspm = 0;
+
+s.bdy.startCol = 10;
+s.lmb.startCol = 10;
+
+% ------------------------------------------
+% $$$ WHEN ADDING IN THREAT
+s.fl.thr = 1;
+s.thr.alSpR = [1 2];
+s.thr.alSpC = [0 0];
+s.thr.randSpr = [2 2];
+
+s.act.GoalRew = 2; 
+s.act.bdyGoalRew = 0;
+
+
+s.act.ThreatRew = -.5; % Put negative reward that isn't as big as body reward
+s.act.bdyThreatRew = -4;
+% $$$
+% ------------------------------------------
+
+% -------------------------------------------------------------------------
+% Run the model
+[s w storedEps net Qtable] = RunRLfun(s);
+% -------------------------------------------------------------------------
+% Run each type of model
+for iM = 1:length(netSizes)
+    
+    s.fl.newNet = 1;
+    s.fl.newTable = 1;
+    
+    % Change specific settings of the model
+    s.lp.netS = netSizes{iM};
+
+    % Relearn Q with different netsizes
+    [net Qtable perf] = RelearnNNFunSC(s,w,storedEps,net,Qtable);
+    % Store network results Structure
+    ntRS(iM).s=s; ntRS(iM).Qtable=Qtable; ntRS(iM).w=w; ntRS(iM).net=net;
+    ntRS(iM).perf = perf;
+    
+    bFld = 'F:\Projects\DPPS\DefenseAgent\Results\ForFigures\';
+% % %     svNm = [bFld 'TESTING_WASP_fixedlimbmove_increasedMovePunishment_MoreForBody_OnlyThreat_v2.mat'];
+    svNm = [bFld 'TESTING_WASP_fixedlimbmove_increasedMovePunishment_MoreForBody_GOALANDTHREAT_BIGGERNETS_MoreLearning.mat'];
+    save(svNm,'ntRS','storedEps','-v7.3');
+    iM
+end
+
+
+%% $$$ Data for response to reviewer: Reward only after eating:
+
+clear s rS ntRS rtRS ytRS olRS
+
+
+% -------------------------------------------------------------------------
+% Base settings
+s.gol.alSpC = [0 0];
+s.gol.randSpr = [0 0];
+s.lp.b1Siz = 1e4;
+s.lp.minExp = 4e7; % minumum number of actions before training sarts (big here so no training)
+s.lp.dispA = 1e6; % only show action count very infreequently
+s.wrld.size = [14 15];
+s.wrld.resetType = 'BottomTop_InfLR';
+s.rp.maxActions = 4e6 ;
+s.lmb.startCol=8;
+s.fl.trainTable=1; s.fl.trainNet=1;
+s.rl.maxRetr= 100;
+
+
+netSizes={[16 14 12 10 8 6]};
+
+
+% ---------------------------
+% Unique settings
+s.fl.grabAndEat = 1;
+s.act.eatRew = 1;
+s.act.GoalRew = 0; 
+
+s.fl.perfWhileLearn = 1;
+s.prf.nRep = 10;
+s.prf.skipBatches=10;
+
+s.lp.gamma = 0.8;
+
+% -------------------------------------------------------------------------
+% Run the model
+[s w storedEps net Qtable] = RunRLfun(s);
+% -------------------------------------------------------------------------
+% Learn the Q-values
+for iM = 1:length(netSizes)
+    
+    s.fl.newNet = 1;
+    s.fl.newTable = 1;
+    
+    % Change specific settings of the model
+    s.lp.netS = netSizes{iM};
+
+    % Relearn Q with different netsizes
+    [net Qtable perf] = RelearnNNFun(s,w,storedEps,net,Qtable);
+    % Store network results Structure
+    ntRS(iM).s=s; ntRS(iM).Qtable=Qtable; ntRS(iM).w=w; ntRS(iM).net=net;
+    ntRS(iM).perf = perf;
+    
+    bFld = 'F:\Projects\DPPS\DefenseAgent\Results\ForFigures\';
+    svNm = [bFld 'EatingModel.mat'];
+    save(svNm,'ntRS','storedEps','-v7.3');
+    iM
+end
+
+%% Try a 'defend zone' model?
+% $$$ New shield model uses body and limb, but limb contact doesn't offer
+% ANY reward, and body contact punishes
+
+
+% -------------------------------------------------------------------------
+% Base settings
+s.gol.alSpC = [0 0];
+s.gol.randSpr = [0 0];
+s.lp.b1Siz = 1e4;
+s.lp.minExp = 4e7; % minumum number of actions before training sarts (big here so no training)
+s.lp.dispA = 1e6; % only show action count very infreequently
+s.wrld.size = [14 15];
+s.wrld.resetType = 'BottomTop_InfLR';
+s.rp.maxActions = 4e6 ;
+s.lmb.startCol=8;
+s.fl.trainTable=1; s.fl.trainNet=1;
+s.rl.maxRetr= 100;
+
+
+
+s.fl.bdyMov = 1;
+
+
+
+netSizes={[16 14 12 10 8 6]};
+
+
+% ---------------------------
+% Unique settings
+s.fl.grabAndEat =  0;
+s.fl.defendZone =  0; %1;
+s.act.shieldRew =  0%; -1;
+s.act.GoalRew   =  0;
+
+% $$$ NEW -----
+s.act.bdyGoalRew = -2;
+s.fl.bdyMov      =  1;
+
+s.gol.randSpr   = [2 2];
+
+s.fl.perfWhileLearn = 1;
+s.prf.nRep = 10;
+s.prf.skipBatches=10;
+
+
+
+s.lp.gamma = 0.8;
+
+% -------------------------------------------------------------------------
+% Run the model
+[s w storedEps net Qtable] = RunRLfun(s);
+
+
+% % % ========================================================
+% % % THIS WAS AN ATTEMPT BUT IT DOESNT ACTUALLY WORK. STILL IT'S TOO NEAT AND
+% % % POTENTIALLY USEFUL TO DELETE
+% % % Modify storedEps so that the agent gets punished at particular locations
+% % storedEpsDefend = storedEps;
+% % storedEpsDefend.R(storedEpsDefend.R > 0) = storedEpsDefend.R(storedEpsDefend.R > 0) - 1;
+% % ss = cell2mat(storedEps.S);
+% % ps = cell2mat(storedEps.prvS);
+% % % % % % This is the normal reward rule
+% % % % % toBeRewarded = ( (ps(:,1) - ps(:,3) ==  1 & ps(:,2) == 11 ) & storedEps.A(:) == 1 ) | ...
+% % % % %                ( (ps(:,1) - ps(:,3) ==  0 & ps(:,2) == 11 ) & storedEps.A(:) == 2 ) | ...
+% % % % %                ( (ps(:,1) - ps(:,3) == -1 & ps(:,2) == 11 ) & storedEps.A(:) == 3 );
+% % % And modify stored eps to not have the 'holding something' input
+% % storedEpsDefend.R(toBeRewarded) = storedEpsDefend.R(toBeRewarded) + 1;
+% % storedEpsDefend.S     = cellfun(@(x) x(1:3), storedEps.S,'UniformOutput',0); 
+% % storedEpsDefend.prvS  = cellfun(@(x) x(1:3), storedEps.prvS,'UniformOutput',0); 
+% % % ========================================================
+
+
+% -------------------------------------------------------------------------
+% Learn the Q-values
+for iM = 1:length(netSizes)
+    
+    s.fl.newNet = 1;
+    s.fl.newTable = 1;
+    
+    % Change specific settings of the model
+    s.lp.netS = netSizes{iM};
+
+    % Relearn Q with different netsizes
+    [net Qtable perf] = RelearnNNFun(s,w,storedEps,net,Qtable);
+    % Store network results Structure
+    ntRS(iM).s=s; ntRS(iM).Qtable=Qtable; ntRS(iM).w=w; ntRS(iM).net=net;
+    ntRS(iM).perf = perf;
+    
+    bFld = 'F:\Projects\DPPS\DefenseAgent\Results\ForFigures\';
+    svNm = [bFld 'ShieldModel_BodyMoves.mat'];
+    save(svNm,'ntRS','storedEps','-v7.3');
+    iM
+end
+
+
+%% Data for response to reviewer: on-policy learning
+
+% -------------------------------------------------------------------------
+% Base settings
+s = DefaultSettings();
+s.gol.alSpR = 1;
+s.gol.alSpC = [0 0];
+s.gol.randSpr = [2 2];
+s.lp.b1Siz = 1e4;
+s.wrld.size = [14 15];
+s.wrld.resetType = 'BottomTop_InfLR';
+s.lmb.startCol=8;
+s.fl.trainTable=1; s.fl.trainNet=1;
+s.rl.maxRetr=20;
+
+s.fl.perfWhileLearn = 1;
+s.prf.nRep = 10;
+s.prf.skipBatches=5;
+
+netSizes={[12 10 8 6],[9 9 9 9],[6 8 10 12]};
+
+
+% --------------------------------------
+% Unique settings
+s.lp.epsilon = 0.8;
+% Policy: unbalanced-epsilon-greedy
+unbPi = @(optimal_action, n_actions, randNum) (randNum > s.lp.epsilon) * optimal_action + (randNum <= s.lp.epsilon) * 3;
+
+
+allGoalRewards = [-2 2] ;
+
+
+
+% Create threat stored epochs
+storedEpsThr = storedEps;
+storedEpsThr.R(storedEps.R > 0.1) = - storedEpsThr.R(storedEps.R > 0.1);
+
+for iRew = 2:length(allGoalRewards)
+
+
+s.act.GoalRew = allGoalRewards(iRew);
+
+
+for iDepth = 1:3
+    % Run each type of model
+
+%     if iDepth == 1
+%         % Run the model
+%         [s w storedEps net Qtable] = RunRLfun(s);
+%     end
+
+
+    for iM=1:length(netSizes)
+
+
+        if iDepth == 1
+            s.fl.newNet = 1;
+            s.fl.newTable = 1;
+    
+
+            % Make sure the correct stored epochs are used
+            if allGoalRewards(iRew) < 0
+                storedEpsSARSA{iDepth}      = storedEpsThr;
+                storedEpsSARSAUnb{iDepth}   = storedEpsThr;
+                storedEpsQ{iDepth}          = storedEpsThr;
+            else
+                storedEpsSARSA{iDepth}      = storedEps;
+                storedEpsSARSAUnb{iDepth}   = storedEps;
+                storedEpsQ{iDepth}          = storedEps;
+            end
+
+            netSARSA    = net;
+            netSARSAUnb = net;
+            netQ        = net;
+        else
+            % Set parameters for nth run, using the network to make decisions
+            s.fl.newNet = 0;
+            s.fl.newTable = 1;
+
+            s.fl.newNet     = 0;
+            s.lp.retr       = 1000000;
+            s.rp.maxActions =  100000;
+            % Change specific settings of the model
+            s.lp.netS = netSizes{iM};
+
+            s.lp.alg = 'SARSA';
+            [s w storedEpsSARSA{iDepth} netSARSA Qtable] = RunRLfun(s,rSsarsa(iM,iDepth-1).net,[]);
+                        
+            sUnb = s;
+            sUnb.act.pi = unbPi;
+            [sUnb w storedEpsSARSAUnb{iDepth} netSARSAUnb Qtable] = RunRLfun(sUnb,rSsarsaUnb(iM,iDepth-1).net,[]);
+
+
+
+            s.lp.alg = 'Q';
+            [s w storedEpsQ{iDepth} netQ Qtable] = RunRLfun(s,rS(iM,iDepth-1).net,[]);
+            
+            netSARSA    = rSsarsa(iM,iDepth-1).net;
+            netSARSAUnb = rSsarsaUnb(iM,iDepth-1).net;
+            netQ        = rS(iM,iDepth-1).net;
+        end
+
+        % Change specific settings of the model
+        s.lp.netS = netSizes{iM};
+
+        s.lp.alg = 'SARSA';
+        [net Qtable perf] = RelearnNNFun(s, w, storedEpsSARSA{iDepth}, ...
+            netSARSA, Qtable);
+        % Store results Structure: SARSA
+        rSsarsa(iM,iDepth).s=s; rSsarsa(iM,iDepth).Qtable=Qtable;
+        rSsarsa(iM,iDepth).w=w; rSsarsa(iM,iDepth).net=net;
+        rSsarsa(iM,iDepth).perf=perf;
+
+        
+        sUnb = s;
+        sUnb.act.pi = unbPi;
+        [net Qtable perf] = RelearnNNFun(sUnb, w, storedEpsSARSAUnb{iDepth}, ...
+            netSARSAUnb, Qtable);
+        % Store results Structure: SARSA but with UNBALANCED epsilon policy
+        rSsarsaUnb(iM,iDepth).s=s; rSsarsaUnb(iM,iDepth).Qtable=Qtable;
+        rSsarsaUnb(iM,iDepth).w=w; rSsarsaUnb(iM,iDepth).net=net;
+        rSsarsaUnb(iM,iDepth).perf=perf;
+
+
+        s.lp.alg = 'Q';
+        [net Qtable perf] = RelearnNNFun(s, w, storedEpsQ{iDepth}, ...
+            netQ, Qtable);
+        % Store results Structure: Q-learning
+        rS(iM,iDepth).s=s; rS(iM,iDepth).Qtable=Qtable;
+        rS(iM,iDepth).w=w; rS(iM,iDepth).net=net;
+        rS(iM,iDepth).perf=perf;
+
+
+        iM
+    end
+
+    if allGoalRewards(iRew) < 0
+        rSsarsathr      = rSsarsa; 
+        rSsarsaUnbthr   = rSsarsaUnb;
+        rSthr           = rS;
+    end
+    
+    svNm='F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SARSA_WithUnbalanced_AndThreat.mat';
+    save(svNm,'rSsarsa','rSsarsaUnb','rS','rSsarsathr','rSsarsaUnbthr','rSthr','-v7.3')
+
+    iDepth
+end
+
+end
+
+
+
+
+
+%% Data for response to reviewers: tool use
+clear s rS ntRS rtRS ytRS olRS
+
+% Load previous tool results
+load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ToolUse\Tool_Pre_post_51_51Batch_ToolPos5_moreRandSpr_NoHist_ToolAlwaysPresentButHalfNoReward.mat')
+
+
+s.fl.ToolChange=1;
+s.lmb.ToolRows=[5];
+
+s.fl.hist = 1;
+s.gol.alSpR = [1];
+s.gol.alSpC =[0 0];
+s.gol.randSpr = [2 2];
+% % % s.rp.maxActions = 4e6 ;
+s.rp.maxActions = 2e6 ;
+s.lp.minExp = 2e7;
+
+s.lp.b1Siz = 1e4;
+s.wrld.size = [14 15];
+s.wrld.resetType = 'BottomTop_InfLR';
+s.lmb.startCol=8;
+s.fl.trainTable=1; s.fl.trainNet=1;
+s.rl.maxRetr=1;
+% % % s.rl.maxRetr=2;
+s.fl.hist = 0;
+
+% % % s.fl.perfWhileLearn = 1;
+s.fl.perfWhileLearn = 1;
+s.prf.nRep = 10;
+s.prf.skipBatches = 1;
+
+netSizes={[8 10 12 14 16], 12.*ones(1,5), [16 14 12 10 8]};
+
+s.lmb.ToolProb=0.5;
+% Run the model and learn Q
+[s w storedEps ] = RunRLfun(s); % Run up to here to check that ther is at least 1 ep with a tool
+% % % [s w storedEps net Qtable] = RunRLfun(s); % Run up to here to check that ther is at least 1 ep with a tool
+
+% Start from the 'only limb' model, and learn tool use, storing the network
+% after every single batch
+for iM = 1:length(netSizes)
+    
+    % Change specific settings of the model
+    s.lp.netS = netSizes{iM};
+
+    % Set the first network to be equal to the no-tool network
+    incrToolRS(iM,1) = olRS(iM);
+
+    for iBatch = 7:51
+        % Then adapt the no-tool network, but with tool-use Q-values
+        s.fl.newNet=0;
+        [net Qtable perf] = RelearnNNFun(s,w,storedEps,incrToolRS(iM,iBatch - 1).net,Qtable);
+        % Store Yes Tool network results Structure
+        incrToolRS(iM,iBatch).s=s; incrToolRS(iM,iBatch).Qtable=Qtable; incrToolRS(iM,iBatch).w=w; incrToolRS(iM,iBatch).net=net;
+        incrToolRS(iM,iBatch).perf = perf;
+
+        bFld = 'F:\Projects\DPPS\DefenseAgent\Results\ForFigures\';
+        svNm = [bFld 'Tool_ReviewerResponse_Pre_post_51_51Batch_ToolPos5_moreRandSpr_NoHist_V2'];
+        save(svNm,'incrToolRS','-v7.3');
+    end
+    
+end
+
+
+
+%% Make videos showing what's happening during training
 
 load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Valence\Valence_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_SmallNetRelearn_B_V15.mat')
 % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Fig_Dist_Pos_Dependence_v5_randRC.mat');
@@ -1410,6 +1880,34 @@ s.plt.grid = 1;
 
 [s2, w2, storedEps, ~, ~]    = RunRLfun(s);
 
+
+%% Make video showing the limb bound to body
+
+
+iM = 1;
+
+net                  = rS(iM).net;
+s2                   = DefaultSettings(rS(iM).s);
+s2.fl.newNet         = 0;
+s2.fl.dspm           = 1;
+s2.rp.maxActions     = 100;
+s2.fl.vid            = 1;
+s2.plt.fancyWorld    = 1;
+s2.plt.vidFR         = 5; %7.5;
+s2.plt.vidFileName   = 'F:\Projects\DPPS\DefenseAgent\Documentation\Figures\Finalising_All\TESTWASP_example_limbWithBody7.avi';
+
+s2.plt.grid = 1;
+
+
+s2.bdy.startCol = 11;
+s2.lmb.startCol = 11;
+
+[s3, w3, storedEps, ~, ~]    = RunRLfun(s2,net);
+
+
+% rS(iM).perf.rewPerAct(end,:)
+
+sum(storedEps.R)./numel(storedEps.R)
 
 %%
 

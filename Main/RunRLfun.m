@@ -12,7 +12,7 @@ function [s, w, storedEps, net, Qtable] = RunRLfun(s,net,Qtable,storedEps,extraI
 % Qtable:     [OPTIONAL] Provides q values in tabular format. Only used if
 %             appropriate setting is chosen in 's' input
 % storedEps:  [OPTIONAL] History of actions and results from a previous run
-%             Will be used to train the network
+%             Will be    used to train the network
 % extraInput: [OPTIONAL] Stores the value of additional environmental objects
 %
 % -------------------------------------------------------------------------
@@ -109,6 +109,12 @@ if max(w.lmb.ToolRows~=0)
 else
     w.lmb.ToolPresent=0;
 end
+
+% -------------------------------------------------------------------------
+% Initialise the holding status
+% This indicates whether the limb is holding a reward, specifically for the
+% environment in which the agent needs to 'eat' to receive reward.
+w.lmb.holdingReward = 0; 
 
 % -------------------------------------------------------------------------
 % Set speeds of 'stimuli' - sample randomly,
@@ -238,6 +244,7 @@ if s.fl.newNet==1
         % ---------------------------------------------------------------------
     else
         net=feedforwardnet(s.lp.netS);
+        net=ChangeNeuronType(net,s);
         net=init(net);
         net.trainFcn = s.lp.TrnFn;
         net.trainParam.epochs=s.lp.TrnEp;
@@ -278,6 +285,8 @@ for i=1:s.rp.numIter
         w.thr.prvRow  = w.thr.row;  w.thr.prvCol  = w.thr.col;
         w.lmb.prvToolRows=w.lmb.ToolRows;
         w.lmb.PrvToolPresent=w.lmb.ToolPresent;
+        w.lmb.prvHoldingReward = w.lmb.holdingReward;
+
         w.bdy.prvCol=w.bdy.col;
         prvtouchV = w.touchV;
         w.rtTask.prvTouch= w.rtTask.percieveTouch;
@@ -336,6 +345,8 @@ for i=1:s.rp.numIter
             
             [val,index] = max(Qest);
             indexAll = find(Qest == val);
+            action = indexAll(1);
+            % If more than one action has optimal value, pick randomly
             if size(indexAll,1) > 1
                 index = 1+round(rand*(length(indexAll)-1));
                 action = indexAll(index,1);
@@ -347,11 +358,9 @@ for i=1:s.rp.numIter
                 action = indexAll(1,index);
                 bestAction=action;
             end
-            % Put random chance in of doing non optimal move
-            if rand(1,1)<=s.lp.epsilon
-                index=1+round(rand*(s.act.numA-1));
-            end
-            action = index;
+            % Select action dpending on policy
+            action = s.act.pi(action,s.act.numA,rand());
+
         end
         
         % -----------------------------------------------------------------
@@ -497,6 +506,27 @@ for i=1:s.rp.numIter
                 end
             end
         end
+
+        % -----------------------------------------------------------------
+        % If the task involves moving 'caught food' to the 'mouth', add the 
+        % relevant rewards
+        if s.fl.grabAndEat == 1
+            % Only if the agent is actually holding something, and if the
+            % limb is in the correct position
+            if w.lmb.holdingReward == 1 && w.lmb.col == ceil(s.wrld.size(2)./2)
+                w.lmb.holdingReward = 0; % Reward is eaten, so hand is empty
+                rewardVal = rewardVal + s.act.eatRew;
+            end
+        end
+
+        % -----------------------------------------------------------------
+        % If the task involves defending a particular area, add the
+        % relevant rewards
+        if s.fl.defendZone == 1
+            if w.goal.row == 12 & w.goal.col == ceil(s.wrld.size(2)./2)
+                rewardVal = rewardVal + s.act.shieldRew;
+            end
+        end
         
         % -----------------------------------------------------------------
         % Other consequences of touch $$ might have to think more here $$
@@ -552,11 +582,11 @@ for i=1:s.rp.numIter
                 batchEps.S = storedEps.S(bTrls,: );
                 batchEps.A = storedEps.A(bTrls,: );
                 batchEps.R = storedEps.R(bTrls,: );
-                [net Qtable] = RelearnNNFun(s,w,batchEps,net,Qtable);
+                [net Qtable] = RelearnNNFunSC(s,w,batchEps,net,Qtable);
                 
             % OR just learn using the full amount of stored epochs
             else
-                [net Qtable] = RelearnNNFun(s,w,storedEps,net,Qtable);
+                [net Qtable] = RelearnNNFunSC(s,w,storedEps,net,Qtable);
             end
             s.fl.newNet=0;
             s.fl.newTable=0;
@@ -587,6 +617,9 @@ if status == GOAL | status == THREAT
     if status == GOAL
         [w.goal.row w.goal.col, rFl, goalSpeedR, goalSpeedC]=ResetObjPos(s,s.gol.alSpR, s.gol.alSpC);
         UpdateWorldMap(w,w.goal.prvRow,w.goal.prvCol,w.goal.row,w.goal.col,rFl,100);
+
+        % Set 'grabbed status', in case the food-to-mouth scenario applies
+        w.lmb.holdingReward = 1;
     elseif status == THREAT
         [w.thr.row w.thr.col, rFl, thrSpeedR, thrSpeedC]=ResetObjPos(s,s.thr.alSpR, s.thr.alSpC);
         UpdateWorldMap(w,w.thr.prvRow,w.thr.prvCol,w.thr.row,w.thr.col,rFl,10);
@@ -638,13 +671,13 @@ if s.plt.fancyWorld == 1
     end
 
     % Plot hand
-    tmpFig = imread('D:\Old_D\DPPS\DefenseAgent\Documentation\Figures\Finalising_All\OnlyHand.png');
+    tmpFig = imread('F:\Projects\DPPS\DefenseAgent\Documentation\Figures\Finalising_All\OnlyHand.png');
     alphachannel = 1-double(all(tmpFig == 255, 3));
     hold on
     h = imshow(tmpFig,'XData',w.lmb.col + [-1.5 -.5],'YData',w.lmb.row+ [-1.5 -.5]);
     set(h, 'AlphaData', alphachannel);
 
-    xlim([.5 13.5])
+    xlim([.5 s.wrld.size(2)-.5])
     caxis([-1.5 1.5])
     axis off
     hold off
