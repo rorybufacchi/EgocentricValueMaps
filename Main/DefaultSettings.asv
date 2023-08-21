@@ -211,6 +211,7 @@ s.plt.grid = 0; % if 1, plots a grid over any imagesc image
 s.plt.showLimb = 0; % if is 1, plots a circle at the position of the limb
 s.plt.showBodyCol = []; % the number of the column where to plot the body
 s.plt.fancyWorld = 0; % For plotting of the actual world state
+s.plt.otherStateVars = [s.plt.lmbRow-6 5]; % For calculating neural activation with the threats/goals in additional positions
 
 % -------------------------------------------------------------------------
 % Figure settins I'm not sure about $$$

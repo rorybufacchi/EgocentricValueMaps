@@ -1278,8 +1278,8 @@ sAll.plt.ON = 0;
 
 
 
-for iTyp = 7:length(neurTypes)
-for iReg = 1:length(regTypes)
+for iTyp = 4:length(neurTypes);
+for iReg = 1:length(regTypes);
 
 
 bFold = 'Results\ForFigures\Valence\';

@@ -7,7 +7,8 @@ function [Q,allNeurAct] = CalcNetOutput(s,w,net,extraInput)
 %   - Q             Action values. Dimensions:   Lmb Row, Lmb Col, Obj Row, Obj Col, layer, neuron
 %   - AllNeurAct    Neural activation Dimensions:Obj Row, Obj Col, LMb Row, Lmb Col, layer, neuron
 
-addpath('D:\Old_D\DPPS\DefenseAgent\Scripts')
+% addpath('D:\Old_D\DPPS\DefenseAgent\Scripts')
+addpath('Scripts')
 
 clear tempQ2
 
@@ -42,7 +43,7 @@ for kRow=1:nOSV(1)
         
         if s.plt.meanOSVfl==0
             % other state variables - only used if s.plt.meanOSVfl is 0
-            inpOSV=[s.plt.lmbRow-6 5];
+            inpOSV=s.plt.otherStateVars; % $$$ This should go into default settings, and then I can run this in a loop a bunch of times
             % inpOSV=[4 4];
         else
             inpOSV=[kRow kCol]+1
@@ -78,7 +79,7 @@ for kRow=1:nOSV(1)
                 
                 % Not sure why this is correct but apparently % it is...
                 tempNeurAct2=permute(tempNeurAct,[5 2 1 3 4]);
-                if s.plt.plotThrFl==1 % $$$$ NOT SURE ABOUT THIS
+                if s.plt.plotThrFl==1 
                     tempNeurAct2=permute(tempNeurAct2,[1 2 3 4 5]);
                 end
                 tempNeurAct2=repmat(tempNeurAct2,[size(w.world2D,1) 1 1 1 1]);
@@ -94,7 +95,7 @@ for kRow=1:nOSV(1)
         
         % Not sure why this is correct but apparently % it is...
         QQ=permute(tempQ2,[5 2 1 3 4]);
-        if s.plt.plotThrFl==1 % $$$$ NOT SURE ABOUT THIS
+        if s.plt.plotThrFl==1 
             QQ=permute(QQ,[1 2 3 4 5]);
         end
         QQ=repmat(QQ,[s.wrld.size(1) 1 1 1 1]);

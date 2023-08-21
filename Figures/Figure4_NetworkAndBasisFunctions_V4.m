@@ -1,4 +1,5 @@
-load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SuccessorState\NetworkAnalysisWorkSpace.mat')
+addpath(genpath('Scripts\EgocentricValueMaps'))
+load('Results\ForFigures\SuccessorState\NetworkAnalysisWorkSpace.mat')
 
 %% Actions chosen by network
 
@@ -275,8 +276,8 @@ for iF = 1:length(allFields)
     cF = allFields{iF};
     
     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SuccessorState\BitsAndPieces\FromMatlab\' cF '.eps'] , 'epsc')
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SuccessorState\BitsAndPieces\FromMatlab\' cF '.pdf'] , 'pdf')
+    saveas(f.(cF).f,['Results\ForFigures\SuccessorState\BitsAndPieces\FromMatlab\' cF '.eps'] , 'epsc')
+    saveas(f.(cF).f,['Results\ForFigures\SuccessorState\BitsAndPieces\FromMatlab\' cF '.pdf'] , 'pdf')
 end
 
 
@@ -292,8 +293,8 @@ QThr    = QGl2;
 
 
 %% Original and reconstructed QThr values (RUN first part of SUCCESSORSTATE FIRST, or load file below)
-% load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SuccessorState\ReconstructingWorkSpace_V2.mat')
-load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SuccessorState\ReconstructingWorkSpace_V3.mat')
+% load('Results\ForFigures\SuccessorState\ReconstructingWorkSpace_V2.mat')
+load('Results\ForFigures\SuccessorState\ReconstructingWorkSpace_V3.mat')
 
 fS.gridXstart = -4.5;
 fS.gridXstep = 1;
@@ -477,7 +478,7 @@ for iF = 1:length(allFields)
     cF = allFields{iF};
     
     set(f2.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f2.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SuccessorState\BitsAndPieces\FromMatlab\' cF '_V2.eps'] , 'epsc')
-    saveas(f2.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SuccessorState\BitsAndPieces\FromMatlab\' cF '_V2.pdf'] , 'pdf')
+    saveas(f2.(cF).f,['Results\ForFigures\SuccessorState\BitsAndPieces\FromMatlab\' cF '_V2.eps'] , 'epsc')
+    saveas(f2.(cF).f,['Results\ForFigures\SuccessorState\BitsAndPieces\FromMatlab\' cF '_V2.pdf'] , 'pdf')
 end
 

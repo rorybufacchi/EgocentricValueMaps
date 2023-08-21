@@ -22,15 +22,6 @@ end
 % Calculate the correlations
 s=DefaultSettings(s); s.plt.pltType='Binned'; s.plt.sequentialLimbCols=0;
 
-% $$$ I NEED TO CHECK WHETHER WEIGHTS ARE CALCULATED CORRECTLY AND IN THE
-% RIGHT ORDER!! $$$
-
-% $$ AND THEN make a weight thing which goes further back?
-
-% $$$ ALSO ALSO: for the body/limb preference: check whether I've been
-% using correlation or covariance or something else. Consider making the
-% option for correlation, if necessary..
-
 switch s.nta.comparison
     case 'Valence'
         s2=s;
@@ -38,10 +29,10 @@ switch s.nta.comparison
         s2.plt.lmbCol=2:s.wrld.size(2)-1;
         s2.plt.plotThrFl=0;
         [Q,allNeurAct] = CalcNetOutput(s2,w,net); [rGl pGl covGl] = NetAnalysis(s2,w,allNeurAct); % Goal correlation
-        glAct=squeeze(nanmean(allNeurAct(:,:,:,s.plt.lmbCol,s.plt.startLayer:s.plt.stopLayer,:),[1 2 3 4]));
+        glAct=squeeze(nanmean(allNeurAct(:,:,:,s2.plt.lmbCol,s2.plt.startLayer:s2.plt.stopLayer,:),[1 2 3 4]));
         s2.plt.plotThrFl=1;
         [Q,allNeurAct] = CalcNetOutput(s2,w,net); [rThr pThr covThr] = NetAnalysis(s2,w,allNeurAct); % Threat correlation
-        thrAct=squeeze(nanmean(allNeurAct(:,:,:,s.plt.lmbCol,s.plt.startLayer:s.plt.stopLayer,:),[1 2 3 4]));
+        thrAct=squeeze(nanmean(allNeurAct(:,:,:,s2.plt.lmbCol,s2.plt.startLayer:s2.plt.stopLayer,:),[1 2 3 4]));
     case 'BodyPart'
         testBodyCols=1:size(w.world2D,2);
         for iBdyCol=1:length(testBodyCols)
@@ -56,11 +47,11 @@ switch s.nta.comparison
         
         s2.plt.lmbRow = size(w.world2D,1)-2;
         [rGl pGl covGl] = NetAnalysis(s2,w,allNeurAct_MeanBody ); % limb correlations
-        glAct=squeeze(nanmean(allNeurAct_MeanBody (:,:,:,:,s.plt.startLayer:s.plt.stopLayer,:),[1 2 3 4]));
+        glAct=squeeze(nanmean(allNeurAct_MeanBody (:,:,:,:,s2.plt.startLayer:s2.plt.stopLayer,:),[1 2 3 4]));
         
         s2.plt.lmbRow = size(w.world2D,1)-1;
         [rThr pThr covThr] = NetAnalysis(s2,w,allNeurAct_MeanLimb); % body correlation
-        thrAct=squeeze(nanmean(allNeurAct_MeanLimb(:,:,:,:,s.plt.startLayer:s.plt.stopLayer,:),[1 2 3 4]));
+        thrAct=squeeze(nanmean(allNeurAct_MeanLimb(:,:,:,:,s2.plt.startLayer:s2.plt.stopLayer,:),[1 2 3 4]));
 end
 % close all
 

@@ -1208,7 +1208,7 @@ clear s rS ntRS rtRS ytRS olRS
 
 % -------------------------------------------------------------------------
 % Base settings
-for iRep = 1:15 %9:15 %100 % $$$ HERE 2023: ADD IN WHICH UNIT TYPES ARE USED
+for iRep = 1:15 % $$$ HERE 2023: ADD IN WHICH UNIT TYPES ARE USED
     
     clear rS
 
@@ -1250,20 +1250,21 @@ netSizes={[6 10 14 18], [12 12 12 12 ], [18 14 10 6]};
 
 
 % Run the model and learn Q
-s.lp.neurTypes = 'tribas'; %'logsig'; %'radbas'; % 'tribas'; %'tansig';  %'hardlim'; %'softmax'; %poslin'; % 'purelin' 
-% s.lp.TrnFn = 'trainlmL1';
-s.lp.TrnFn = 'trainlm';
+s.lp.neurTypes = 'radbas'; %'softmax'; % 'logsig'; %'radbas'; % 'tribas'; %'tansig';  %'hardlim'; %'softmax'; %poslin'; % 'purelin' 
+s.lp.TrnFn = 'trainlmL1';
+% s.lp.TrnFn = 'trainlm';
 s = DefaultSettings(s);
 [s w storedEps net Qtable] = RunRLfun(s);
 
 % Run each type of model
 for iM = 1:length(netSizes)
     
-    s.fl.newNet   = 1;
-    s.fl.newTable = 1;
-    s.fl.trainNet = 1;
-    s.act.numA = 3;
-    s.act.Name = {'LEFT','STAY','RIGHT'};
+    s.fl.newNet     = 1;
+    s.fl.newTable   = 1;
+    s.fl.trainNet   = 1;
+    s.act.numA      = 3;
+    s.act.Name      = {'LEFT','STAY','RIGHT'};
+    s               = DefaultSettings(s);
 %     
     % Change specific settings of the model
     s.lp.netS = netSizes{iM};
@@ -1280,10 +1281,10 @@ for iM = 1:length(netSizes)
     rS(iM).s=s; rS(iM).Qtable=Qtable; rS(iM).w=w; rS(iM).net=net;
     rS(iM).perf = perf;
     
-    bFld = 'F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Valence\';
+    bFld = 'Results\ForFigures\Valence\';
 
-    svNm = [bFld 'Valence_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_' s.lp.neurTypes '_B_V' num2str(iRep)];
-% % %     svNm = [bFld 'Valence_L1_Regularization_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_' s.lp.neurTypes '_B_V' num2str(iRep)];
+% % %     svNm = [bFld 'Valence_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_' s.lp.neurTypes '_B_V' num2str(iRep)];
+    svNm = [bFld 'Valence_L1_Regularization_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_' s.lp.neurTypes '_B_V' num2str(iRep)];
     save(svNm,'rS','-v7.3');
 
     iM

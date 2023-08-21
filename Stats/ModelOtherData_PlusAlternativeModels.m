@@ -136,7 +136,6 @@ end
 % % % allQ.bodyPart{1}        = 'Trunk'; 
 % % % allQ.centerpos{1}   = sBdy.clc.nearPos; % x y z position of this plot in the OVERALL space --> trunk is central
 
-
 %%
 
 
