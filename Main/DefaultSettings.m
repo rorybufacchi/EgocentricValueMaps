@@ -212,6 +212,8 @@ s.plt.showLimb = 0; % if is 1, plots a circle at the position of the limb
 s.plt.showBodyCol = []; % the number of the column where to plot the body
 s.plt.fancyWorld = 0; % For plotting of the actual world state
 s.plt.otherStateVars = [s.plt.lmbRow-6 5]; % For calculating neural activation with the threats/goals in additional positions
+s.plt.contours = 0;
+s.plt.contourVals = [-0.3, 0.3];
 
 % -------------------------------------------------------------------------
 % Figure settins I'm not sure about $$$

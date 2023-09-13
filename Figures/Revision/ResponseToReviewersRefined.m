@@ -1,6 +1,8 @@
 %% Effects of policy
 
-% % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SARSA_WithUnbalanced_AndThreat.mat')
+addpath(genpath('Scripts\EgocentricValueMaps'))
+
+load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SARSA_WithUnbalanced_AndThreat.mat')
 % % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SARSA_WithUnbalanced.mat')
 
 f.Policy.f = figure('Position',[20 20 1800 900]);
@@ -11,7 +13,8 @@ sgtitle('POSITIVE VALENCE STIMULI                                               
 fS.lineYLim = [-0.01 0.55];
 fS.lineXLim = [ 0   0.7];
 fS.xPoints  = [5 5 ; 10 10]';
-fS.cAxes    = [-1.8 1.8];
+% fS.cAxes    = [-1.8 1.8];
+fS.cAxes    = [-2 2];
 
 fS.gridXstart   = -5.5;
 fS.gridXstep    =  1;
@@ -32,7 +35,7 @@ for iD = 1:size(rS,2)
     for iM = 1:3
         [tmpQ(:,:,:,:,:,iM),allNeurAct] = CalcNetOutput(rS(iM,iD).s,rS(iM,iD).w,rS(iM,iD).net);
     end
-    Q = nanmean(tmpQ,6);
+    Q = nanmean(tmpQ,[5 6]);
     [ax, plQhoriz(:,1,1,iD), plQvert(:,1,1,iD)] = plot2D(rS,fS,Q,iM,iD);
     axes(ax{1});
     caxis(fS.cAxes); %caxis([0 2])
@@ -46,7 +49,7 @@ for iD = 1:size(rS,2)
     for iM = 1:3
         [tmpQ(:,:,:,:,:,iM),allNeurAct] = CalcNetOutput(rSsarsa(iM,iD).s,rSsarsa(iM,iD).w,rSsarsa(iM,iD).net);
     end
-    Q = nanmean(tmpQ,6);
+    Q = nanmean(tmpQ,[5 6]);
     [ax, plQhoriz(:,1,2,iD), plQvert(:,1,2,iD)] = plot2D(rSsarsa,fS,Q,iM,iD);
     axes(ax{1});
     caxis(fS.cAxes); %caxis([0 2])
@@ -60,7 +63,7 @@ for iD = 1:size(rS,2)
     for iM = 1:3
         [tmpQ(:,:,:,:,:,iM),allNeurAct] = CalcNetOutput(rSsarsaUnb(iM,iD).s,rSsarsaUnb(iM,iD).w,rSsarsaUnb(iM,iD).net);
     end
-    Q = nanmean(tmpQ,6);
+    Q = nanmean(tmpQ,[5 6]);
     [ax, plQhoriz(:,1,3,iD), plQvert(:,1,3,iD)] = plot2D(rSsarsaUnb,fS,Q,iM,iD);
     axes(ax{1});
     caxis(fS.cAxes); %caxis([0 2])
@@ -79,7 +82,7 @@ for iD = 1:size(rS,2)
     for iM = 1:3
         [tmpQ(:,:,:,:,:,iM),allNeurAct] = CalcNetOutput(rSthr(iM,iD).s,rSthr(iM,iD).w,rSthr(iM,iD).net);
     end
-    Q = nanmean(tmpQ,6);
+    Q = nanmean(tmpQ,[5 6]);
     [ax, plQhoriz(:,2,1,iD), plQvert(:,2,1,iD)] = plot2D(rSthr,fS,Q,iM,iD);
     axes(ax{3}); xlim(-flip(fS.lineXLim));
     axes(ax{2}); ylim(-flip(fS.lineYLim));
@@ -96,7 +99,7 @@ for iD = 1:size(rS,2)
     for iM = 1:3
         [tmpQ(:,:,:,:,:,iM),allNeurAct] = CalcNetOutput(rSsarsathr(iM,iD).s,rSsarsathr(iM,iD).w,rSsarsathr(iM,iD).net);
     end
-    Q = nanmean(tmpQ,6);
+    Q = nanmean(tmpQ,[5 6]);
     [ax, plQhoriz(:,2,2,iD), plQvert(:,2,2,iD)] = plot2D(rSsarsathr,fS,Q,iM,iD);
     axes(ax{3}); xlim(-flip(fS.lineXLim));
     axes(ax{2}); ylim(-flip(fS.lineYLim));
@@ -114,7 +117,7 @@ for iD = 1:size(rS,2)
     for iM = 1:3
         [tmpQ(:,:,:,:,:,iM),allNeurAct] = CalcNetOutput(rSsarsaUnbthr(iM,iD).s,rSsarsaUnbthr(iM,iD).w,rSsarsaUnbthr(iM,iD).net);
     end
-    Q = nanmean(tmpQ,6);
+    Q = nanmean(tmpQ,[5 6]);
     [ax, plQhoriz(:,2,3,iD), plQvert(:,2,3,iD)] = plot2D(rSsarsaUnbthr,fS,Q,iM,iD);
     axes(ax{3}); xlim(-flip(fS.lineXLim));
     axes(ax{2}); ylim(-flip(fS.lineYLim));
@@ -129,7 +132,6 @@ for iD = 1:size(rS,2)
 %     colormap(hsv)
     colormap(flip(redbluecmapRory(11,5)))
 end
-
 
 % Plot the horizontal and vertical means in the same plots, to show effects
 
@@ -282,6 +284,23 @@ end
 legend(trainedOn)
 
 
+f.Colourbars.f = figure('Position',[20 50 400 600]);
+colorbar;
+caxis(fS.cAxes);
+colormap(flip(redbluecmapRory(11,5)))
+
+% Savefigure
+allFields = fields(f);
+for iF = 1:length(allFields)
+    cF = allFields{iF};
+  
+    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\LearningAlgorithm\' cF '.eps'] , 'epsc')
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\LearningAlgorithm\' cF '.pdf'] , 'pdf')
+
+end
+
+
 %% Wasp scenario
 
 % $$$ MAKE THIS into a loop and plot the best action for all 3
@@ -428,11 +447,11 @@ end
 end
 
 % Save analysed neuron types
-save('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V3.mat','-v7.3')
+save('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat','-v7.3')
 
 %% $$$ Plot some kind of order metrics or something
 
-% load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V2.mat')
+load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat')
 
 % binEdges = -4:.5:10;
 binEdges    = -7:.5:7;
@@ -506,6 +525,7 @@ for iM = 1:size(binNPFtmp,3)
     numSmaller(iM) = sum(structMetricPm(:,iM) > structMetric(iM))
 end
 
+% $$$ HERE CAN ALSO PLOT AGAINST PERFORMANCE
 
 structureOverChance = (structMetric - structMetricPm'   );
 
@@ -570,14 +590,28 @@ legend([splineH{:}],'Narrowing networks', 'constant width networks', 'Widening n
 
 %% Plot eating version
 
+% % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\EatingModel.mat')
+% % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\EatingModel_WithRandomMove.mat')
+
+
 iM = 1;
 
 f.Eating.f = figure('Position',[50 200 1600 400]);
+
+eatRS = ntRS;
 
 eatRS(iM).s.plt.meanLimbCols  = 1
 eatRS(iM).s.plt.holdingRew    = 0;
 eatRS(iM).s.plt.lmbCol        = 10;
 eatRS(iM).s.plt.plAct         = 2;
+
+fS.lineYLim = [-0.2 0];
+fS.lineXLim = [-0.2 0];
+fS.xPoints  = [5 5 ; 10 10]';
+% fS.cAxes    = [-1.8 1.8];
+% fS.cAxes    = [-2 2];
+fS.cAxes    = [-.4 .4];
+
 
 eatRS(iM).s.plt.colLims = [1.5 13.5];
 eatRS(iM).s.plt.rowLims = [1.5 13.5];
@@ -587,82 +621,108 @@ fS.gridYstart = 2.5;
 fS.gridYstep = 1;
 
 
-subplot(2,9,[1 2 10 11])
+
+subplot(2,6,1)
 eatRS(iM).s.plt.lmbCol  = 2:14;
 [Q,allNeurAct] = CalcNetOutput(eatRS(iM).s,eatRS(iM).w,eatRS(iM).net);
 DisplActValsFun(eatRS(iM).s,eatRS(iM).w,-Q);
 colorbar off
 GridOverImage(fS,gca)
-caxis([-1 1]);
+caxis(fS.cAxes);
 title('Positive stimulus, average Q-field')
 
+MakeSidePlots(gca,Q,fS,eatRS(iM))
 mouthOffset = [-4:2:4]; % [-2:2] ; 
 for iO = 1:length(mouthOffset) % loop through offsets
 
     % current offset
     cLimbCol = 8 - mouthOffset(iO);
-    subplot(2,9,2 + iO)
+    subplot(2,6,1 + iO);
     eatRS(iM).s.plt.lmbCol  = cLimbCol;
-    [Q,allNeurAct] = CalcNetOutput(eatRS(iM).s,eatRS(iM).w,eatRS(iM).net);
+    
+
+    
+    [tmpQ,allNeurAct] = CalcNetOutput(eatRS(iM).s,eatRS(iM).w,eatRS(iM).net);
+    Q = nanmean(tmpQ,[5 6]);
+
+    eatRS(iM).s.plt.plAct = 1;
     DisplActValsFun(eatRS(iM).s,eatRS(iM).w,-Q);
+
+
     colorbar off
     GridOverImage(fS,gca)
-    caxis([-1 1]);
-    title(['REWARD: Mouth at ' num2str(mouthOffset(iO)) ])
-end
+    caxis(fS.cAxes);
+% % %     title(['REWARD: Mouth at ' num2str(mouthOffset(iO)) ])
 
+    MakeSidePlots(gca,Q,fS,eatRS(iM))
+end
 
 
 colormap(redbluecmapRory)
 
-% Shield version --> stationary dangerzone
+% % % 
+% % % % Shield version --> stationary dangerzone
+% % % 
+% % % 
+% % % iM = 1;
+% % % 
+% % % % % % f.Eating.f = figure('Position',[50 200 1600 400]);y
+% % % 
+% % % shieldRS(iM).s.plt.meanLimbCols  = 1
+% % % shieldRS(iM).s.plt.holdingRew    = 0;
+% % % shieldRS(iM).s.plt.lmbCol        = 10;
+% % % shieldRS(iM).s.plt.plAct         = 2;
+% % % 
+% % % shieldRS(iM).s.plt.colLims = [1.5 13.5];
+% % % shieldRS(iM).s.plt.rowLims = [1.5 13.5];
+% % % fS.gridXstart = -5.5;
+% % % fS.gridXstep = 1;
+% % % fS.gridYstart = 2.5;
+% % % fS.gridYstep = 1;
+% % % 
+% % % 
+% % % subplot(2,9,[8 9 17 18])
+% % % shieldRS(iM).s.plt.lmbCol  = 2:14;
+% % % [Q,allNeurAct] = CalcNetOutput(shieldRS(iM).s,shieldRS(iM).w,shieldRS(iM).net);
+% % % DisplActValsFun(shieldRS(iM).s,shieldRS(iM).w,-Q);
+% % % colorbar off
+% % % GridOverImage(fS,gca)
+% % % caxis([-.1 .1]);
+% % % title('Negative stimulus, only harms mouth, average Q-field')
+% % % 
+% % % mouthOffset = [-4:2:4]; % [-2:2] ; 
+% % % for iO = 1:length(mouthOffset) % loop through offsets
+% % % 
+% % %     % current offset
+% % %     cLimbCol = 8 - mouthOffset(iO);
+% % %     subplot(2,9,11 + iO)
+% % %     shieldRS(iM).s.plt.lmbCol  = cLimbCol;
+% % %     [Q,allNeurAct] = CalcNetOutput(shieldRS(iM).s,shieldRS(iM).w,shieldRS(iM).net);
+% % %     DisplActValsFun(shieldRS(iM).s,shieldRS(iM).w,-Q);
+% % %     colorbar off
+% % %     GridOverImage(fS,gca)
+% % %     caxis([-.4 .4]);
+% % %     title(['DANGER: Mouth at ' num2str(mouthOffset(iO)) ])
+% % % end
+% % % 
+% % % 
+% % % 
+% % % colormap(redbluecmapRory)
 
 
-iM = 1;
 
-% % % f.Eating.f = figure('Position',[50 200 1600 400]);y
+% Save figures for eating
+allFields = fields(f);
+for iF = 1:length(allFields)
+    cF = allFields{iF};
+  
+    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\Eating\' cF '.eps'] , 'epsc')
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\Eating\' cF '.pdf'] , 'pdf')
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.eps'] , 'epsc')
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.pdf'] , 'pdf')
 
-shieldRS(iM).s.plt.meanLimbCols  = 1
-shieldRS(iM).s.plt.holdingRew    = 0;
-shieldRS(iM).s.plt.lmbCol        = 10;
-shieldRS(iM).s.plt.plAct         = 2;
-
-shieldRS(iM).s.plt.colLims = [1.5 13.5];
-shieldRS(iM).s.plt.rowLims = [1.5 13.5];
-fS.gridXstart = -5.5;
-fS.gridXstep = 1;
-fS.gridYstart = 2.5;
-fS.gridYstep = 1;
-
-
-subplot(2,9,[8 9 17 18])
-shieldRS(iM).s.plt.lmbCol  = 2:14;
-[Q,allNeurAct] = CalcNetOutput(shieldRS(iM).s,shieldRS(iM).w,shieldRS(iM).net);
-DisplActValsFun(shieldRS(iM).s,shieldRS(iM).w,-Q);
-colorbar off
-GridOverImage(fS,gca)
-caxis([-.1 .1]);
-title('Negative stimulus, only harms mouth, average Q-field')
-
-mouthOffset = [-4:2:4]; % [-2:2] ; 
-for iO = 1:length(mouthOffset) % loop through offsets
-
-    % current offset
-    cLimbCol = 8 - mouthOffset(iO);
-    subplot(2,9,11 + iO)
-    shieldRS(iM).s.plt.lmbCol  = cLimbCol;
-    [Q,allNeurAct] = CalcNetOutput(shieldRS(iM).s,shieldRS(iM).w,shieldRS(iM).net);
-    DisplActValsFun(shieldRS(iM).s,shieldRS(iM).w,-Q);
-    colorbar off
-    GridOverImage(fS,gca)
-    caxis([-.4 .4]);
-    title(['DANGER: Mouth at ' num2str(mouthOffset(iO)) ])
 end
-
-
-
-colormap(redbluecmapRory)
-
 %% $$$ Shield version --> moving body
 % $$$ I need to see whether the body-moving shield version works.
 
@@ -1206,7 +1266,7 @@ cosThetaAbs = abs(cosThetaAbs);
 theta       = acos(cosTheta);
 
 
-%% Compute similarity of encoding direction as a function of dimenstion depth
+%% Compute similarity of encoding direction as a function of dimension depth
 
 nPCs = 3;
 
@@ -1341,6 +1401,8 @@ end
 end
 
 %% $$$ Plot out the PCA results for all the models and neuron types
+
+% % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\FullWorkSpace.mat')
 
 clear dotProd dotProdAbs cosTheta cosThetaAbs theta thetaAbs crossProd crossProdSize crossProdRelMax
 
@@ -1509,7 +1571,12 @@ save(['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\Simil
           'SimilarityScores_V2.mat'], ...
           'b1','b1ScaleDimSd','b1ScaleDimSdExpVar','b2','b2ScaleDimSd','b2ScaleDimSdExpVar','-v7.3');
 
+
+
 %% Convert to useable quantities
+
+
+load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_V2.mat');
 
 TmpNrm  = @(x) squeeze(sqrt(sum(x.^2,1)));
 
@@ -1535,19 +1602,53 @@ crossProdRelMax = crossProdSize ./ ...
                    (TmpNrm(b1Tmp(1:end-1,:,:,:,:,:,:)) .* TmpNrm(b2Tmp(1:end-1,:,:,:,:,:,:)));
     
 
-    %% $$$ PLOT#
+%% $$$ Create permuted b2 --> permute ACROSS RUNS
 
-    % $$$ NEXT re-make theta etc
+% (vect coords,iDim,iVar,iTyp,iReg,iRun,iM)
 
-    % $$$ And should figure out why b1 and b2 are still getting so huge --> maybe do median split thing
-    % $$$ AND I should store b1 and b2, AS WELL AS OTHER VECTORS
-    % $$$ Then, just below here, I can recompute the dot-products etc etc
-    
+tic
+
+nPrm = 100;
+
+b2TmpPrm = repmat(b2Tmp,[1,1,1,1,1,1,1, nPrm]);
 
 
-    iV   = 6; % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
-    iTyp = 2; % Neuron type
-    iReg = 1; % Regression type
+% Define the target array size without the last dimension
+aS = size(b2TmpPrm);
+aS = aS(1:end-1);
+
+% Use a nested loop to fill in the last dimension
+for iP = 1:nPrm
+for i = 1:aS(1), for j = 1:aS(2), for k = 1:aS(3), for l = 1:aS(4), for m = 1:aS(5), for n = 1:aS(7), 
+    b2TmpPrm(i, j, k, l, m, :, n, iP) = b2Tmp(i, j, k, l, m, randperm(aS(6)), n);
+end, end, end, end, end, end
+end
+
+toc
+
+tic
+for iP = 1:nPrm
+    crossProdSizePerm(:,:,:,:,:,:,iP) = TmpNrm(cross(b1Tmp(1:end-1,:,:,:,:,:,:), b2TmpPrm(1:end-1,:,:,:,:,:,:,iP)));
+    dotProdAbsPerm(:,:,:,:,:,:,iP)    = abs(squeeze(dot(b1Tmp(1:end-1,:,:,:,:,:,:), b2TmpPrm(1:end-1,:,:,:,:,:,:,iP)))  );
+    thetaPerm(:,:,:,:,:,:,iP)         = acos(  squeeze(dot(b1Tmp(1:end-1,:,:,:,:,:,:), b2TmpPrm(1:end-1,:,:,:,:,:,:,iP))) ./ ...
+        (TmpNrm(b1Tmp(1:end-1,:,:,:,:,:,:)) .* TmpNrm(b2TmpPrm(1:end-1,:,:,:,:,:,:,iP)))  );
+end
+toc
+
+    %% Line plots 
+
+
+    iV   = 5; %1; % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
+    iTyp = 1; % Neuron type
+    iReg = 2; % Regularisation type
+
+
+
+    % Compute similarity of encoding direction as a function of dimenstion depth
+    allVars     = {'thrRow','thrCol','lmbCol','lmbCol','golDist',...
+               'minStimDist','minStimDist'};
+    allVarsComp = {'golRow','golCol','thrCol','golCol','thrDist',...
+               'maxStimDist','avStimDist'};
 
 
 allVars{iV}
@@ -1560,6 +1661,8 @@ neurTypes{iTyp}
 
 % figure('Position',[2000 50 600 900]),
 figure('Position',[50 50 600 900]),
+
+% -------------
 subplot(4,1,1)
 plot(assessDims , squeeze(theta(:,iV,iTyp,iReg,:))); hold on
 plot(assessDims , squeeze(nanmean(theta(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
@@ -1568,7 +1671,7 @@ title('theta')
 xlabel('dimension of PCA')
 ylabel('angle between vectors (pi/2 is orthogonal)')
 
-
+% -------------
 subplot(4,1,2)
 plot(assessDims , squeeze(cosThetaAbs(:,iV,iTyp,iReg,:))); hold on
 plot(assessDims , squeeze(nanmean(cosThetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
@@ -1577,6 +1680,7 @@ title('costhetaAbs')
 xlabel('dimension of PCA')
 ylabel('overlap of vectors (0 is orthogonal)')
 
+% -------------
 subplot(4,1,3)
 plot(assessDims , squeeze(thetaAbs(:,iV,iTyp,iReg,:))); hold on
 plot(assessDims , squeeze(nanmean(thetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
@@ -1585,17 +1689,23 @@ title('theta abs diff from pi/2')
 xlabel('dimension of PCA')
 ylabel('abs angle diff between vectors (0 is orthogonal)')
 
+% -------------
 subplot(4,1,4)
-plot(assessDims , squeeze(dotProd(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(nanmean(dotProd(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
+plot(assessDims , squeeze(dotProdAbs(:,iV,iTyp,iReg,:))); hold on
+plot(assessDims , squeeze(nanmean(dotProdAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
 plot(assessDims , zeros(size(assessDims)) ,'-.k');
-title('dot product')
+
+tmpD = nanmean(dotProdAbsPerm(:,iV,iTyp,iReg,:,:,:,:),7); % $$$
+plot(assessDims , squeeze(nanmedian(tmpD(:,1,1,1,:),5)  ) ,'-b','LineWidth',3); hold on
+
+title('dot product abs')
 xlabel('dimension of PCA')
 ylabel('dot product between vectors (0 is orthogonal)')
 ylim([-1 1])
 
 
 figure('Position',[800 50 600 900]),
+% -------------
 subplot(4,1,1)
 plot(assessDims , squeeze(crossProdRelMax(:,iV,iTyp,iReg,:))); hold on
 plot(assessDims , squeeze(nanmean(crossProdRelMax(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
@@ -1604,37 +1714,421 @@ title('xprod relative to maximum')
 xlabel('dimension of PCA')
 ylabel('xProd')
 
+% -------------
 subplot(4,1,2)
 plot(assessDims , squeeze(crossProdSize(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(nanmean(crossProdSize(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
+plot(assessDims , squeeze(nanmedian(crossProdSize(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
 plot(assessDims , ones(size(assessDims)) .* 0 ,'-.k');
+
+tmpD = nanmean(crossProdSizePerm(:,iV,iTyp,iReg,:,:,:,:),7); % $$$
+plot(assessDims , squeeze(nanmedian(tmpD(:,1,1,1,:),5)  ) ,'-b','LineWidth',3); hold on
+
 title('xprod size')
 xlabel('dimension of PCA')
 ylabel('xProd')
 
+% -------------
+subplot(4,1,3)
+tmpD = abs(squeeze(crossProdSize(:,iV,iTyp,iReg,:))) ./ (  abs(squeeze(crossProdSize(:,iV,iTyp,iReg,:)))  +  abs(squeeze(dotProd(:,iV,iTyp,iReg,:)))  );
+plot(assessDims ,tmpD); hold on
+plot(assessDims , nanmean(tmpD,2) ,'-k','LineWidth',2); 
+plot(assessDims , ones(size(assessDims)) .* 0 ,'-.k');
+title('abs(xprod) vs abs(xprod) + abs(dotprod)')
+xlabel('dimension of PCA')
+ylabel('xProd')
 
-% $$$ NOW scaling the vectors by the variance to get more indicative
-% vectors of the effect size
 
-% $$$ For some reason it's still huge --> is B1 wrong or shold I do center
-% of mass of top and bottom half?
+%% Plots for each neuron type
+
+binEdges = -15:2.5:15;
+% binEdges = -10:2.5:10;
+% binEdges = -5:5;
+
+f.NeurTypesPCA.f         = figure('Position',[20 -20 900 900]);
+% f.NeurTypesPCAAngles.f   = figure('Position',[20 -20 900 900]);
+f.NeurTypesPCAExamplesLeast.f = figure('Position',[20 -20 900 900]);
+f.NeurTypesPCAExamplesMost.f  = figure('Position',[20 -20 900 900]);
+
+cOrder      = {[0 0 .7], [.7 0 0], [.8 .6 0]};
 
 
-%% $$$ QUESTION: DO I need to do it on the goal x threat data? 
-%      --> I guess so, because i want to find separate subspaces for each,
-%      right? Like have a 'goal close' and a 'threat close' type situation.
-%      So then I need to
-%      A) Figure out how to 'reconstruct' which element of each of the
-%      score rows corresponds to exactly which element of the activity
-%      matrix, and
-%      B) Creat allNeurAct in which there is a dimension for goals AND for
-%      threats
+
+neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
+regTypes    = {'Valence_51','L1'};
+regNames    = {'No','L1'};
+
+s.wrld.size = [14 15];
+
+cM   = 1:3;
+
+iV    = 1; % 1 % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
+
+iPl  = 1;
+iPl2 = 1;
+iPl3 = 1;
+
+for iTyp = 1:length(neurTypes) % Neuron type
+    for iReg = 1:2 % Regularisation type
+
+
+
+        figure(f.NeurTypesPCA.f);
+        subplot(numel(neurTypes),numel(regNames),iPl)
+
+        for iM = cM
+            % $$$ Here think about how to properly plot the effects? Maybe just two
+            % distributions? That could be neat, one blue, one red?
+            %         tmpPM = nanmean(crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:),7);
+            %         tmpPM = crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:);
+            %         tmpPM = crossProdSize(1,iV,iTyp,iReg,:,iM);
+
+% % %                         tmpPM = crossProdSize(1,iV,iTyp,iReg,:,iM) - crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:);
+            tmpPM = dotProdAbs(1,iV,iTyp,iReg,:,iM) - nanmean(dotProdAbsPerm(1,iV,iTyp,iReg,:,iM,:),7);
+
+            tmpPM = tmpPM(:);
+
+            h = histogram(tmpPM(:),'Normalization','probability','BinEdges',binEdges,...
+                'FaceColor',cOrder{iM},'FaceAlpha',0.3, ...
+                'EdgeColor','k','EdgeAlpha', 0.2 ); hold on
+            % % %                     h = histogram(tmpPM(:),'Normalization','probability',...
+            % % %                         'FaceColor',cOrder{iM},'FaceAlpha',0.3, ...
+            % % %                         'EdgeColor','k','EdgeAlpha', 0.2 ); hold on
+            % % %                             tmpPM2(1:numel(tmpPM(:)),iM) = tmpPM(:);
+            hold on
+            splineH{iM} = PlotHistSpline(h,'LineWidth',2,'Color',cOrder{iM});
+            % % %         xlim([binEdges(1) binEdges(end)])
+            xlim([binEdges(1) -binEdges(1)]);
+            ylim([0 0.7]);
+            plot([0 0],[0 0.7],'-.k')
+        end
+
+        % % %         figure(f.NeurTypesPCAAngles.f);
+        % % %         subplot(numel(neurTypes),numel(regNames),iPl)
+        % % %
+        % % %         for iM = cM
+        % % %             tmpTPM = real(squeeze(thetaPerm(1,iV,iTyp,iReg,:,iM,:))) ;
+        % % %             polarhistogram(tmpTPM(:),12,'Normalization','probability'); hold on
+        % % %             tmpT   = squeeze(theta(1,iV,iTyp,iReg,:,iM));
+        % % %             polarhistogram(tmpT,12,'Normalization','probability'); hold on
+        % % %         end
+
+
+
+        iPl = iPl + 1;
+
+% % %         tmpPMforChoosePlot = squeeze(crossProdSize(1,iV,iTyp,iReg,:,:) - mean(crossProdSizePerm(1,iV,iTyp,iReg,:,:,:),7));
+        tmpPMforChoosePlot = squeeze(dotProdAbs(1,iV,iTyp,iReg,:,:) - mean(dotProdAbsPerm(1,iV,iTyp,iReg,:,:,:),7));
+
+        for iExampFig = 1:2
+            if iExampFig == 1
+                figure(f.NeurTypesPCAExamplesLeast.f);
+                tmpMin = nanmin(squeeze(tmpPMforChoosePlot),[],'all');
+            elseif iExampFig == 2
+                figure(f.NeurTypesPCAExamplesMost.f);
+                tmpMin = nanmax(squeeze(tmpPMforChoosePlot),[],'all');
+            end
+
+            %         tmpPMforChoosePlot = squeeze(dotProdAbs(1,iV,iTyp,iReg,:,:) - mean(dotProdAbsPerm(1,iV,iTyp,iReg,:,:,:),7));
+            %         tmpMin = nanmin(squeeze(tmpPMforChoosePlot),[],'all');
+            %         tmpMin = nanmedian(squeeze(tmpPMforChoosePlot),'all');
+            [cRun cM] = find(tmpMin == tmpPMforChoosePlot,1);
+
+            if isempty(cRun)
+                cRun = 1;
+                cM   = 1;
+            end
+
+            load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+                'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(cRun) '_NetArch_' num2str(cM) '.mat']);
+
+            % Create flattened activations for PCA
+            glByThrActFlat = permute(glByThrAct,[1 2 3 6 7 4 5]);
+            unwrapSize     = size(glByThrActFlat);
+            glByThrActFlat = permute(glByThrActFlat(:,:,:,:,:,:),[6 1 2 3 4 5]);
+            glByThrActFlat = glByThrActFlat(:,:);
+
+            % Create 'explanatory variables'
+            thrRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[1 2 3 7]) ] );
+            thrRow = permute(thrRow, [2 3 4 1 5]);
+
+            golRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[2 3 6 7]) ] );
+            golRow = permute(golRow, [1 2 3 4 5]);
+
+
+            % Perform PCA
+            [coeff,score,~,~,explained] = pca(glByThrActFlat( ~isnan(glByThrActFlat(:,1)),:)');
+            % Replace with zero if the PCA doesn't work
+            if size(score,2) == 0
+                score = zeros([size(glByThrActFlat,2) 3]);
+            end
+
+
+            % Downsample only a little
+            tmpScore = reshape(score', [size(score,2) unwrapSize(1:5)] );
+            tmpScore = tmpScore(:,:,2:2:end,1:2:end,:,2:2:end);
+            tmpScore = tmpScore(:,:)';
+
+            for iVar = 1:2
+
+                if iExampFig == 1
+                    subplot(numel(neurTypes), numel(regNames).*2, iPl2);
+                    iPl2 = iPl2 + 1;
+                elseif iExampFig == 2
+                    subplot(numel(neurTypes), numel(regNames).*2, iPl3);
+                    iPl3 = iPl3 + 1;
+                end
+
+                if iVar == 1
+                    tmpCl = golRow(:,2:2:end,1:2:end,:,2:2:end);
+                elseif iVar == 2
+                    tmpCl = thrRow(:,2:2:end,1:2:end,:,2:2:end);
+                end
+                tmpCl = tmpCl(:);
+                tmpSz = 5;
+
+                value_min = min(tmpCl);
+                value_max = max(tmpCl);
+
+                colormap_name = 'jet'; % You can use any built-in colormap or create a custom one
+
+                nrmCl = (tmpCl - value_min) / (value_max - value_min); % Normalize data to [0, 1]
+                color_map = colormap(redbluecmapRory); % Apply the colormap to the normalized data
+                colors = interp1(linspace(0, 1, size(color_map, 1)), color_map, nrmCl); % Interpolate colors
+
+                scatter3(tmpScore(:,1), tmpScore(:,2), tmpScore(:,3), tmpSz , colors , 'filled');
+                %             scatter(tmpScore(:,1), tmpScore(:,2), tmpSz , colors , 'filled');
+
+                if iVar == 1
+                    title('Goal row')
+                elseif iVar == 2
+                    title('Threat row')
+                end
+            end
+
+            if iExampFig == 1
+                sgtitle('Least orthogonal examples');
+            elseif iExampFig == 2
+                sgtitle('most orthogonal examples');
+            end
+
+        end
+
+
+    end
+end
+
+
+%% Collect data for performance vs PCA orthogonality
+
+neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
+regTypes    = {'Valence_51','L1'};
+regNames    = {'No','L1'};
+
+tic
+for iTyp = 1:length(neurTypes) % Neuron type
+    for iReg = 1:2 % Regularisation type
+
+
+
+        % Prepare base files for loading
+        bFold = 'Results\ForFigures\Valence\';
+        cFiles = dir([bFold '*' regTypes{iReg} '*_' neurTypes{iTyp} '_B_V*.mat']);
+        
+        for iRun = 1:length(cFiles)
+            load([bFold cFiles(iRun).name]);
+            for iM = 1:numel(rS)
+                rewPerAct(iTyp,iReg,iRun,iM) = sum(rS(iM).perf.rewPerAct(end,:));
+            end
+        end
+    end
+    iTyp
+end
+toc
+
+%% Plot performance vs orthogonality and structure
+
+% $$$ FOr structure, check out line 128
+
+% figure('Position',[50,500,1800,400])
+f.PCAvsRew.f        = figure('Position',[50,200,600,600]);
+f.StructvsRew.f     = figure('Position',[50,200,600,600]);
+f.PCAvsStructvsRew.f = figure('Position',[50,200,600,600]);
+
+cM = 1:3;
+cReg = 1;
+
+iPl = 1;
+
+
+figure(f.PCAvsRew.f)
+% PCA ORTHOGONALITY -------------------------------------------------------
+tmpX = log(squeeze(dotProdAbs(1,1,:,cReg,:,cM)));
+tmpY = rewPerAct(:,cReg,:,cM);
+scatter(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'.k'); hold on
+lsline
+xlabel('Dot product (paralellity)')
+% [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:), linspace(min(tmpX(:)),max(tmpX(:)),100), min(tmpX(:)-))
+[xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:));
+plot(xQuery,yAvg)
+
+
+
+% NETWORK STRUCTURE -------------------------------------------------------
+figure(f.StructvsRew.f)
+tmpX = permute(squeeze(sum(abs(allBinNPF(:,:,cM,:,:,cReg)),[1 2])), [3 2 1]);
+tmpY = rewPerAct(:,cReg,:,cM);
+scatter(tmpX(:), tmpY(:),'filled'); hold on
+lsline
+ylim([-0.1 0.1])
+xlim([0 20])
+[xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:));
+plot(xQuery,yAvg)
+xlabel('Network structure')
+
+
+
+
+for iTyp = 1:length(neurTypes)
+
+%     subplot(1,length(neurTypes),iPl)
+%     iPl = iPl + 1;
+
+figure(f.PCAvsRew.f)
+% PCA ORTHOGONALITY -------------------------------------------------------
+tmpX = log(squeeze(dotProdAbs(1,1,iTyp,cReg,:,cM)));
+% tmpX = squeeze(crossProdSize(1,1,iTyp,cReg,:,cM));
+% tmpX = squeeze(crossProdRelMax(1,1,iTyp,cReg,:,cM));
+
+tmpY = rewPerAct(iTyp,cReg,:,cM);
+
+scatter(tmpX(:), tmpY(:),'filled'); hold on
+
+% lsline
+ylim([-0.1 0.1])
+% xlim([0 10])
+% xlim([-6 2])
+xlabel('Dot product (paralellity)')
+ylabel('Reward per action')
+sgtitle(['CM ' num2str(cM) ])
+
+
+figure(f.StructvsRew.f)
+% NETWORK STRUCTURE -------------------------------------------------------
+% dotprob: (iD,iV,iTyp,iReg,iRun,iM)
+% allbinNPF: (dim1, dim2, iM,iRun,iTyp,iReg)
+tmpX = permute(squeeze(sum(abs(allBinNPF(:,:,cM,:,iTyp,cReg)),[1 2])), [3 2 1]);
+% % % % Subtract the permuted average
+% % % if numel(cM) > 1
+% % %     tmpX = tmpX - permute(squeeze(mean(sum(abs(allBinNPFpm(:,:,:,:,:,iTyp,:)),[1 2]),3)), [3 2 1]);
+% % % else
+% % %     tmpX = tmpX - permute(squeeze(mean(sum(abs(allBinNPFpm(:,:,:,cM,:,iTyp,:)),[1 2]),[3 5])), [2 1 3]);
+% % % end
+
+tmpY = rewPerAct(iTyp,cReg,:,cM);
+
+scatter(tmpX(:), tmpY(:),'filled'); hold on
+% lsline
+ylim([-0.1 0.1])
+xlim([0 20])
+xlabel('Network structure')
+ylabel('Reward per action')
+legend(['all','linear fit','smoothed fit',neurTypes])
+
+
+figure(f.PCAvsStructvsRew.f)
+% BOTH -------------------------------------------------------
+tmpX = log(squeeze(dotProdAbs(1,1,iTyp,cReg,:,cM)));
+tmpY = permute(squeeze(sum(abs(allBinNPF(:,:,cM,:,iTyp,cReg)),[1 2])), [3 2 1]);
+tmpZ = rewPerAct(iTyp,cReg,:,cM);
+
+scatter3(tmpX(:), tmpY(:), tmpZ(:), 'filled'); hold on
+% lsline
+xlabel('Dot product (paralellity)')
+ylabel('Network structure')
+zlabel('Reward per action')
+
+
+end
+
+
+
+
+%  $$$ dotProdAbs(1,1,iTyp,iReg,:,iM)
+
+%% Plot icons for neuron types
+
+% Input strength range
+x = -5:0.1:5;
+
+% Initialize a figure
+f.NeurTypesSketch.f         = figure('Position',[20 -20 900 900]);
+
+for i = 1:length(neurTypes)
+    % Compute neuron output for given input strength
+    switch neurTypes{i}
+        case 'tansig'
+            y = tansig(x);
+        case 'logsig'
+            y = logsig(x);
+        case 'softmax'
+            % Softmax is a bit unique since it's typically used for multi-dimensional input
+            % For our example, let's consider a 2-D input where the second dimension is just negative of the first.
+            y = softmax([x; -x]);
+            y = y(1, :); % consider one dimension for display
+        case 'poslin'
+            y = poslin(x);
+        case 'purelin'
+            y = purelin(x);
+        case 'tribas'
+            y = tribas(x);
+        case 'radbas'
+            y = radbas(x);
+        otherwise
+            y = zeros(size(x));
+    end
+    
+    % Create a subplot and plot the neuron's response
+    subplot(4, 2, i);
+    plot(x, y, 'LineWidth', 1.5);
+    title(neurTypes{i});
+    xlabel('Input Strength');
+    ylabel('Output');
+    grid on;
+end
+
+% Adjust layout
+tight_layout = true;
+if tight_layout
+    sgtitle('Response Functions of Various Neuron Types');
+end
+
+
+
+%% Save figures for neuron types
+allFields = fields(f);
+for iF = 1:length(allFields)
+    cF = allFields{iF};
+  
+    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\' cF '.eps'] , 'epsc')
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\' cF '.pdf'] , 'pdf')
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.eps'] , 'epsc')
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.pdf'] , 'pdf')
+
+end
+
 
 %% Functions
 
 
 
 function [ax, plQhoriz, plQvert] = plot2D(rS,fS,Q,iM,iD);
+
+    
+    rS(iM,iD).s.plt.contours = 1;
+    rS(iM,iD).s.plt.contourVals = [-0.25, 0.25];
+    
+    rS(iM,iD).s.plt.plAct = 1;
 
     rS(iM,iD).s.plt.lmbCol = 2:14;
     rS(iM,iD).s.plt.meanLimbCols = 1;
@@ -1705,6 +2199,37 @@ pt_sub_fig = ax_sub.Position(1:2) + pt_sub_normalized .* ax_sub.Position(3:4);
 
 % Draw the annotation line
 annotation('line', [pt_main_fig(1), pt_sub_fig(1)], [pt_main_fig(2), pt_sub_fig(2)] , 'LineStyle', '--' );
+
+end
+
+
+function [] = MakeSidePlots(baseAx,Q,fS,rS)
+
+    Q = - Q;
+
+    ax{1} = baseAx;
+
+    % Plot average OR line through Q-values
+    ax{2} = axes('Position',ax{1}.Position .* [1 1 1 0] + [0 -0.1 0 0.1]  );
+% % %     plQhoriz = flip(squeeze(nanmean(Q(1,rS.s.plt.lmbCol,2:11,2:end-1,:),[2 3 5]))); % lmb R, C, stim R, C, A
+    plQhoriz = flip(squeeze(nanmean(Q(1,rS.s.plt.lmbCol,:,3:end-2,:),[2 3 5]))); % lmb R, C, stim R, C, A
+    plot((1:numel(plQhoriz))' - 0.5  , [plQhoriz],'-','LineWidth',2); hold on
+    xLims = xlim;
+    xlim([0 numel(plQhoriz) ]);
+    hold on
+    ylim(fS.lineYLim);
+    grid on
+    ax{2}.XAxis.Visible = 'off';
+    ax{2}.YAxis.Visible = 'off';
+    ax{3} = axes('Position',ax{1}.Position .* [1 1 0 1] + [-0.03 0 0.03 0]  );
+% % %     plQvert = squeeze(nanmean(Q(1,rS.s.plt.lmbCol,2:end-1,2:end-1,:),[2 4 5])); % lmb R, C, stim R, C, A
+    plQvert = squeeze(nanmean(Q(1,rS.s.plt.lmbCol,2:end-1,:,:),[2 4 5])); % lmb R, C, stim R, C, A
+    plot( plQvert, (numel(plQvert):-1:1)' - 0.5 , '-','LineWidth',2); hold on
+    xlim(fS.lineXLim);
+    ylim([0 12])
+    grid on
+    ax{3}.XAxis.Visible = 'off';
+    ax{3}.YAxis.Visible = 'off';
 
 end
 

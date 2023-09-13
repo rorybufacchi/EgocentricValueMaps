@@ -1278,8 +1278,8 @@ sAll.plt.ON = 0;
 
 
 
-for iTyp = 4:length(neurTypes);
-for iReg = 1:length(regTypes);
+for iTyp = 7:length(neurTypes)
+for iReg = 1:length(regTypes)
 
 
 bFold = 'Results\ForFigures\Valence\';
@@ -1342,12 +1342,13 @@ end
 
 %% $$$ Plot out the PCA results for all the models and neuron types
 
-
 clear dotProd dotProdAbs cosTheta cosThetaAbs theta thetaAbs crossProd crossProdSize crossProdRelMax
 
 clear b1 b1ScaleDimSd b1ScaleDimSdExpVar b2 b2ScaleDimSd b2ScaleDimSdExpVar
 
 for iTyp = 1:length(neurTypes);
+
+
 for iReg = 1:length(regTypes);
 
 
@@ -1359,8 +1360,11 @@ for iRun = 1:length(cFiles)
 
 for iM = 1:size(rSall,1)
 
-load(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
-          'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) ' .mat']);
+% % % load(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+% % %           'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) ' .mat']);
+
+load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+          'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
 
 % $$$ HERE figure out how to deal with the bloody model architectures --> I
 % think just store them separately?
@@ -1394,6 +1398,10 @@ load(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures
     
     % Perform PCA
     [coeff,score,~,~,explained] = pca(glByThrActFlat( ~isnan(glByThrActFlat(:,1)),:)');
+    % Replace with zero if the PCA doesn't work
+    if size(score,2) == 0
+        score = zeros([size(glByThrActFlat,2) 3]);
+    end
 
     
 
@@ -1433,7 +1441,7 @@ load(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures
             % Rescale vector by the scale of the dimensions
             b2ScaleDimSd(:,iD,iV,iTyp,iReg,iRun,iM) = b2(:,iD,iV,iTyp,iReg,iRun,iM) .* [std(tmpScore(:,dS:dE)) 1]';
             % Rescale vector by the explained variance
-            b2(:,iD,iV,iTyp,iReg,iRun,iM) = b2ScaleDimSdExpVar(:,iD,iV,iTyp,iReg,iRun,iM) .* sqrt(stats(1));
+            b2ScaleDimSdExpVar(:,iD,iV,iTyp,iReg,iRun,iM) = b2ScaleDimSd(:,iD,iV,iTyp,iReg,iRun,iM) .* sqrt(stats(1));
 
 % % %             dotProd(iD,iV,iTyp,iReg,iRun,iM)     = dot(b1(1:end-1), b2(1:end-1));
 % % %             dotProdAbs(iD,iV,iTyp,iReg,iRun,iM)  = abs(dotProd(iD,iV,iTyp,iReg,iRun,iM));
@@ -1469,7 +1477,9 @@ load(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures
             disp('testing til here')
 
             % Save figure
-            saveas(gcf,['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\' ...
+% % %             saveas(gcf,['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\' ...
+% % %                 'Results\ForFigures\DimensionReduction\PCAs\NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) ] , 'fig')
+            saveas(gcf,['F:\Projects\DPPS\DefenseAgent\' ...
                 'Results\ForFigures\DimensionReduction\PCAs\NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) ] , 'fig')
 
             close all
@@ -1490,31 +1500,67 @@ end
 end
 end
 
-save(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\DimensionReduction\Similarities\' ...
-          'SimilarityScores.mat'], ...
+% save(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\DimensionReduction\Similarities\' ...
+%           'SimilarityScores.mat'], ...
+%           'b1','b1ScaleDimSd','b1ScaleDimSdExpVar','b2','b2ScaleDimSd','b2ScaleDimSdExpVar','-v7.3');
+
+
+save(['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\Similarities\' ...
+          'SimilarityScores_V2.mat'], ...
           'b1','b1ScaleDimSd','b1ScaleDimSdExpVar','b2','b2ScaleDimSd','b2ScaleDimSdExpVar','-v7.3');
 
+%% Convert to useable quantities
 
-    %% $$$ PLOT
+TmpNrm  = @(x) squeeze(sqrt(sum(x.^2,1)));
 
-    % $$$ Here I'm re-storing the logsig run 1. Then I should rerun the PCA business, including all the different network architectures
+% b1Tmp = b1;
+% b2Tmp = b2;
 
-    % $$$ HERE - I just tried rerunning everything :D
+b1Tmp = b1ScaleDimSd;
+b2Tmp = b2ScaleDimSd;
 
-    % $$$ should als redo for each model architecture
-% $$$ And should figure out why b1 and b2 are still getting so huge --> maybe do median split thing
-% $$$ AND I should store b1 and b2, AS WELL AS OTHER VECTORS
-% $$$ Then, just below here, I can recompute the dot-products etc etc
+% b1Tmp = b1ScaleDimSdExpVar;
+% b2Tmp = b2ScaleDimSdExpVar;
+
+dotProd     = squeeze(dot(b1Tmp(1:end-1,:,:,:,:,:,:), b2Tmp(1:end-1,:,:,:,:,:,:)));
+dotProdAbs  = abs(dotProd);
+cosTheta    = dotProd ./ (TmpNrm(b1Tmp(1:end-1,:,:,:,:,:,:)) .* TmpNrm(b2Tmp(1:end-1,:,:,:,:,:,:)));
+cosThetaAbs = abs(cosTheta);
+theta       = acos(cosTheta);
+thetaAbs    = abs(theta - pi./2);
+
+crossProd       = cross(b1Tmp(1:end-1,:,:,:,:,:,:), b2Tmp(1:end-1,:,:,:,:,:,:));
+crossProdSize   = TmpNrm(crossProd);
+crossProdRelMax = crossProdSize ./ ...
+                   (TmpNrm(b1Tmp(1:end-1,:,:,:,:,:,:)) .* TmpNrm(b2Tmp(1:end-1,:,:,:,:,:,:)));
     
-    iV   = 1; % comparison Variables
-    iTyp = 7; % Neuron type
+
+    %% $$$ PLOT#
+
+    % $$$ NEXT re-make theta etc
+
+    % $$$ And should figure out why b1 and b2 are still getting so huge --> maybe do median split thing
+    % $$$ AND I should store b1 and b2, AS WELL AS OTHER VECTORS
+    % $$$ Then, just below here, I can recompute the dot-products etc etc
+    
+    iV   = 5; % comparison Variables
+    iTyp = 4; % Neuron type
     iReg = 2; % Regression type
-    
 
-figure('Position',[2000 50 600 900]),
+
+allVars{iV}
+allVarsComp{iV}
+neurTypes{iTyp}
+
+    assessDims = 1:size(b1,2);
+
+
+
+% figure('Position',[2000 50 600 900]),
+figure('Position',[50 50 600 900]),
 subplot(4,1,1)
 plot(assessDims , squeeze(theta(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(mean(theta(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
+plot(assessDims , squeeze(nanmean(theta(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
 plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
 title('theta')
 xlabel('dimension of PCA')
@@ -1523,7 +1569,7 @@ ylabel('angle between vectors (pi/2 is orthogonal)')
 
 subplot(4,1,2)
 plot(assessDims , squeeze(cosThetaAbs(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(mean(cosThetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
+plot(assessDims , squeeze(nanmean(cosThetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
 plot(assessDims , zeros(size(assessDims)) ,'-.k');
 title('costhetaAbs')
 xlabel('dimension of PCA')
@@ -1531,7 +1577,7 @@ ylabel('overlap of vectors (0 is orthogonal)')
 
 subplot(4,1,3)
 plot(assessDims , squeeze(thetaAbs(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(mean(thetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
+plot(assessDims , squeeze(nanmean(thetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
 plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
 title('theta abs diff from pi/2')
 xlabel('dimension of PCA')
@@ -1539,7 +1585,7 @@ ylabel('abs angle diff between vectors (0 is orthogonal)')
 
 subplot(4,1,4)
 plot(assessDims , squeeze(dotProd(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(mean(dotProd(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
+plot(assessDims , squeeze(nanmean(dotProd(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
 plot(assessDims , zeros(size(assessDims)) ,'-.k');
 title('dot product')
 xlabel('dimension of PCA')
@@ -1547,10 +1593,10 @@ ylabel('dot product between vectors (0 is orthogonal)')
 ylim([-1 1])
 
 
-figure('Position',[2000 50 600 900]),
+figure('Position',[800 50 600 900]),
 subplot(4,1,1)
 plot(assessDims , squeeze(crossProdRelMax(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(mean(crossProdRelMax(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
+plot(assessDims , squeeze(nanmean(crossProdRelMax(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
 plot(assessDims , ones(size(assessDims)) .* 1,'-.k');
 title('xprod relative to maximum')
 xlabel('dimension of PCA')
@@ -1558,7 +1604,7 @@ ylabel('xProd')
 
 subplot(4,1,2)
 plot(assessDims , squeeze(crossProdSize(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(mean(crossProdSize(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
+plot(assessDims , squeeze(nanmean(crossProdSize(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
 plot(assessDims , ones(size(assessDims)) .* 0 ,'-.k');
 title('xprod size')
 xlabel('dimension of PCA')

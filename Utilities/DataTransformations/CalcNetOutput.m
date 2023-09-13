@@ -17,6 +17,9 @@ clear tempQ2
 % goalVisVal=200;
 % thrVisVal=-200;
 
+
+s = DefaultSettings(s);
+
 % Number of other state variables - 1 if not taking the mean
 if s.plt.meanOSVfl==0
     nOSV=[1 1];

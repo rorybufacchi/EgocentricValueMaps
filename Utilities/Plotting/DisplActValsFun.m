@@ -1,5 +1,6 @@
 function [bestQ squishQs rDist pDist] = DisplActValsFun(s,w,Q)
 
+s = DefaultSettings(s);
 
 flipValFlag=0;
 
@@ -96,6 +97,25 @@ switch s.plt.pltType
                     else
                         xlim(colVal(1)+s.plt.colLims);
                     end
+
+                    % Plot contour lines if requested
+                    if s.plt.contours == 1
+                        tmpQ = squeeze(Q(handRow,handCol,:,:,kAction));
+                        % Create x- and y- axes
+                        [X, Y] = meshgrid(colVal, rowVal);
+ 
+                        % Up-sample data using interp2
+                        factor = 2; % Up-sample factor
+                        [Xq, Yq] = meshgrid(linspace(min(X(:)), max(X(:)), factor * size(tmpQ, 2)), linspace(min(Y(:)), max(Y(:)), factor * size(tmpQ, 1)));
+                        tmpQ2 = interp2(X,Y,tmpQ, Xq, Yq, 'cubic');
+
+                        % Overlay contour plot
+                        hold on;
+                        [C, h] = contour(Xq, Yq, tmpQ2, s.plt.contourVals, 'k','LineWidth',2); % '10' is the number of contour levels, adjust as needed
+                        % clabel(C, h); % Optional: Add labels to the contour levels
+                        hold off;
+                    end
+
                     drawnow
                     
                     colormap jet

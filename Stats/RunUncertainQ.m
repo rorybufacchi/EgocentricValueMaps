@@ -326,7 +326,7 @@ end
 
 
 
-% #################################################################
+%% #################################################################
 % TOOL TIME!
 % =========================================================
 % TOOL by HAND, TOWARDS
@@ -347,7 +347,8 @@ if doubleUnc == 1
 end
 % % % [newQ ] = CalcQDirect(sHndTool,allQ.qVals{17});
 % store q values and attributes
-cQ = cQ(end) + 1; % $$$ HERE it goes wrong for some reason @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+% cQ = cQ(end) + 1; % $$$ HERE it goes wrong for some reason @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+cQ = 94;
 allQ.qVals{cQ}       = newQ;
 allQ.dir(cQ)         = 1; %s.clc.stimDynams([0 0 0]); % towards
 allQ.rew(cQ)         = sHndTool.clc.startRew; % towards
@@ -491,7 +492,7 @@ allQ.bodyPart{cQ}    = 'HandByChestPlusToolRakeUnc';
 allQ.centerpos{cQ}   = sHndToolRake.clc.nearPos; % x y z position of this plot in the OVERALL space --> trunk is central
 
 
-% -----------------------------
+%% -----------------------------
 % NEG REW, AWAY
 % REWARD SIZE
 
@@ -696,7 +697,7 @@ end
 
 
 % Hopefully final save
-save('F:\Projects\DPPS\DefenseAgent\Data\NewWithHitProbs_MultSensInt_AndDist_AndUncertainQ_V3.mat')
+save('F:\Projects\DPPS\DefenseAgent\Data\NewWithHitProbs_MultSensInt_AndDist_AndUncertainQ_andSARSAQ_V2.mat')
 
 
 %% Functions 
