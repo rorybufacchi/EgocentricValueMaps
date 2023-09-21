@@ -66,8 +66,6 @@ for iC=1:3
     end
 end
 
-c
-
 
 % % % function c = whitetocol(m,fC,splitLocs)
 % % % % c = whitetocol(m,fC,varargin)

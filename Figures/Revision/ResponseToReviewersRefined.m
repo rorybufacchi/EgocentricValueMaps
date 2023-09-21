@@ -451,7 +451,7 @@ save('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat'
 
 %% $$$ Plot some kind of order metrics or something
 
-load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat')
+load('Results\ForFigures\NeurTypesAnalysed_V4.mat')
 
 % binEdges = -4:.5:10;
 binEdges    = -7:.5:7;
@@ -1402,7 +1402,7 @@ end
 
 %% $$$ Plot out the PCA results for all the models and neuron types
 
-% % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\FullWorkSpace.mat')
+% % % load('Results\ForFigures\DimensionReduction\FullWorkSpace.mat')
 
 clear dotProd dotProdAbs cosTheta cosThetaAbs theta thetaAbs crossProd crossProdSize crossProdRelMax
 
@@ -1422,11 +1422,11 @@ for iRun = 1:length(cFiles)
 
 for iM = 1:size(rSall,1)
 
-% % % load(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
-% % %           'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) ' .mat']);
-
-load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+load(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
           'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
+
+% % % load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+% % %           'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
 
 % $$$ HERE figure out how to deal with the bloody model architectures --> I
 % think just store them separately?
@@ -1576,7 +1576,7 @@ save(['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\Simil
 %% Convert to useable quantities
 
 
-load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_V2.mat');
+load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_V2.mat');
 
 TmpNrm  = @(x) squeeze(sqrt(sum(x.^2,1)));
 
@@ -1748,6 +1748,7 @@ f.NeurTypesPCA.f         = figure('Position',[20 -20 900 900]);
 % f.NeurTypesPCAAngles.f   = figure('Position',[20 -20 900 900]);
 f.NeurTypesPCAExamplesLeast.f = figure('Position',[20 -20 900 900]);
 f.NeurTypesPCAExamplesMost.f  = figure('Position',[20 -20 900 900]);
+f.NeurTypesPCAExamplesLeastSubSection.f = figure('Position',[20 -20 1600 600]);
 
 cOrder      = {[0 0 .7], [.7 0 0], [.8 .6 0]};
 
@@ -1767,7 +1768,7 @@ iPl  = 1;
 iPl2 = 1;
 iPl3 = 1;
 
-for iTyp = 1 %1:length(neurTypes) % Neuron type
+for iTyp = 1:length(neurTypes) % Neuron type
     for iReg =  1:2 % Regularisation type
 
 
@@ -1838,8 +1839,12 @@ for iTyp = 1 %1:length(neurTypes) % Neuron type
                 cM   = 1;
             end
 
-            load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+% % %             load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+% % %                 'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(cRun) '_NetArch_' num2str(cM) '.mat']);
+
+            load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
                 'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(cRun) '_NetArch_' num2str(cM) '.mat']);
+
 
             % Create flattened activations for PCA
             glByThrActFlat = permute(glByThrAct,[1 2 3 6 7 4 5]);
@@ -1868,7 +1873,7 @@ for iTyp = 1 %1:length(neurTypes) % Neuron type
             tmpScore = tmpScore(:,:,2:2:end,1:2:end,:,2:2:end);
             tmpScore = tmpScore(:,:)';
 
-            for iVar = 1 %1:2
+            for iVar = 1:2
 
                 if iExampFig == 1
                     subplot(numel(neurTypes), numel(regNames).*2, iPl2);
@@ -1895,16 +1900,17 @@ for iTyp = 1 %1:length(neurTypes) % Neuron type
 % % %                 color_map = colormap(redbluecmapRory); % Apply the colormap to the normalized data
                 
                 if iVar == 1
-                    color_map = colormap(whitetocol(100,[0 0 0.7 ],[1])); % Apply the colormap to the normalized data
+%                     color_map = colormap(coltocol(100,[0 0.7 0],[0 0 0.7])); % Apply the colormap to the normalized data 
+                    color_map = colormap(coltocol(100,[0.2 0.2 0.2],[0 0 0.7])); % Apply the colormap to the normalized data 
                 elseif iVar == 2
-                    color_map = colormap(whitetocol(100,[0.7 0 0 ],[1])); % Apply the colormap to the normalized data
+                    color_map = colormap(coltocol(100,[0.2 0.2 0.2],[0.7 0 0])); % Apply the colormap to the normalized data 
                 end
 
                 % $$$ HERE HERE
 %                 color_map = colormap(coltocol(100,[0 1 0], [0 0 .7 ],[1]));
-                color_map = colormap(redbluecmapRory); 
+%                 color_map = colormap(redbluecmapRory); 
 %                 color_map = color_map(:,[1 3 2]);
-                color_map = color_map(:,[2 3 1]);
+%                 color_map = color_map(:,[2 3 1]);
 
                 
                 colors = interp1(linspace(0, 1, size(color_map, 1)), color_map, nrmCl); % Interpolate colors
@@ -1917,6 +1923,49 @@ for iTyp = 1 %1:length(neurTypes) % Neuron type
                 elseif iVar == 2
                     title('Threat row')
                 end
+
+                
+                % Make clearer mini-example
+                if iExampFig == 1 & iTyp == 1 & iReg == 2
+                    figure(f.NeurTypesPCAExamplesLeastSubSection.f);
+
+                    if iVar == 1
+                        subplot(1,2,1);
+                    elseif iVar == 2
+                        subplot(1,2,2);
+                    end
+
+                    scatter3(tmpScore(:,1), tmpScore(:,2), tmpScore(:,3), tmpSz , colors , 'filled');
+
+                    view(-74.3145, 43.0968);
+                    xlim([-3 3.8]);
+                    ylim([-4.5, 2]);
+
+                    if iVar == 1
+                        title('Goal row')
+                    elseif iVar == 2
+                        title('Threat row')
+                    end
+
+                    cBarLims(iVar,1) = min(nrmCl(:));
+                    cBarLims(iVar,2) = max(nrmCl(:));
+
+                    % % %                     figure(f.NeurTypesPCAExamplesColourBars.f)
+                    % % %                     subplot(1,2,iVar)
+                    colormap(gca, color_map);
+                    caxis(cBarLims(iVar,:));
+                    colorbar;
+
+                    % Move back to the other figure
+                    if iExampFig == 1
+                        figure(f.NeurTypesPCAExamplesLeast.f);
+                        tmpMin = nanmin(squeeze(tmpPMforChoosePlot),[],'all');
+                    elseif iExampFig == 2
+                        figure(f.NeurTypesPCAExamplesMost.f);
+                        tmpMin = nanmax(squeeze(tmpPMforChoosePlot),[],'all');
+                    end
+                end
+                
             end
 
             if iExampFig == 1
@@ -1933,6 +1982,8 @@ end
 
 
 %% Collect data for performance vs PCA orthogonality
+
+% % %  load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat')
 
 neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
 regTypes    = {'Valence_51','L1'};
@@ -1983,7 +2034,10 @@ lsline
 xlabel('Dot product (paralellity)')
 % [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:), linspace(min(tmpX(:)),max(tmpX(:)),100), min(tmpX(:)-))
 [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:));
-plot(xQuery,yAvg)
+[xQuery, yStd] = SlidingWindowFunction(tmpX(:), tmpY(:),@(x)std(x));
+shOpts.PlotMean = 0; shOpts.c = [0.7 0.7 0.7];
+plot(xQuery,yAvg,'k','LineWidth',2); hold on
+ShadedPlot(xQuery,yAvg, yAvg - yStd, yAvg + yStd, shOpts)
 
 
 
@@ -1996,7 +2050,9 @@ lsline
 ylim([-0.1 0.1])
 xlim([0 20])
 [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:));
-plot(xQuery,yAvg)
+[xQuery, yStd] = SlidingWindowFunction(tmpX(:), tmpY(:),@(x)std(x));
+plot(xQuery,yAvg,'k','LineWidth',2); hold on
+ShadedPlot(xQuery,yAvg, yAvg - yStd, yAvg + yStd, shOpts)
 xlabel('Network structure')
 
 
@@ -2124,8 +2180,8 @@ for iF = 1:length(allFields)
     cF = allFields{iF};
   
     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\' cF '.eps'] , 'epsc')
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\' cF '.pdf'] , 'pdf')
+    saveas(f.(cF).f,['Results\ForFigures\Revision\NeurTypes\' cF '.eps'] , 'epsc')
+    saveas(f.(cF).f,['Results\ForFigures\Revision\NeurTypes\' cF '.pdf'] , 'pdf')
 % % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.eps'] , 'epsc')
 % % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.pdf'] , 'pdf')
 

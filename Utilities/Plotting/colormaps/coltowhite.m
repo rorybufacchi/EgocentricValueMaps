@@ -1,4 +1,5 @@
 function c = coltowhite(m,fC,varargin)
+% c = coltowhite(m,fC,varargin)
 % continuous white to some other colour colourmap
 % fC is the final colour
 
