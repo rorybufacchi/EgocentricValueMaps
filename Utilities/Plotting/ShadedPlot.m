@@ -6,6 +6,8 @@ function [] = ShadedPlot(xVals,yValsMean,yValsMin,yValsMax,opts)
 
 if ~exist('opts','var')
     opts.c = [0.7 0.7 0.7];
+elseif ~isfield(opts,'c')
+    opts.c = [0.7 0.7 0.7];
 end
 
 if ~isfield(opts,'FaceAlpha')
