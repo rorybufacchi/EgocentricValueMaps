@@ -797,6 +797,9 @@ colormap(redbluecmapRory)
 
 %% $$$ Incremental tool improvements
 
+
+% % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Tool_ReviewerResponse_Pre_post_51_51Batch_ToolPos5_moreRandSpr_NoHist_PEAKSANALYSED.mat')
+
 iM = 1;
 
 % plotReps = 1:length(incrToolRS);
@@ -908,8 +911,8 @@ save('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Tool_ReviewerResponse_Pre
 %% Plot tool results
 
 
-fS.lineYLim = [-0.01 0.55];
-fS.lineXLim = [ 0   0.7];
+fS.lineYLim = [-0.55 0.01 ];
+fS.lineXLim = [-0.8  0];
 fS.xPoints  = [5 5 ; 10 10]';
 fS.cAxes    = [-1.8 1.8];
 
@@ -917,6 +920,11 @@ fS.gridXstart   = -5.5;
 fS.gridXstep    =  1;
 fS.gridYstart   =  2.5;
 fS.gridYstep    =  1;
+
+
+% % % fS2 = fS;
+% % % fS2.lineXLim = [-0.8 0];
+% % % fS2.lineYLim = [-0.8 0];
 
 
 
@@ -946,11 +954,14 @@ for iM = 1:size(incrToolRS,1)
         prcTilePks(:,iM,iD)   = prctile(incrToolRS(iM,iD).npks,[5 95]);
     end 
 end
-allPks = allPks(:,:);
+allPks2 = allPks;
+allPks  = allPks(:,:);
 
 % Average across model architectures
-mnPks = nanmean(mnPks);
-sdPks = sum(sqrt(sdPks .^2 ));
+mnPks2 = mnPks;
+mnPks  = nanmean(mnPks);
+sdPks = sdPks ./ sqrt(size(allPks2,3)); % convert to standard error
+sdPks  = sum(sqrt(sdPks .^2 ));
 
 
 % subplot(4,3,[1:9]);
@@ -963,10 +974,12 @@ yyaxis left
 
 f.Tool.ax{1} = gca;
 
-plot(mnPks','b-o','LineWidth',2); hold on
+plot(mnPks','b-o','LineWidth',2); hold 
+plot(mnPks2');
 opts.c = [0 0 .7];
 opts.PlotMean = 0;
 ShadedPlot((1:51),mnPks,mnPks - sdPks,mnPks + sdPks,opts);
+plot(mnPks','b-o','LineWidth',2); hold 
 
 
 % ylim([0 3.5])
@@ -1023,6 +1036,8 @@ for iPl = 1:length(plBatchs)
                         f.Tool.ax{cAx}, 0, 1.5);
 
 
+    % $$$ Make side plots
+    MakeSidePlots(f.Tool.ax{cAx},mean(Qall(:,:,:,:,:,:,plBatchs(iPl)),6),fS,incrToolRS(1));
 
     cAx = cAx + 1;
 end
