@@ -795,34 +795,7 @@ colormap(redbluecmapRory)
 
 
 
-%% $$$ Incremental tool improvements
 
-
-% % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Tool_ReviewerResponse_Pre_post_51_51Batch_ToolPos5_moreRandSpr_NoHist_PEAKSANALYSED.mat')
-
-iM = 1;
-
-% plotReps = 1:length(incrToolRS);
-plotReps = 1:51;
-
-
-% toolPerfs = cell2mat(arrayfun(@(iR) incrToolRS(iM,iR).perf.rewPerAct(end,1), plotReps, 'UniformOutput', false)');
-
-% toolPerfs = cell2mat(arrayfun(@(iR) [incrToolRS(1,iR).perf.rewPerAct(end,1) ... 
-%                                      incrToolRS(2,iR).perf.rewPerAct(end,1) ... 
-%                                      incrToolRS(3,iR).perf.rewPerAct(end,1)], ...
-%                                      plotReps, 'UniformOutput', false)');
-
-toolPerfs = cell2mat(arrayfun(@(iR) [incrToolRS(1,iR).perf.rewPerAct(end,1) ... 
-                                     incrToolRS(2,iR).perf.rewPerAct(end,1) ... 
-                                     incrToolRS(3,iR).perf.rewPerAct(end,1)], ...
-                                     plotReps, 'UniformOutput', false)');
-
-figure,plot(toolPerfs,'LineWidth',2)      
-ylabel('Performance (score/timestep)')
-xlabel('Batch number')
-
-legend('Widening','Constant','Narrowing')
 
 %% $$$ Find the number of peaks for each training step
 
@@ -908,6 +881,36 @@ toc
 
 save('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Tool_ReviewerResponse_Pre_post_51_51Batch_ToolPos5_moreRandSpr_NoHist_PEAKSANALYSED.mat','-v7.3')
 
+
+%% Calculate Incremental tool improvements
+
+
+% % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Tool_ReviewerResponse_Pre_post_51_51Batch_ToolPos5_moreRandSpr_NoHist_PEAKSANALYSED.mat')
+
+iM = 1;
+
+% plotReps = 1:length(incrToolRS);
+plotReps = 1:51;
+
+
+% toolPerfs = cell2mat(arrayfun(@(iR) incrToolRS(iM,iR).perf.rewPerAct(end,1), plotReps, 'UniformOutput', false)');
+
+% toolPerfs = cell2mat(arrayfun(@(iR) [incrToolRS(1,iR).perf.rewPerAct(end,1) ... 
+%                                      incrToolRS(2,iR).perf.rewPerAct(end,1) ... 
+%                                      incrToolRS(3,iR).perf.rewPerAct(end,1)], ...
+%                                      plotReps, 'UniformOutput', false)');
+
+toolPerfs = cell2mat(arrayfun(@(iR) [incrToolRS(1,iR).perf.rewPerAct(end,1) ... 
+                                     incrToolRS(2,iR).perf.rewPerAct(end,1) ... 
+                                     incrToolRS(3,iR).perf.rewPerAct(end,1)], ...
+                                     plotReps, 'UniformOutput', false)');
+
+figure,plot(toolPerfs,'LineWidth',2)      
+ylabel('Performance (score/timestep)')
+xlabel('Batch number')
+
+legend('Widening','Constant','Narrowing')
+
 %% Plot tool results
 
 
@@ -990,7 +993,7 @@ ylabel('Number of peaks in receptive field')
 
 title('A receptive field grows around the tooltip as the agent learns to use the tool')
 
-xlim([0 21])
+xlim([0 51])
 
 box off
 
@@ -1004,7 +1007,7 @@ sFP.plt.rowLims         = [1.5 13.5];
 
 
 % Plot the tool-fields as the agent learns
-plBatchs = [1 2 3 5 10 20];
+plBatchs = [1 2 3 7 51];
 % Space out the sub-plots equally along the x-axis
 % subPlotxPos = f.Tool.ax{1}.Position(3) ./ (numel(plBatchs) + 2);  
 subPlotxPos = f.Tool.ax{1}.Position(3) ./ (numel(plBatchs) + 1 );  
@@ -1072,6 +1075,19 @@ colormap(whitetocol(100,[0 0 0.7 ],[1]));
 % % % cBatch = 1;
 % % % figure,plot(squeeze(nanmean(npksN(:,:,:,:,:),[1 3 4])))
 % % % legend(1:6)
+
+
+% Savefigure
+allFields = fields(f);
+for iF = 1:length(allFields)
+    cF = allFields{iF};
+  
+    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+    saveas(f.(cF).f,['Results\ForFigures\Revision\ToolUse\' cF '.eps'] , 'epsc')
+    saveas(f.(cF).f,['Results\ForFigures\Revision\ToolUse\' cF '.pdf'] , 'pdf')
+
+end
+
 
 
 %% $$$ Create subspace analysis for separate networks
