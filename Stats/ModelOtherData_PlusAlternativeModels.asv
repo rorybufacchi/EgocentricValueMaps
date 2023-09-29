@@ -1,5 +1,3 @@
-addpath('F:\Projects\DPPS\DefenseAgent\Scripts\rlsimplepps')
-addpath('F:\Projects\DPPS\DefenseAgent\Scripts')
 addpath('F:\Programs\Matlab\Utilities\')
 addpath('F:\Programs\Matlab\Utilities\plotting\colormaps\')
 addpath('F:\Programs\Matlab\Utilities\plotting\Plot_VoxelSurf_V1_11')
@@ -10,7 +8,7 @@ addpath('F:\Programs\Matlab\Toolboxes\CircStat2012a');
 addpath('F:\Programs\Matlab\Utilities\plotting\colormaps');
 
 
-load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Fig1_Results_v3')
+load('Results\ForFigures\Fig1_Results_v3')
 s=rS(end).s;
 w=rS(end).w;
 addpath(genpath('F:\Projects\DPPS\DefenseAgent\Scripts\rlsimplepps'));
@@ -3387,7 +3385,7 @@ dNegDi.psi = cellfun(@(psi) -psi, dDi.psi, 'UniformOutput', false);
 
 % Save fitted data
 tic
-save('F:\Projects\DPPS\DefenseAgent\Data\LatesFittedData.mat','-v7.3')
+save('Data\LatestFittedData.mat','-v7.3')
 toc
 
 % $$$ HERE HERE
@@ -3979,7 +3977,7 @@ for iF = 1:length(allFields)
     cF = allFields{iF};
 
     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.eps'] , 'eps')
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.eps'] , 'epsc')
     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.pdf'] , 'pdf')
 %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.tif'] , 'tif')
 end
@@ -4197,6 +4195,276 @@ end
 
 title('Trunk + Head + Hand PPS')
 
+
+%% Make figures showing body part movements for theoretical fig
+
+
+lims3D   = [105 365 ; -20 120 ; 0 150];
+sizePlot = [0 300 0 130 0 150]; % [0.1 0.8 0.1 0.8 0.1 0.8]
+
+s.plt.vidFl = 0;
+
+actNames    = {'Stay','Up','Down','Left','Right','Forward','Back'};
+actCriteria = {@(x) sum(x==0,2)==3, ... STAY
+               @(x) x(:,3) > 0, ...     UP
+               @(x) x(:,3) < 0, ...     DOWN
+               @(x) x(:,2) > 0, ...     LEFT
+               @(x) x(:,2) < 0, ...     RIGHT
+               @(x) x(:,1) < 0, ...     FORWARD
+               @(x) x(:,1) > 0} %       BACK
+
+taskNames = {'Goal','Threat'};
+taskDefs  = [1, -1];
+
+bdyPartNames = {'Trunk','Head','Hand'};
+bdyPartTags  = {'sBdy', 'sHed','sHnd'}'
+
+qsToPlot % $$$ TAKE THIS FROM ALLQ!! Combining iTask and iBdyPart
+
+
+% ------------------------------------------------------
+% First skin for all body parts
+
+f.Model3DBase.f = figure('Position',[20 20 1400 1200]);
+
+% HAND
+sFPl = sHndSide ;
+plQ = allQ(13,:);
+sFPl.clc.startRew       = 1;
+sFPl.clc.plS.iAct       = 1:43;
+sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 2; % semi-arbitrary offset to get around how voxelsurf.m deals with negative numbers
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.plSkin     = 'Y';
+sFPl.clc.plS.plField    = 'N'; %
+
+% [1 sY 1 sX 1 sZ]
+sFPl.clc.plS.volSettings= {true,sizePlot,1};
+
+[newQ, f] = PlotQMaps(sFPl,plQ,f); hold on
+
+ylim(lims3D(1,:));
+xlim(lims3D(2,:));
+zlim(lims3D(3,:));
+
+% set(gca,'XTick',[0.2 0.4 0.6 0.8])
+% set(gca,'YTick',[0.2 0.4 0.6 0.8])
+% set(gca,'ZTick',[0.2 0.4 0.6 0.8])
+% set(gca,'XTickLabels',{''})
+% set(gca,'YTickLabels',{''})
+% set(gca,'ZTickLabels',{''})
+caxis([1 4])
+
+
+% BODY
+sFPl = sBdy;
+plQ = allQ(2,:);
+sFPl.clc.startRew       = -1;
+sFPl.clc.plS.iAct       = 1:7;
+sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 3; 
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.plSkin     = 'Y';
+sFPl.clc.plS.plField    = 'N';
+
+sFPl.clc.plS.volSettings= {true,sizePlot,1};
+[newQ, f] = PlotQMaps(sFPl,plQ,f);
+
+caxis([1 4])
+
+% HEAD
+sFPl = sHed;
+plQ = allQ(6,:);
+sFPl.clc.startRew       = -1;
+sFPl.clc.plS.iAct       = 1:7;
+sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 3; 
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.plSkin     = 'Y';
+sFPl.clc.plS.plField    = 'N';
+
+sFPl.clc.plS.volSettings= {true,sizePlot,1};
+[newQ, f] = PlotQMaps(sFPl,plQ,f);
+
+caxis([1 4])
+
+% MapsColourBar();
+
+view([30 25])
+axis off
+
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if s.plt.vidFl == 1
+    % Video without fields
+
+    s.plt.vidFileName = 'F:\Projects\DPPS\DefenseAgent\Results\Videos\RotateWithWIthoutFields.avi';
+
+    s.plt.vidFR = 36;
+    s.plt.addVidAngs = linspace(0,360 .* 1.5,s.plt.vidFR * 6)
+
+    v = RotateAndFilm(gcf,s,[]);
+end
+
+title('Body Surface')
+
+
+for iBP = 1:length(bdyPartNames)
+
+% Select body part
+eval(['sFPl = ' bdyPartTags{iBP} ';']);
+plQ = allQ(2,:);
+
+
+for iTask = 1:length(taskDefs)
+for iAct = 1:length(actNames)
+
+% ------------------------------------------------------
+% Next FIELDS for all body parts
+
+figure(f.Model3DBase.f); 
+
+% Create new figure or switch to existing figure
+if iTask ==1
+    currFigName = ['Model3DForTheory_' actNames{iAct} 'BodyPart_' bdyPartNames{iBP}];
+
+    % Make copy of figure
+    cAx = gca;
+    f.(currFigName).f = figure('Position',[20 20 1400 1200]);
+    cAx = copyobj(cAx,f.(currFigName).f);
+else
+    figure(f.(currFigName).f)
+end
+
+
+sFPl.clc.plS.iAct       = actCriteria{iAct}(sFPl.clc.actConsequence);
+% sFPl.clc.plS.ActFun     = @(x) x(1,:,:,:,:);
+% sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+sFPl.clc.plS.ActFun     = @(x) max(abs(x),[],1);
+% sFPl.clc.plS.ActFun     = @(x) median(x,1);
+sFPl.clc.plS.plDim      = 3;
+sFPl.clc.plS.offset     = 3; 
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45;
+sFPl.clc.plS.plSkin     = 'N';
+sFPl.clc.plS.plField    = 'Y';
+
+sFPl.clc.plS.volSettings= {true,sizePlot,.25};
+
+for iTask = 1:length(taskNames)
+    subplot(length(actNames),2,iTask + (iAct-1) .* length(taskDefs))
+    sFPl.clc.startRew   = taskDefs(iTask);
+    [newQ, f]           = PlotQMaps(sFPl,plQ,f);
+%     caxis([1 4])
+    cLims = caxis;
+    caxis(max(abs(cLims)) .* [-1 1] );
+
+
+    ylim(lims3D(1,:));
+    xlim(lims3D(2,:));
+    zlim(lims3D(3,:));
+
+    hold on
+
+    % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if s.plt.vidFl == 1
+        % Video with body field
+        s.plt.addVidAngs = linspace(0,360 .* 1,s.plt.vidFR * 4)
+        v = RotateAndFilm(gcf,s,v);
+    end
+
+    set(gca,'Visible','off')
+
+    title([ actNames{iAct} ' ' taskNames(iTask)])
+end
+
+
+
+% % % % HEAD
+% % % sFPl = sHed;
+% % % plQ = allQ(6,:);
+% % % sFPl.clc.plS.iAct       = actCriteria{iAct}(sHed.clc.actConsequence);
+% % % % sFPl.clc.plS.ActFun     = @(x) x(1,:,:,:,:);
+% % % % sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+% % % sFPl.clc.plS.ActFun     = @(x) max(abs(x),[],1);
+% % % % sFPl.clc.plS.ActFun     = @(x) median(x,1);
+% % % sFPl.clc.plS.plDim      = 3;
+% % % sFPl.clc.plS.offset     = 3; 
+% % % sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45;
+% % % sFPl.clc.plS.plSkin     = 'N';
+% % % sFPl.clc.plS.plField    = 'Y';
+% % % 
+% % % sFPl.clc.plS.volSettings= {true,sizePlot,.25};
+% % % 
+% % % for iTask = 1:length(taskNames)
+% % %     subplot(length(actNames),2,iTask + (iAct-1) .* length(taskDefs))
+% % %     sFPl.clc.startRew   = taskDefs(iTask);
+% % %     [newQ, f] = PlotQMaps(sFPl,plQ,f);
+% % % 
+% % %     % MapsColourBar();
+% % % 
+% % %     % title('Trunk + Head PPS')
+% % % 
+% % %     ylim(lims3D(1,:));
+% % %     xlim(lims3D(2,:));
+% % %     zlim(lims3D(3,:));
+% % % 
+% % % 
+% % %     % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% % %     if s.plt.vidFl == 1
+% % %         s.plt.addVidAngs = linspace(0,360 .* 1,s.plt.vidFR * 4)
+% % %         v = RotateAndFilm(gcf,s,v);
+% % %     end
+% % % end
+% % % 
+% % % % HAND
+% % % 
+% % % sFPl = sHndSide ;
+% % % plQ = allQ(13,:);
+% % % sFPl.clc.startRew       = 1;
+% % % sFPl.clc.plS.iAct       = actCriteria{iAct}(sHnd.clc.actConsequence);
+% % % % sFPl.clc.plS.ActFun     = @(x) x(1,:,:,:,:);
+% % % % sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
+% % % sFPl.clc.plS.ActFun     = @(x) max(abs(x),[],1);
+% % % % sFPl.clc.plS.ActFun     = @(x) median(x,1);
+% % % sFPl.clc.plS.plDim      = 3;
+% % % sFPl.clc.plS.offset     = 2; 
+% % % sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45
+% % % sFPl.clc.plS.plSkin     = 'N';
+% % % sFPl.clc.plS.plField    = 'Y'; %
+% % % 
+% % % sFPl.clc.plS.volSettings= {true,sizePlot,.25};
+% % % 
+% % % for iTask = 1:length(taskNames)
+% % %     subplot(length(actNames),2,iTask + (iAct-1) .* length(taskDefs))
+% % %     sFPl.clc.startRew   = taskDefs(iTask);
+% % %     [newQ, f] = PlotQMaps(sFPl,plQ,f); hold on
+% % % 
+% % %     caxis([1 4])
+% % %     colormap(BlueWhiteRedDavide3)
+% % % 
+% % %     % MapsColourBar();
+% % % 
+% % %     ylim(lims3D(1,:));
+% % %     xlim(lims3D(2,:));
+% % %     zlim(lims3D(3,:));
+% % % 
+% % % 
+% % %     % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% % %     if s.plt.vidFl == 1
+% % %         s.plt.addVidAngs = linspace(0,360 .* 2.5 ,s.plt.vidFR * 10)
+% % %         v = RotateAndFilm(gcf,s,v);
+% % %         close(v)
+% % %     end
+% % % 
+% % % end
+
+end
+end
+sgtitle(bdyPartNames{iBP});
+end
 
 
 %%

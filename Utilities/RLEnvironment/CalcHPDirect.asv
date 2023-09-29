@@ -64,9 +64,10 @@ maxActDists = maxActDists + cellfun(@(dim) max(abs(dim)), s.clc.sensSpread);
 
 % next, loop through rows backwards and add sums
 % % % for iSR = max(s.clc.startSR) - 1 : -1 : maxActDists(1)
-for iIt = 1:s.clc.nReps
-for iSweeps = 1:s.clc.nSteps
-for iSR = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
+for iIt    = 1:s.clc.nReps
+for iSweeps = 1:s.clc.nSteps % this can be used to sweep through all values first, before using the updates values to continue Q-value calculation
+oldQ = newQ;
+for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     iSR
 
     % reverse direction to get symmetric result if doing more than 1
@@ -78,7 +79,7 @@ for iSR = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     end
     
     for iSC = colOrder
-        for iSZ = 1 + maxActDists(3) : s.wrld.size(3) - maxActDists(3)
+        for iSZ = 1 + (maxActDists(3)-1) : s.wrld.size(3) - (maxActDists(3)-1)
 
 
             % Only update Q if it is not an 'originally rewarded' location
@@ -148,7 +149,7 @@ for iSR = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                     % DEBUGGING
                     if iAct == 1 & ...
                             iSR == 47 & ...
-                            iSC == 15 & ... 11
+                            iSC == 11 & ... 11
                             iSZ == 15 %13
 
 % %                                        any(s.clc.startSR - 1 == iSR) & ...
@@ -245,7 +246,7 @@ for iSR = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                     % For faster updates,calculate the Q-values from latest
                     % approximation.For unbiased updates, instead set the
                     % flag below to 1
-                    if sBdy.clc.stepUpdateFl == 0
+                    if s.clc.stepUpdateFl == 0
                         oldQ = newQ;
                     end
                 end
@@ -255,11 +256,7 @@ for iSR = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
         end
     end
 end
-oldQ = newQ;
-
-
-
-
+end
 iIt
 end
 
@@ -268,10 +265,10 @@ end
 % !!!!!!!!!!!!!!!!!!!!!!!! THIS NEEDS TO BE CHANGED BACK !!!!!!!!!!!!!!!!!!
 % $$$
 
-% % % % Then set the value of the touch condition back to 0
-% % % for iVol = 1:length(s.clc.startSZ)
-% % %     newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = 0;
-% % % end
+% Then set the value of the touch condition back to 0
+for iVol = 1:length(s.clc.startSZ)
+    newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = 0;
+end
 
 % Or set tool space to the slightly nearer position
 if isfield(s.clc,'toolSR')

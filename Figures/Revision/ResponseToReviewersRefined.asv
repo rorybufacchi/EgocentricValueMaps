@@ -393,13 +393,9 @@ colormap(custom_colormap);
 
 % $$$ Maybe also do gridoverimage?
 
-cAx = [0 1];
-
-for iAct = 1 %:size(newQ,1)
+for iAct = 1:size(newQ,1)
 
 f.TwoDimPlotQ.f        = figure('Position',[20 20 1200 1200]);
-
-iPl = 0;
 
 for iHP = 1:nHandPos
 
@@ -412,9 +408,16 @@ for iHP = 1:nHandPos
         sTmp = sBdy;
         
 
-        newQ2 = newQ(iAct,:,:,:); % Max value
+        [newQ2 optAct] = max(newQ(iAct,:,:,:),[],1); % Max value
+        % newQ2 = mean(newQ(iAct,:,:,:),1); % avg value
 
+        newQ2 = optAct;
+
+
+        % % % f.TwoDimPlot.ax{1}    = axes('Position',[.05 .1 .4 .8]);
+        % % % f.TwoDimPlot.ax{1}    = axes('Position',[.05 .05 .9 .9]);
         f.TwoDimPlot.ax{iPl}    = subplot(nHandPos,nDynam,iPl);
+
 
         zPos = sTmp.clc.nearPos(3) - cHP; % POSITION OF SLICE
         imagesc(squeeze(-newQ2(1,:,:,zPos )) );

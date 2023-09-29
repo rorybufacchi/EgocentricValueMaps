@@ -68,7 +68,7 @@ for iIt    = 1:s.clc.nReps
 for iSweeps = 1:s.clc.nSteps % this can be used to sweep through all values first, before using the updates values to continue Q-value calculation
 oldQ = newQ;
 for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
-    iSR
+%     iSR
 
     % reverse direction to get symmetric result if doing more than 1
     % repetition
@@ -79,7 +79,7 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     end
     
     for iSC = colOrder
-        for iSZ = 1 + maxActDists(3) : s.wrld.size(3) - maxActDists(3)
+        for iSZ = 1 + (maxActDists(3)-1) : s.wrld.size(3) - (maxActDists(3)-1)
 
 
             % Only update Q if it is not an 'originally rewarded' location
@@ -257,7 +257,7 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     end
 end
 end
-iIt
+% iIt
 end
 
 
