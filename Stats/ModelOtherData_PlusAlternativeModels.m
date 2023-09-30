@@ -3977,8 +3977,12 @@ for iF = 1:length(allFields)
     cF = allFields{iF};
 
     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.eps'] , 'epsc')
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.pdf'] , 'pdf')
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V3.eps'] , 'epsc')
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V3.pdf'] , 'pdf')
+    
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.eps'] , 'epsc')
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.pdf'] , 'pdf')
+
 %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.tif'] , 'tif')
 end
 
@@ -4211,7 +4215,7 @@ actCriteria = {@(x) sum(x==0,2)==3, ... STAY
                @(x) x(:,2) > 0, ...     LEFT
                @(x) x(:,2) < 0, ...     RIGHT
                @(x) x(:,1) < 0, ...     FORWARD
-               @(x) x(:,1) > 0} %       BACK
+               @(x) x(:,1) > 0}; %      BACK
 
 taskNames = {'Goal','Threat'};
 taskDefs  = [1, -1];
@@ -4219,7 +4223,9 @@ taskDefs  = [1, -1];
 bdyPartNames = {'Trunk','Head','Hand'};
 bdyPartTags  = {'sBdy', 'sHed','sHnd'}'
 
-qsToPlot % $$$ TAKE THIS FROM ALLQ!! Combining iTask and iBdyPart
+qsToPlot = [ 1  2; ... Body goal threat (towards)
+             5  6; ... Head goal threat (towards)
+            13 14];  % Hand goal threat (towards)
 
 
 % ------------------------------------------------------
@@ -4316,25 +4322,26 @@ for iBP = 1:length(bdyPartNames)
 
 % Select body part
 eval(['sFPl = ' bdyPartTags{iBP} ';']);
-plQ = allQ(2,:);
-
 
 for iTask = 1:length(taskDefs)
+
+% Select data for body part and task
+plQ = allQ(qsToPlot(iBP,iTask),:);
+
 for iAct = 1:length(actNames)
 
 % ------------------------------------------------------
 % Next FIELDS for all body parts
 
-figure(f.Model3DBase.f); 
 
 % Create new figure or switch to existing figure
-if iTask ==1
+if iTask == 1 & iAct == 1
     currFigName = ['Model3DForTheory_' actNames{iAct} 'BodyPart_' bdyPartNames{iBP}];
 
     % Make copy of figure
-    cAx = gca;
-    f.(currFigName).f = figure('Position',[20 20 1400 1200]);
-    cAx = copyobj(cAx,f.(currFigName).f);
+%     cAx = gca;
+    f.(currFigName).f = figure('Position',[20 20 2400 1200]);
+%     cAx = copyobj(cAx,f.(currFigName).f);
 else
     figure(f.(currFigName).f)
 end
@@ -4353,31 +4360,49 @@ sFPl.clc.plS.plField    = 'Y';
 
 sFPl.clc.plS.volSettings= {true,sizePlot,.25};
 
-for iTask = 1:length(taskNames)
-    subplot(length(actNames),2,iTask + (iAct-1) .* length(taskDefs))
-    sFPl.clc.startRew   = taskDefs(iTask);
-    [newQ, f]           = PlotQMaps(sFPl,plQ,f);
+
+% subplot(length(actNames),2,iTask + (iAct-1) .* length(taskDefs))
+axS.xOffset = 0.05;
+axS.yOffset = 0.05
+% % % axes('Position',[axS.xOffset + (iAct-1) .* ((1 - 2.*axS.xOffset) ./ length(actNames)) , ...
+% % %                  axS.yOffset + (iTask-1) .* ((1 - 2.*axS.yOffset) ./ length(taskDefs)), ... 
+% % %                  ((1 - 2.*axS.xOffset) ./ length(actNames)), ...
+% % %                  ((1 - 2.*axS.yOffset) ./ length(taskDefs))]);
+
+% % % axes('Position',[axS.xOffset + (iTask-1) .* ((1 - 2.*axS.xOffset) ./ length(taskDefs)) , ...
+% % %                  axS.yOffset + (iAct-1) .* ((1 - 2.*axS.yOffset) ./ length(actNames)), ... 
+% % %                  ((1 - 2.*axS.xOffset) ./ length(taskDefs)), ...
+% % %                  ((1 - 2.*axS.yOffset) ./ length(actNames))]);
+sFPl.clc.startRew   = taskDefs(iTask);
+[newQ, f]           = PlotQMaps(sFPl,plQ,f);
 %     caxis([1 4])
-    cLims = caxis;
-    caxis(max(abs(cLims)) .* [-1 1] );
+cLims = caxis;
+caxis(max(abs(cLims)) .* [-1 1] );
 
 
-    ylim(lims3D(1,:));
-    xlim(lims3D(2,:));
-    zlim(lims3D(3,:));
+ylim(lims3D(1,:));
+xlim(lims3D(2,:));
+zlim(lims3D(3,:));
 
-    hold on
+hold on
 
-    % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if s.plt.vidFl == 1
-        % Video with body field
-        s.plt.addVidAngs = linspace(0,360 .* 1,s.plt.vidFR * 4)
-        v = RotateAndFilm(gcf,s,v);
-    end
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if s.plt.vidFl == 1
+    % Video with body field
+    s.plt.addVidAngs = linspace(0,360 .* 1,s.plt.vidFR * 4)
+    v = RotateAndFilm(gcf,s,v);
+end
 
-    set(gca,'Visible','off')
+set(gca,'Visible','off')
 
-    title([ actNames{iAct} ' ' taskNames(iTask)])
+title([ actNames{iAct} ' ' taskNames(iTask)])
+
+
+% Adapt colourmap to task
+if iTask == 1 
+    colormap(gca, whitetocol(100, [0 0 0.7]) );
+else
+    colormap(gca, whitetocol(100, [0.7 0 0]) );
 end
 
 
@@ -4619,7 +4644,7 @@ for iQ = 1:size(allQ,1)
 
             % colormap(whitetocol(100,[0 0 0.7]))
             % colormap(redbluecmapRory)
-            colormap(BlueWhiteRedDavide3)
+            % colormap(BlueWhiteRedDavide3)
 
             
 
