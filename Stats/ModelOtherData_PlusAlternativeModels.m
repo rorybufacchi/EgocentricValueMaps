@@ -3976,10 +3976,15 @@ allFields = fields(f);
 for iF = 1:length(allFields)
     cF = allFields{iF};
 
-    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V3.eps'] , 'epsc')
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V3.pdf'] , 'pdf')
+% % %     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.tif'] , 'tif')
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf'] , 'pdf')
     
+%     print(f.(cF).f,'-vector','-dsvg',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.epsc']) % svg
+%     print(f.(cF).f,'-vector','-dsvg',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.svg']) % svg
+%     print(f.(cF).f,'-vector','-dpdf',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf']) % pdf
+
+
 % % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.eps'] , 'epsc')
 % % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.pdf'] , 'pdf')
 
@@ -4234,13 +4239,17 @@ qsToPlot = [ 1  2; ... Body goal threat (towards)
 f.Model3DBase.f = figure('Position',[20 20 1400 1200]);
 
 % HAND
+% Check whether it's got the wrong starting column
+if all(sHndSide.clc.startSC < 15)
+    sHndSide.clc.startSC = sHndSide.clc.startSC + 10
+end
 sFPl = sHndSide ;
-plQ = allQ(13,:);
-sFPl.clc.startRew       = 1;
+plQ = allQ(14,:);
+sFPl.clc.startRew       = 0.1;
 sFPl.clc.plS.iAct       = 1:43;
 sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
 sFPl.clc.plS.plDim      = 3;
-sFPl.clc.plS.offset     = 2; % semi-arbitrary offset to get around how voxelsurf.m deals with negative numbers
+sFPl.clc.plS.offset     = 0; % semi-arbitrary offset to get around how voxelsurf.m deals with negative numbers
 sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
 sFPl.clc.plS.plSkin     = 'Y';
 sFPl.clc.plS.plField    = 'N'; %
@@ -4260,17 +4269,18 @@ zlim(lims3D(3,:));
 % set(gca,'XTickLabels',{''})
 % set(gca,'YTickLabels',{''})
 % set(gca,'ZTickLabels',{''})
-caxis([1 4])
+caxis([1 4]);
+hold on
 
 
 % BODY
 sFPl = sBdy;
 plQ = allQ(2,:);
-sFPl.clc.startRew       = -1;
+sFPl.clc.startRew       = 0.1;
 sFPl.clc.plS.iAct       = 1:7;
 sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
 sFPl.clc.plS.plDim      = 3;
-sFPl.clc.plS.offset     = 3; 
+sFPl.clc.plS.offset     = 0; 
 sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
 sFPl.clc.plS.plSkin     = 'Y';
 sFPl.clc.plS.plField    = 'N';
@@ -4283,11 +4293,11 @@ caxis([1 4])
 % HEAD
 sFPl = sHed;
 plQ = allQ(6,:);
-sFPl.clc.startRew       = -1;
+sFPl.clc.startRew       = 0.1;
 sFPl.clc.plS.iAct       = 1:7;
 sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
 sFPl.clc.plS.plDim      = 3;
-sFPl.clc.plS.offset     = 3; 
+sFPl.clc.plS.offset     = 0; 
 sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
 sFPl.clc.plS.plSkin     = 'Y';
 sFPl.clc.plS.plField    = 'N';
@@ -4299,7 +4309,7 @@ caxis([1 4])
 
 % MapsColourBar();
 
-view([30 25])
+view([-28 22.5])
 axis off
 
 
@@ -4334,17 +4344,37 @@ for iAct = 1:length(actNames)
 % Next FIELDS for all body parts
 
 
-% Create new figure or switch to existing figure
-if iTask == 1 & iAct == 1
-    currFigName = ['Model3DForTheory_' actNames{iAct} 'BodyPart_' bdyPartNames{iBP}];
+% % % % Create new figure or switch to existing figure
+% % % if iTask == 1 & iAct == 1
+% % % 
+% % %     figure(f.Model3DBase.f)
+% % % 
+% % %     currFigName = ['Model3DForTheory_' actNames{iAct} 'BodyPart_' bdyPartNames{iBP}];
+% % %     currFigName = ['Model3DForTheory_' actNames{iAct} '_BodyPart_' bdyPartNames{iBP} '_Act_' num2str(iAct)];
+% % % 
+% % %     % Make copy of figure
+% % %     cAx = gca;
+% % % % % %     f.(currFigName).f = figure('Position',[20 20 2400 1200]);
+% % %     f.(currFigName).f = figure('Position',[20 20 1400 1200]);
+% % %     cAx = copyobj(cAx,f.(currFigName).f);
+% % % else
+% % %     figure(f.(currFigName).f)
+% % % end
 
-    % Make copy of figure
-%     cAx = gca;
-    f.(currFigName).f = figure('Position',[20 20 2400 1200]);
-%     cAx = copyobj(cAx,f.(currFigName).f);
-else
-    figure(f.(currFigName).f)
-end
+% Create new figure or switch to existing figure
+figure(f.Model3DBase.f)
+
+currFigName = ['Model3DForTheory_' actNames{iAct} 'BodyPart_' bdyPartNames{iBP}];
+currFigName = ['Model3DForTheory_' actNames{iAct} '_BodyPart_' bdyPartNames{iBP} '_Act_' num2str(iAct)];
+
+% Make copy of figure
+cAx = gca;
+% % %     f.(currFigName).f = figure('Position',[20 20 2400 1200]);
+f.(currFigName).f = figure('Position',[20 20 1400 1200]);
+cAx = copyobj(cAx,f.(currFigName).f);
+
+
+
 
 
 sFPl.clc.plS.iAct       = actCriteria{iAct}(sFPl.clc.actConsequence);
@@ -4362,8 +4392,9 @@ sFPl.clc.plS.volSettings= {true,sizePlot,.25};
 
 
 % subplot(length(actNames),2,iTask + (iAct-1) .* length(taskDefs))
-axS.xOffset = 0.05;
-axS.yOffset = 0.05
+% subplot(2,length(actNames),iAct + (iTask-1) .* length(actNames))
+% % % axS.xOffset = 0.05;
+% % % axS.yOffset = 0.05
 % % % axes('Position',[axS.xOffset + (iAct-1) .* ((1 - 2.*axS.xOffset) ./ length(actNames)) , ...
 % % %                  axS.yOffset + (iTask-1) .* ((1 - 2.*axS.yOffset) ./ length(taskDefs)), ... 
 % % %                  ((1 - 2.*axS.xOffset) ./ length(actNames)), ...
@@ -4375,9 +4406,9 @@ axS.yOffset = 0.05
 % % %                  ((1 - 2.*axS.yOffset) ./ length(actNames))]);
 sFPl.clc.startRew   = taskDefs(iTask);
 [newQ, f]           = PlotQMaps(sFPl,plQ,f);
-%     caxis([1 4])
-cLims = caxis;
-caxis(max(abs(cLims)) .* [-1 1] );
+    caxis([0 1])
+% % % cLims = caxis;
+% % % caxis(max(abs(cLims)) .* [-1 1] );
 
 
 ylim(lims3D(1,:));
@@ -4400,9 +4431,11 @@ title([ actNames{iAct} ' ' taskNames(iTask)])
 
 % Adapt colourmap to task
 if iTask == 1 
-    colormap(gca, whitetocol(100, [0 0 0.7]) );
+%     colormap(gca, whitetocol(100, [0 0 0.7]) );
+    colormap(coltocol(100,[0.3 0.3 0.3],[0 0 0.7]))
 else
-    colormap(gca, whitetocol(100, [0.7 0 0]) );
+%     colormap(gca, whitetocol(100, [0.7 0 0]) );
+    colormap(coltocol(100,[0.3 0.3 0.3],[0.7 0 0]))
 end
 
 

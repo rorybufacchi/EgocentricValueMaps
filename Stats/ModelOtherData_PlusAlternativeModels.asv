@@ -3976,11 +3976,15 @@ allFields = fields(f);
 for iF = 1:length(allFields)
     cF = allFields{iF};
 
-    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V3.eps'] , 'epsc')
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V3.pdf'] , 'pdf')
-    5
+% % %     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.tif'] , 'tif')
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf'] , 'pdf')
     
+%     print(f.(cF).f,'-vector','-dsvg',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.epsc']) % svg
+%     print(f.(cF).f,'-vector','-dsvg',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.svg']) % svg
+%     print(f.(cF).f,'-vector','-dpdf',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf']) % pdf
+
+
 % % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.eps'] , 'epsc')
 % % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.pdf'] , 'pdf')
 
@@ -4337,12 +4341,17 @@ for iAct = 1:length(actNames)
 
 % Create new figure or switch to existing figure
 if iTask == 1 & iAct == 1
+
+    figure(f.Model3DBase.f)
+
     currFigName = ['Model3DForTheory_' actNames{iAct} 'BodyPart_' bdyPartNames{iBP}];
+    
 
     % Make copy of figure
-%     cAx = gca;
-    f.(currFigName).f = figure('Position',[20 20 2400 1200]);
-%     cAx = copyobj(cAx,f.(currFigName).f);
+    cAx = gca;
+% % %     f.(currFigName).f = figure('Position',[20 20 2400 1200]);
+    f.(currFigName).f = figure('Position',[20 20 1400 1200]);
+    cAx = copyobj(cAx,f.(currFigName).f);
 else
     figure(f.(currFigName).f)
 end
@@ -4363,8 +4372,9 @@ sFPl.clc.plS.volSettings= {true,sizePlot,.25};
 
 
 % subplot(length(actNames),2,iTask + (iAct-1) .* length(taskDefs))
-axS.xOffset = 0.05;
-axS.yOffset = 0.05
+% subplot(2,length(actNames),iAct + (iTask-1) .* length(actNames))
+% % % axS.xOffset = 0.05;
+% % % axS.yOffset = 0.05
 % % % axes('Position',[axS.xOffset + (iAct-1) .* ((1 - 2.*axS.xOffset) ./ length(actNames)) , ...
 % % %                  axS.yOffset + (iTask-1) .* ((1 - 2.*axS.yOffset) ./ length(taskDefs)), ... 
 % % %                  ((1 - 2.*axS.xOffset) ./ length(actNames)), ...
