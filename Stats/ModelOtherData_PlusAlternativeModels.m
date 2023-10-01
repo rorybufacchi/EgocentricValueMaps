@@ -4012,7 +4012,7 @@ sFPl.clc.plS.iAct       = 1:43;
 sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 2; % semi-arbitrary offset to get around how voxelsurf.m deals with negative numbers
-sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.3;
 sFPl.clc.plS.plSkin     = 'Y';
 sFPl.clc.plS.plField    = 'N'; %
 
@@ -4042,7 +4042,7 @@ sFPl.clc.plS.iAct       = 1:7;
 sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 3; 
-sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.3;
 sFPl.clc.plS.plSkin     = 'Y';
 sFPl.clc.plS.plField    = 'N';
 
@@ -4059,7 +4059,7 @@ sFPl.clc.plS.iAct       = 1:7;
 sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 3; 
-sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.3;
 sFPl.clc.plS.plSkin     = 'Y';
 sFPl.clc.plS.plField    = 'N';
 
@@ -4111,7 +4111,7 @@ sFPl.clc.plS.ActFun     = @(x) x(1,:,:,:,:);
 % sFPl.clc.plS.ActFun     = @(x) median(x,1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 3; 
-sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45;
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.3;
 sFPl.clc.plS.plSkin     = 'N';
 sFPl.clc.plS.plField    = 'Y';
 
@@ -4145,7 +4145,7 @@ sFPl.clc.plS.ActFun     = @(x) x(1,:,:,:,:);
 % sFPl.clc.plS.ActFun     = @(x) median(x,1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 3; 
-sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45;
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.3;
 sFPl.clc.plS.plSkin     = 'N';
 sFPl.clc.plS.plField    = 'Y';
 
@@ -4250,7 +4250,7 @@ sFPl.clc.plS.iAct       = 1:43;
 sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 0; % semi-arbitrary offset to get around how voxelsurf.m deals with negative numbers
-sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < -1;
 sFPl.clc.plS.plSkin     = 'Y';
 sFPl.clc.plS.plField    = 'N'; %
 
@@ -4281,7 +4281,7 @@ sFPl.clc.plS.iAct       = 1:7;
 sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 0; 
-sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < -1;
 sFPl.clc.plS.plSkin     = 'Y';
 sFPl.clc.plS.plField    = 'N';
 
@@ -4298,7 +4298,7 @@ sFPl.clc.plS.iAct       = 1:7;
 sFPl.clc.plS.ActFun     = @(x) max(x,[],1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 0; 
-sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.1;
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < -1;
 sFPl.clc.plS.plSkin     = 'Y';
 sFPl.clc.plS.plField    = 'N';
 
@@ -4384,7 +4384,7 @@ sFPl.clc.plS.ActFun     = @(x) max(abs(x),[],1);
 % sFPl.clc.plS.ActFun     = @(x) median(x,1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 3; 
-sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45;
+sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.3;
 sFPl.clc.plS.plSkin     = 'N';
 sFPl.clc.plS.plField    = 'Y';
 
@@ -4450,7 +4450,7 @@ end
 % % % % sFPl.clc.plS.ActFun     = @(x) median(x,1);
 % % % sFPl.clc.plS.plDim      = 3;
 % % % sFPl.clc.plS.offset     = 3; 
-% % % sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.45;
+% % % sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.3;
 % % % sFPl.clc.plS.plSkin     = 'N';
 % % % sFPl.clc.plS.plField    = 'Y';
 % % % 
@@ -4670,9 +4670,10 @@ for iQ = 1:size(allQ,1)
             % Have to set tmpQ to all positive, becasue voxelsurf is weird
             % with negative numbers
             tmpQ = tmpQ + s.clc.plS.offset;
-
-            tmpQ( s.clc.plS.excl3D(tmpQ) ) = 0;
             
+            % Make the excluded points invisible
+            tmpQ( s.clc.plS.excl3D(tmpQ) ) = 0;
+
             voxelSurf(squeeze(tmpQ(1,:,:,:)),s.clc.plS.volSettings{:});
 
             % colormap(whitetocol(100,[0 0 0.7]))
