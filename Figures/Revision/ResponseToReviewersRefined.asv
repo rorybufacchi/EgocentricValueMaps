@@ -393,35 +393,68 @@ colormap(custom_colormap);
 
 % $$$ Maybe also do gridoverimage?
 
-for iAct = 1:size(newQ,1)
+% cAx = [-1 1];
 
-f.TwoDimPlotQ.f        = figure('Position',[20 20 1200 1200]);
+
+for iAct = 1:6
+figN = ['TwoDimPlotQAct' num2str(iAct)];
+% % % figN = ['TwoDimPlotQmean'];
+
+f.(figN).f        = figure('Position',[20 20 1200 1200]);
+
+iPl = 0;
 
 for iHP = 1:nHandPos
 
     cHP = allHP(iHP);
     for iDynam = 1:nDynam
 
-        iPl = iPl + 1
+        if ~ (iDynam == 1 & iAct == 6)
+
+        iPl = iPl + 1;
 
         newQ = allQ.qVals{iDynam};
         sTmp = sBdy;
         
 
-        [newQ2 optAct] = max(newQ(iAct,:,:,:),[],1); % Max value
-        % newQ2 = mean(newQ(iAct,:,:,:),1); % avg value
+% % %         newQ2 = newQ(iAct,:,:,:); % Max value
 
-        newQ2 = optAct;
+% % %         % Mean action value
+% % %         newQ2 = mean(-newQ,1); % Max value
 
 
-        % % % f.TwoDimPlot.ax{1}    = axes('Position',[.05 .1 .4 .8]);
-        % % % f.TwoDimPlot.ax{1}    = axes('Position',[.05 .05 .9 .9]);
-        f.TwoDimPlot.ax{iPl}    = subplot(nHandPos,nDynam,iPl);
+% % %         % Differential action value compared to the mean or max of the others
+% % %         blAct = 1:size(newQ,1);
+% % %         blAct(blAct == iAct) = [];
+% % % %         newQ2 = newQ(iAct,:,:,:) - mean(newQ(blAct,:,:,:),1);
+% % %         newQ2 = newQ(iAct,:,:,:) - max(newQ(blAct,:,:,:),[],1);
 
+
+% % %         % ONLY POSITIVE part of the Differential action value compared to 
+% % %         % the mean or max of the others
+% % %         blAct                   = 1:size(newQ,1);
+% % %         blAct(blAct == iAct)    = [];
+% % %         newQtmp = newQ;
+% % %         % For moving, give all actions some tiny penalty
+% % %         newQtmp(2:end,:,:,:) = newQtmp(2:end,:,:,:) - 0.001;
+% % %         newQ2                   = newQtmp(iAct,:,:,:) - max(newQtmp(blAct,:,:,:),[],1);        
+% % %         newQ2(newQ2 < 0)        = 0;
+% % %         % Set tot NaN for graying out later
+% % %         newQ2(newQ2 == 0)       = NaN;
+
+
+        f.(figN).ax{iPl}    = subplot(nHandPos,nDynam,iPl);
 
         zPos = sTmp.clc.nearPos(3) - cHP; % POSITION OF SLICE
-        imagesc(squeeze(-newQ2(1,:,:,zPos )) );
+% % %         if iAct == 1
+            % Set an arbitrary point very close to 0, so that the colourmap
+            % still works
+            newQ2(1,1,1,zPos) = 0.00000001;
+% % %         end
+
+        imagesc(squeeze(newQ2(1,:,:,zPos )) ); hold on
 %         GridOverImage(fS,f.TwoDimPlot.ax{1});
+
 
         % Show where the hand and the body are
         hold on
@@ -436,9 +469,13 @@ for iHP = 1:nHandPos
         end
         hold off;
 
-        % caxis auto
-        caxis(cAx);
+%         caxis auto
+%         colorbar
+        cAXES = caxis;
+%         caxis(max(abs(cAXES)) .* [-1 1]);
+%         caxis([0.0001 max(cAXES)]);
 
+        title(['Act' num2str(iAct) '.col' num2str(cAXES)])
 
 % % %         xlim([20  41]);
 % % %         ylim([40  61]);
@@ -446,17 +483,67 @@ for iHP = 1:nHandPos
 % % %         xlim([23  38]);
 % % %         ylim([43  58]);
 
-        xlim([12 49]);
-        ylim([22 60]);
+% % %         xlim([12 49]);
+% % %         ylim([22 60]);
+
+        xlim([20 41]);
+        ylim([41 60]);
+
+
+        % PLOT THE mask for when the action is not taken
+        maskDat = isnan(squeeze(newQ2(1,:,:,zPos )));
+        ax2 = axes('Position', f.(figN).ax{iPl}.Position);
+        h = imagesc(maskDat);
+        % Adjust the AlphaData property of the image object
+        set(h, 'AlphaData', 0.2 .* maskDat);
+        colormap(ax2,whitetocol(2,[0 0 0]));
+
+        axis off;
+        linkaxes([f.(figN).ax{iPl}, ax2]); % link the two axes for zooming, panning, etc.
+
+        % Hide the top axes box but retain the ability to interact with it
+        set(ax2, 'Color', 'none', 'Box', 'off');
+
+        colormap(f.(figN).ax{iPl},whitetocol(256,[0 0.7 0]));
+% % %         colormap(f.(figN).ax{iPl},whitetocol(256,[0 0 0]));
+        axis off
+
+
+        end
 
     end
+
+% % %     sgtitle(['ACTION' num2str(iAct)]);
+end
+
+% colormap(redbluecmapRory)
+
+% % % % Add grey for Nan
+% % % if any(isnan(newQ2(:)))
+% % %     colormap([ [.95 .95 .95] ;  whitetocol(256000,[0 0.7 0]) ]);
+% % % else
+% % %     colormap(whitetocol(256,[0 0.7 0]));
+% % % end
+
+f.(figN).ax{iPl+1} = axes('Position', [0.9 0.05 0.1 0.9]);
+colorbar;
+% caxis(cAx);
+f.(figN).ax{iPl+1}.Visible = 'off';
+
 end
 
 
-f.TwoDimPlot.ax{iPl+1} = axes('Position', [0.9 0.05 0.1 0.9])
-colorbar;
-caxis(cAx);
-f.TwoDimPlot.ax{iPl+1}.Visible = 'off';
+%% Save figures for wasp stuff
+allFields = fields(f);
+for iF = 1:length(allFields)5
+    
+    cF = allFields{iF};
+  
+    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+    saveas(f.(cF).f,['C:\Users\Rory Bufacchi\OneDrive\Projects\DPPS\DefenseAgent\Documentation\Figures\Revision\Wasp\' cF '.eps'] , 'epsc')
+    saveas(f.(cF).f,['C:\Users\Rory Bufacchi\OneDrive\Projects\DPPS\DefenseAgent\Documentation\Figures\Revision\Wasp' cF '.pdf'] , 'pdf')
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.eps'] , 'epsc')
+% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.pdf'] , 'pdf')
 
 end
 
