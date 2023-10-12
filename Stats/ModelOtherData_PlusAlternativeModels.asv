@@ -3978,15 +3978,15 @@ for iF = 1:length(allFields)
 
 % % %     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.tif'] , 'tif')
-% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf'] , 'pdf')
-    
+%     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf'] , 'pdf')
+%     
 %     print(f.(cF).f,'-vector','-dsvg',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.epsc']) % svg
 %     print(f.(cF).f,'-vector','-dsvg',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.svg']) % svg
 %     print(f.(cF).f,'-vector','-dpdf',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf']) % pdf
 
 
-% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.eps'] , 'epsc')
-% % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.pdf'] , 'pdf')
+%     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.eps'] , 'epsc')
+%     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.pdf'] , 'pdf')
 
 %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.tif'] , 'tif')
 end
@@ -4254,8 +4254,6 @@ if s.plt.vidFl == 1
     v = RotateAndFilm(gcf,s,[]);
 end
 
-title('Body Surface')
-
 
 % % % % Create new figure or switch to existing figure
 % % % figure(f.Model3DBase.f)
@@ -4271,7 +4269,7 @@ eval(['sFPl = ' bdyPartTags{iBP} ';']);
 
 if s.plt.QrelMax == 1
     currFigName = ['Model3DForTheory_' actNames{iAct} 'BodyPart_' bdyPartNames{iBP}];
-    f.(currFigName).f = figure('Position',[20 20 900 1800]);
+    f.(currFigName).f = figure('Position',[20 20 300 1800]);
 end
 
 for iTask = 1:length(taskDefs)
@@ -4308,9 +4306,10 @@ for iAct = 1:length(actNames)
 % % % end
 
 
-if s.plt.QrelMax == 0
+if s.plt.QrelMax == 10
+else
     % % % currFigName = ['Model3DForTheory_' actNames{iAct} 'BodyPart_' bdyPartNames{iBP}];
-    currFigName = ['Model3DTask' num2str(iTask) '' actNames{iAct} 'BodyPart' bdyPartNames{iBP} 'PlotRelmax=' num2str(s.plt.QrelMax)];
+    currFigName = ['Model3DTask' num2str(iTask) '' actNames{iAct} 'BodyPart' bdyPartNames{iBP} 'PlotRelmax' num2str(s.plt.QrelMax)];
 
     f.(currFigName).f = figure('Position',[20 20 600 600]);
 end
@@ -4318,8 +4317,8 @@ end
 % subplot(length(actNames),2,iTask + (iAct-1) .* length(taskDefs))
 % subplot(2,length(actNames),iAct + (iTask-1) .* length(actNames))
 
-if s.plt.QrelMax == 1
-    axS.xOffset = 0.05;
+if s.plt.QrelMax == 10
+    axS.xOffset = 0.00;
     axS.yOffset = 0.05;
 
 % % %     axes('Position',[axS.xOffset + (iAct-1) .* ((1 - 2.*axS.xOffset) ./ length(actNames)) , ...
@@ -4331,6 +4330,7 @@ if s.plt.QrelMax == 1
                      axS.yOffset + (iAct-1) .* ((1 - 2.*axS.yOffset) ./ length(actNames)), ...
                      ((1 - 2.*axS.xOffset) ./ length(taskDefs)), ...
                      ((1 - 2.*axS.yOffset) ./ length(actNames))]);
+
 
     PlotBaseBody(f, s, sHndSide, sBdy, sHed, allQ); hold on
 else
@@ -4351,8 +4351,9 @@ sFPl.clc.plS.ActFun     = @(x) max(abs(x),[],1);
 sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 0; 
 if s.plt.QrelMax == 1
-    sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < max(plQ.qVals{1}(:)) ./ 5;
-%     sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < max(plQ.qVals{1}(:)) ./ 100;
+    tmpD = plQ.qVals{1}(sFPl.clc.plS.iAct,:,:,:);
+%     sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < max(tmpD(:)) ./ 5;
+    sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < max(plQ.qVals{1}(:)) ./ 3;
 else
     sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.3;
 end
@@ -4362,6 +4363,7 @@ sFPl.clc.plS.plField    = 'Y';
 
 if s.plt.QrelMax == 1
     sFPl.clc.plS.volSettings= {true,sizePlot,.25};
+% % %     sFPl.clc.plS.volSettings= {true,sizePlot,.35};
 else
     % % % sFPl.clc.plS.volSettings= {true,sizePlot,.25};
     % % % sFPl.clc.plS.volSettings= {true,sizePlot,.1};
@@ -4383,7 +4385,7 @@ else
     curCaxis = caxis;
     % Set a very low minimal colour differential
     curCaxis = [curCaxis, 1e-5];
-    caxis([0 max(curCaxis)]);
+    caxis([0 max(curCaxis).*0.75 ]);
 %     caxis auto
 end
 
@@ -4406,7 +4408,7 @@ end
 
 % % % set(gca,'Visible','off') % $$$ HERE SETTING AXIS VISIBILITY
 
-title([ actNames{iAct} ' ' taskNames(iTask)])
+% title([ actNames{iAct} ' ' taskNames(iTask)])
 
 
 % Adapt colourmap to task
@@ -4419,10 +4421,18 @@ if s.plt.QrelMax == 0
         colormap(coltocol(100,[0.3 0.3 0.3],[0.7 0 0]));
     end
 else
-    colormap([[0.3 0.3 0.3] ; whitetocol(100,[0 0 0.7])]);
+    if iTask == 1
+        colormap(gca,[[0.3 0.3 0.3] ; whitetocol(100,[0 0 0.7])]);
+    else
+        colormap(gca,[[0.3 0.3 0.3] ; whitetocol(100,[0.7 0 0])]);
+    end
 end
 
-    title(currFigName)
+%     title(currFigName)
+axis on
+xticklabels([]);
+yticklabels([]);
+zticklabels([]);
 end
 end
 % % % sgtitle(bdyPartNames{iBP});
@@ -4482,7 +4492,7 @@ xlim(s.plt.lims3D(2,:));
 zlim(s.plt.lims3D(3,:));
 
 view([-28 22.5])
-axis off
+% % % axis off
 colormap(coltocol(100,[0.3 0.3 0.3],[0 0.5 0]))
 
 
@@ -5246,7 +5256,6 @@ sFPl.clc.plS.plField    = 'N'; %
 sFPl.clc.plS.volSettings= {true,s.plt.sizePlot,1};
 
 [newQ, f] = PlotQMaps(sFPl,plQ,f); hold on
-% % % caxis(1e-10 .* [0 1]);
 
 ylim(s.plt.lims3D(1,:));
 xlim(s.plt.lims3D(2,:));
