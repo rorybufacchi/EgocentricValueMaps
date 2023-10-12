@@ -183,7 +183,7 @@ daspect([1 1 1]);
 pbaspect([1 1 1]);
 camproj('perspective')
 %replot light sources
-delete(findall(gcf,'Type','light'))
+delete(findall(gca,'Type','light'))
 light('Position',[   (axes(2)-axes(1))/2      (axes(4)-axes(3))/2      axes(5)-(axes(6)-axes(5))],'Style','local')
 light('Position',[   (axes(2)-axes(1))/2      (axes(4)-axes(3))/2      axes(6)+(axes(6)-axes(5))],'Style','local')
 light('Position',[   (axes(2)-axes(1))/2    axes(3)-(axes(4)-axes(3))     (axes(6)-axes(5))/2   ],'Style','local')

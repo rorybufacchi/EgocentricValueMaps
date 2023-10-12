@@ -4419,11 +4419,7 @@ if s.plt.QrelMax == 0
         colormap(coltocol(100,[0.3 0.3 0.3],[0.7 0 0]));
     end
 else
-    if iTask == 1
-        colormap([[0.3 0.3 0.3] ; whitetocol(100,[0 0 0.7])]);
-    else
-        colormap([[0.3 0.3 0.3] ; whitetocol(100,[0.7 0 0])]);
-    end
+    colormap([[0.3 0.3 0.3] ; whitetocol(100,[0 0 0.7])]);
 end
 
     title(currFigName)
@@ -5250,6 +5246,7 @@ sFPl.clc.plS.plField    = 'N'; %
 sFPl.clc.plS.volSettings= {true,s.plt.sizePlot,1};
 
 [newQ, f] = PlotQMaps(sFPl,plQ,f); hold on
+% % % caxis(1e-10 .* [0 1]);
 
 ylim(s.plt.lims3D(1,:));
 xlim(s.plt.lims3D(2,:));
