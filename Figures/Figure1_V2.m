@@ -1,17 +1,15 @@
 % $$$ NEXT is make model type 5 use the network for plotting :) $$$
 
-load('D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\Fig1_Results_v3')
+load('Results\ForFigures\Fig1_Results_v3')
 s=rS(end).s;
 w=rS(end).w;
-addpath(genpath('D:\Old_D\DPPS\DefenseAgent\Scripts\rlsimplepps'));
-addpath('D:\Old_D\Programs\Matlab\Utilities\plotting\colormaps');
-
+addpath(genpath('Scripts\EgocentricValueMaps'))
 
 
 % Make 2 plots, one with original gammas, and one with gamma == 1
-allGammas = [0.3 0.7 ; 1 1]
+allGammas = [0.7 0.7 ; 1 1; 0.3 0.7]
 
-for iFig = 1:2
+for iFig = 1:3
 
 % settings for plot
 sFP=s;
@@ -85,10 +83,17 @@ GridOverImage(fS,spl);
 
 spl = subplot(40,1000,1)
 set(spl, 'Position', [spX(4) spY(2) fS.sub.w(4)+wSpace/4 fS.sub.h(2) ]);
-
 s.clc.gammaVal = allGammas(iFig,1);
 s.clc.actConsequence = [-1 0 1];
 [newQ optQ] = CalcQDirect(s);
+% Create average value across actions
+if iFig == 3
+    tmpNewQ = repmat(newQ,[1 1 1 1 3]);
+    tmpNewQ(:,:,:,2:end  ,1)   = newQ(:,:,:,1:end-1);
+    tmpNewQ(:,:,:,1:end-1,3) = newQ(:,:,:,2:end);
+    newQ = nanmean(tmpNewQ,5);
+    caxis([0 0.7]);
+end
 DisplActValsFun(sFP,w,newQ); hold on
 GridOverImage(fS,spl);
 % % colorbar
@@ -98,6 +103,14 @@ set(spl, 'Position', [spX(5)-wSpace/4 spY(2) fS.sub.w(5)+wSpace/4 fS.sub.h(2) ])
 
 s.clc.gammaVal = allGammas(iFig,2);
 [newQ optQ] = CalcQDirect(s);
+% Create average value across actions
+if iFig == 3
+    tmpNewQ = repmat(newQ,[1 1 1 1 3]);
+    tmpNewQ(:,:,:,2:end  ,1)   = newQ(:,:,:,1:end-1);
+    tmpNewQ(:,:,:,1:end-1,3) = newQ(:,:,:,2:end);
+    newQ = nanmean(tmpNewQ,5);
+    caxis([0 0.7]);
+end
 DisplActValsFun(sFP,w,newQ); hold on
 GridOverImage(fS,spl);
 % % colorbar
@@ -134,6 +147,14 @@ set(spl, 'Position', [spX(4) spY(3) fS.sub.w(4)+wSpace/4 fS.sub.h(2) ]);
 s.clc.gammaVal = allGammas(iFig,1);
 s.clc.actConsequence = [-1 0 1];    
 [newQ optQ] = CalcQDirect(s);
+% Create average value across actions
+if iFig == 3
+    tmpNewQ = repmat(newQ,[1 1 1 1 3]);
+    tmpNewQ(:,:,:,2:end  ,1)   = newQ(:,:,:,1:end-1);
+    tmpNewQ(:,:,:,1:end-1,3) = newQ(:,:,:,2:end);
+    newQ = nanmean(tmpNewQ,5);
+    caxis([0 0.7]);
+end
 DisplActValsFun(sFP,w,newQ); hold on
 GridOverImage(fS,spl);
 % % colorbar
@@ -144,6 +165,14 @@ set(spl, 'Position', [spX(5)-wSpace/4 spY(3) fS.sub.w(5)+wSpace/4 fS.sub.h(2) ])
 s.clc.gammaVal = allGammas(iFig,2);
 s.clc.actConsequence = [-1 0 1];
 [newQ optQ] = CalcQDirect(s);
+% Create average value across actions
+if iFig == 3
+    tmpNewQ = repmat(newQ,[1 1 1 1 3]);
+    tmpNewQ(:,:,:,2:end  ,1)   = newQ(:,:,:,1:end-1);
+    tmpNewQ(:,:,:,1:end-1,3) = newQ(:,:,:,2:end);
+    newQ = nanmean(tmpNewQ,5);
+    caxis([0 0.7]);
+end
 DisplActValsFun(sFP,w,newQ); hold on
 GridOverImage(fS,spl);
 % % colorbar
@@ -279,8 +308,8 @@ end
 
 for iF = 1:length(fig)
     set(fig{iF}, 'Renderer', 'painters'); % default, opengl
-    saveas(fig{iF},['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '.eps'] , 'epsc')
-    saveas(fig{iF},['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '.pdf'] , 'pdf')
+    saveas(fig{iF},['Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '.eps'] , 'epsc')
+    saveas(fig{iF},['Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '.pdf'] , 'pdf')
 end
 
 %% FUNCTIONS

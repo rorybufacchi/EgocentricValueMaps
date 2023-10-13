@@ -1,5 +1,5 @@
 addpath(genpath('Scripts\EgocentricValueMaps'))
-load('Results\ForFigures\SuccessorState\NetworkAnalysisWorkSpace.mat')
+load('Results\ForFigures\SuccessorState\NetworkAnalysisWorkSpace2.mat')
 
 %% Actions chosen by network
 
@@ -40,7 +40,7 @@ f.ChAct.cb.TickLabels = {'Towards','Away'};
 
 %% Separability of network
 
-for iM = [6 9] % 53 FOR BIG NETWORK, 53 is nice
+for iM = 53 % [6 9] % 53 FOR BIG NETWORK, 53 is nice
     
     iM
     
