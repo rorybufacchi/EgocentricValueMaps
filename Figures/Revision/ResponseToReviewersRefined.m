@@ -1521,16 +1521,24 @@ ylabel('abs angle diff between vectors (0 is orthogonal)')
 %      for all --> see if there is consistent, model-independent pattern
 
 
-neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
-% % % neurTypes   = {'softmax','logsig','tribas','radbas','poslin','purelin','tansig'};
-regTypes    = {'Valence_51','L1'};
-regNames    = {'No','L1'};
+% % % % FOR SMALL NETWORKS
+% % % neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
+% % % % % % neurTypes   = {'softmax','logsig','tribas','radbas','poslin','purelin','tansig'};
+% % % regTypes    = {'Valence_51','L1'};
+% % % regNames    = {'No','L1'};
+% % % saveName = 'Results\ForFigures\DimensionReduction\FullWorkSpace.mat'
+
+% FOR BIG NETWORKS
+neurTypes   = {'SuperCompRelearn'};
+regTypes    = {'Valence_51'};
+regNames    = {'No'};
+saveName = 'Results\ForFigures\DimensionReduction\FullWorkSpace_BigNets.mat';
 
 sAll.plt.ON = 0;
 
 
 
-for iTyp = 7:length(neurTypes)
+for iTyp = 1:length(neurTypes)
 for iReg = 1:length(regTypes)
 
 
@@ -1557,6 +1565,8 @@ for iRun = 1:length(cFiles)
                 s2.plt.ON = 0;
                 s2.plt.lmbCol=2:s.wrld.size(2)-1;
                 s2.plt.plotThrFl=0;
+                s2.plt.startLayer = 1;
+                s2.plt.stopLayer  = numel(s2.lp.netS);
 
                 s2.plt.otherStateVars = [thrR thrC];
 
@@ -1573,7 +1583,7 @@ for iRun = 1:length(cFiles)
             end
         end
 
-         save(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+         save(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
           'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat'], ...
           'glByThrAct','-v7.3')
   
@@ -1587,7 +1597,7 @@ iRun
 
 end
 
-save('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\DimensionReduction\FullWorkSpace.mat','-v7.3')
+save(saveName,'-v7.3')
 
 end
 end
@@ -1614,7 +1624,7 @@ for iRun = 1:length(cFiles)
 
 for iM = 1:size(rSall,1)
 
-load(['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
           'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
 
 % % % load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
@@ -1760,7 +1770,7 @@ end
 
 
 save(['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\Similarities\' ...
-          'SimilarityScores_V2.mat'], ...
+          'SimilarityScores_BigNetworks.mat'], ...
           'b1','b1ScaleDimSd','b1ScaleDimSdExpVar','b2','b2ScaleDimSd','b2ScaleDimSdExpVar','-v7.3');
 
 
@@ -1768,7 +1778,8 @@ save(['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\Simil
 %% Convert to useable quantities
 
 
-load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_V2.mat');
+% load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_V2.mat');
+load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_BigNetworks.mat');
 
 TmpNrm  = @(x) squeeze(sqrt(sum(x.^2,1)));
 
@@ -1829,10 +1840,24 @@ toc
 
     %% Line plots 
 
+    % Reshape in case only 1 regu;arization and type is present (i.e. if
+    % only looking at the big networks)
+    if size(crossProdSize,5) <= 1
+        crossProdSize       = permute(crossProdSize,[1 2 5 6 3 4 7]);
+        dotProdAbs          = permute(dotProdAbs,[1 2 5 6 3 4 7]);
+        crossProdSizePerm   = permute(crossProdSizePerm,[1 2 5 6 3 4 7 8]);
+        dotProdAbsPerm      = permute(dotProdAbsPerm,[1 2 5 6 3 4 7 8]);
+    end
 
-    iV   = 5; %1; % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
+% % %     % For small networks
+% % %     iV   = 5; %1; % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
+% % %     iTyp = 1; % Neuron type
+% % %     iReg = 2; % Regularisation type
+
+    % For big networks
+    iV   = 1; %1; % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
     iTyp = 1; % Neuron type
-    iReg = 2; % Regularisation type
+    iReg = 1; % Regularisation type
 
 
 
@@ -1930,25 +1955,44 @@ xlabel('dimension of PCA')
 ylabel('xProd')
 
 
+
 %% Plots for each neuron type
 
-binEdges = -15:2.5:15;
+
 % binEdges = -10:2.5:10;
 % binEdges = -5:5;
 
-f.NeurTypesPCA.f         = figure('Position',[20 -20 900 900]);
-% f.NeurTypesPCAAngles.f   = figure('Position',[20 -20 900 900]);
-f.NeurTypesPCAExamplesLeast.f = figure('Position',[20 -20 900 900]);
-f.NeurTypesPCAExamplesMost.f  = figure('Position',[20 -20 900 900]);
-f.NeurTypesPCAExamplesLeastSubSection.f = figure('Position',[20 -20 1600 600]);
+
 
 cOrder      = {[0 0 .7], [.7 0 0], [.8 .6 0]};
 
 
+% % % % FOR SMALL NETWORKS
+% % % neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
+% % % regTypes    = {'Valence_51','L1'};
+% % % regNames    = {'No','L1'};
+% % % az = -74.3145;
+% % % el = 43.0968;
+% % % binEdges = -15:2.5:15;
+% % % f.NeurTypesPCA.f         = figure('Position',[20 -20 900 900]);
+% % % % f.NeurTypesPCAAngles.f   = figure('Position',[20 -20 900 900]);
+% % % f.NeurTypesPCAExamplesLeast.f = figure('Position',[20 -20 900 900]);
+% % % f.NeurTypesPCAExamplesMost.f  = figure('Position',[20 -20 900 900]);
+% % % f.NeurTypesPCAExamplesLeastSubSection.f = figure('Position',[20 -20 1600 600]);
 
-neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
-regTypes    = {'Valence_51','L1'};
-regNames    = {'No','L1'};
+% FOR BIG NETWORKS
+neurTypes   = {'SuperCompRelearn'};
+regTypes    = {'Valence_51'};
+regNames    = {'No'};
+az = 39.0563;
+el = 52.8667;
+binEdges = -25:2.5:7.5;
+f.NeurTypesPCA.f         = figure('Position',[20 -20 450 900]);
+% f.NeurTypesPCAAngles.f   = figure('Position',[20 -20 900 900]);
+f.NeurTypesPCAExamplesLeast.f = figure('Position',[20 -20 600 900]);
+f.NeurTypesPCAExamplesMost.f  = figure('Position',[20 -20 600 900]);
+f.NeurTypesPCAExamplesLeastSubSection.f = figure('Position',[20 -20 1600 600]);
+
 
 s.wrld.size = [14 15];
 
@@ -1961,7 +2005,7 @@ iPl2 = 1;
 iPl3 = 1;
 
 for iTyp = 1:length(neurTypes) % Neuron type
-    for iReg =  1:2 % Regularisation type
+    for iReg =  1:length(regTypes) % Regularisation type
 
 
 
@@ -1975,8 +2019,9 @@ for iTyp = 1:length(neurTypes) % Neuron type
             %         tmpPM = crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:);
             %         tmpPM = crossProdSize(1,iV,iTyp,iReg,:,iM);
 
-% % %                         tmpPM = crossProdSize(1,iV,iTyp,iReg,:,iM) - crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:);
-            tmpPM = dotProdAbs(1,iV,iTyp,iReg,:,iM) - nanmean(dotProdAbsPerm(1,iV,iTyp,iReg,:,iM,:),7);
+% % % % % %                         tmpPM = crossProdSize(1,iV,iTyp,iReg,:,iM) - crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:);
+% % %             tmpPM = dotProdAbs(1,iV,iTyp,iReg,:,iM) - nanmean(dotProdAbsPerm(1,iV,iTyp,iReg,:,iM,:),7);
+            tmpPM = dotProdAbs(1,iV,iTyp,iReg,:,iM) - dotProdAbsPerm(1,iV,iTyp,iReg,:,iM,:);
 
             tmpPM = tmpPM(:);
 
@@ -2129,7 +2174,7 @@ for iTyp = 1:length(neurTypes) % Neuron type
 
                     scatter3(tmpScore(:,1), tmpScore(:,2), tmpScore(:,3), tmpSz , colors , 'filled');
 
-                    view(-74.3145, 43.0968);
+                    view([az el]);
                     xlim([-3 3.8]);
                     ylim([-4.5, 2]);
 
