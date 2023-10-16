@@ -3977,7 +3977,7 @@ for iF = 1:length(allFields)
     cF = allFields{iF};
 
 % % %     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.tif'] , 'tif')
+    saveas(f.(cF).f,['C:\Users\Rory Bufacchi\OneDrive\Projects\DPPS\DefenseAgent\Documentation\Figures\Revision\RevisedMainTextFigures\BitsForEgocentricMap\' cF '.tif'] , 'tif')
 %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf'] , 'pdf')
 %     
 %     print(f.(cF).f,'-vector','-dsvg',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.epsc']) % svg
@@ -4213,8 +4213,9 @@ s.plt.lims3D   = [60 280 ; 20 120 ; 20 140];
 s.plt.sizePlot = [0 300 0 130 0 150]; % [0.1 0.8 0.1 0.8 0.1 0.8]
 s.plt.bodyCol  = -1e-6;
 
-s.plt.vidFl = 0;
+s.plt.vidFl   = 0;
 s.plt.QrelMax = 1;
+s.plt.VisAx   = 0;
 
 actNames    = {'Stay','Up','Down','Left','Right','Forward','Back'};
 actCriteria = {@(x) sum(x==0,2)==3, ... STAY
@@ -4309,7 +4310,11 @@ for iAct = 1:length(actNames)
 if s.plt.QrelMax == 10
 else
     % % % currFigName = ['Model3DForTheory_' actNames{iAct} 'BodyPart_' bdyPartNames{iBP}];
-    currFigName = ['Model3DTask' num2str(iTask) '' actNames{iAct} 'BodyPart' bdyPartNames{iBP} 'PlotRelmax' num2str(s.plt.QrelMax)];
+    if s.plt.VisAx == 1
+        currFigName = ['Model3DTask' num2str(iTask) '' actNames{iAct} 'BodyPart' bdyPartNames{iBP} 'PlotRelmax' num2str(s.plt.QrelMax)];
+    else
+        currFigName = ['NoAxModel3DTask' num2str(iTask) '' actNames{iAct} 'BodyPart' bdyPartNames{iBP} 'PlotRelmax' num2str(s.plt.QrelMax)];
+    end
 
     f.(currFigName).f = figure('Position',[20 20 600 600]);
 end
@@ -4352,8 +4357,8 @@ sFPl.clc.plS.plDim      = 3;
 sFPl.clc.plS.offset     = 0; 
 if s.plt.QrelMax == 1
     tmpD = plQ.qVals{1}(sFPl.clc.plS.iAct,:,:,:);
-%     sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < max(tmpD(:)) ./ 5;
-    sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < max(plQ.qVals{1}(:)) ./ 3;
+    sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < max(tmpD(:)) ./ 5;
+%     sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < max(plQ.qVals{1}(:)) ./ 4;
 else
     sFPl.clc.plS.excl3D     = @(x) abs(x-sFPl.clc.plS.offset) < 0.3;
 end
@@ -4429,7 +4434,11 @@ else
 end
 
 %     title(currFigName)
-axis on
+if s.plt.VisAx == 1
+    axis on
+else
+    axis off
+end
 xticklabels([]);
 yticklabels([]);
 zticklabels([]);

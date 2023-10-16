@@ -435,8 +435,8 @@ for iHP = 1:nHandPos
         blAct                   = 1:size(newQ,1);
         blAct(blAct == iAct)    = [];
         newQtmp = newQ;
-        % For moving, give all actions some tiny penalty
-        newQtmp(2:end,:,:,:) = newQtmp(2:end,:,:,:) - 0.001;
+% % %         % For moving, give all actions some tiny penalty
+% % %         newQtmp(2:end,:,:,:) = newQtmp(2:end,:,:,:) - 0.001;
         newQ2                   = newQtmp(iAct,:,:,:) - max(newQtmp(blAct,:,:,:),[],1);        
         newQ2(newQ2 < 0)        = 0;
         % Set tot NaN for graying out later
@@ -475,7 +475,7 @@ for iHP = 1:nHandPos
 %         caxis(max(abs(cAXES)) .* [-1 1]);
 %         caxis([0.0001 max(cAXES)]);
 
-        title(['Act' num2str(iAct) '.col' num2str(cAXES)])
+% % %         title(['Act' num2str(iAct) '.col' num2str(cAXES)])
 
 % % %         xlim([20  41]);
 % % %         ylim([40  61]);
