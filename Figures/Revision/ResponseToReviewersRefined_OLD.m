@@ -548,10 +548,71 @@ for iF = 1:length(allFields)5
 end
 
 
+%% Effects of neuron type
 
-%% $$$ Plot some kind of order metrics or something --> $$$ !!! POSSIBLY REMOVE
+iM = 1;
 
-% % % load('Results\ForFigures\NeurTypesAnalysed_V4.mat')
+neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
+% % % neurTypes   = {'softmax','logsig','tribas','radbas','poslin','purelin','tansig'};
+regTypes    = {'Valence_51','L1'};
+regNames    = {'No','L1'};
+
+
+
+for iTyp = 1:length(neurTypes);
+for iReg = 1:length(regTypes);
+
+
+bFold = 'F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Valence\';
+cFiles = dir([bFold '*' regTypes{iReg} '*_' neurTypes{iTyp} '_B_V*.mat'])
+
+
+for iRun = 1:length(cFiles)
+
+load([bFold cFiles(iRun).name]);
+
+rSall(1:numel(rS),iRun,iTyp,iReg) = rS(:);
+
+% % % end
+
+% F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Valence\Valence_L1_Regularization_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_softmax_B_V4.mat'
+
+
+% Loop through all results and calculate structure metrics
+% % % for iRun = 1:size(rSall,2)
+    for iM = 1:size(rSall,1)
+        try
+    rSall(iM,iRun,iTyp,iReg).s.plt.nPm = 100 ; % change to 100 later
+
+    [rSall(iM,iRun,iTyp,iReg),allNetAR(iM,iRun,iTyp,iReg),allSumBinNPFdist(iM,iRun,iTyp,iReg),allSumBinNPFpmdist(:,iM,iRun,iTyp,iReg),allBinNPF(:,:,iM,iRun,iTyp,iReg),allBinNPFpm(:,:,:,iM,iRun,iTyp,iReg)] = AssessStructure(rSall(iM,iRun,iTyp,iReg));
+
+
+% % %         [rSallTMP,allNetARTMP,allSumBinNPFdistTMP,allSumBinNPFpmdistTMP,allBinNPFTMP,allBinNPFpmTMP] = AssessStructure(rSall(iM,iRun,iTyp,iReg));
+
+        catch
+            if iTyp > 1
+                warning('whoops:')
+                iM
+                iRun
+                iTyp
+                iReg
+            end
+        end
+% % %     [TMPrSall,TMPallNetAR,TMPallSumBinNPFdist,TMPallSumBinNPFpmdist,TMPallBinNPF,TMPallBinNPFpm] = ...
+% % %         AssessStructure(rSall(iRun));
+    end
+
+end
+
+end
+end
+
+% Save analysed neuron types
+save('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat','-v7.3')
+
+%% $$$ Plot some kind of order metrics or something
+
+load('Results\ForFigures\NeurTypesAnalysed_V4.mat')
 
 % binEdges = -4:.5:10;
 binEdges    = -7:.5:7;
@@ -1722,11 +1783,11 @@ load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_BigNet
 
 TmpNrm  = @(x) squeeze(sqrt(sum(x.^2,1)));
 
-b1Tmp = b1;
-b2Tmp = b2;
+% b1Tmp = b1;
+% b2Tmp = b2;
 
-% b1Tmp = b1ScaleDimSd;
-% b2Tmp = b2ScaleDimSd;
+b1Tmp = b1ScaleDimSd;
+b2Tmp = b2ScaleDimSd;
 
 % b1Tmp = b1ScaleDimSdExpVar;
 % b2Tmp = b2ScaleDimSdExpVar;
@@ -1750,7 +1811,7 @@ crossProdRelMax = crossProdSize ./ ...
 
 tic
 
-nPrm = 1000;
+nPrm = 100;
 
 b2TmpPrm = repmat(b2Tmp,[1,1,1,1,1,1,1, nPrm]);
 
@@ -2199,598 +2260,16 @@ for iTyp = 1:length(neurTypes) % Neuron type
             for iM = 1:numel(rS)
                 rewPerAct(iTyp,iReg,iRun,iM) = sum(rS(iM).perf.rewPerAct(end,:));
             end
+
+
+            
+
+
         end
     end
     iTyp
 end
 toc
-
-
-%% Effects of neuron type
-tic
-iM = 1;
-
-% % FOR SMALL NETWORKS
-% neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
-% % % % neurTypes   = {'softmax','logsig','tribas','radbas','poslin','purelin','tansig'};
-% regTypes    = {'Valence_51','L1'};
-% regNames    = {'No','L1'};
-
-
-% FOR BIG NETWORKS
-neurTypes   = {'SuperCompRelearn'};
-regTypes    = {'Valence_51'};
-regNames    = {'No'};
-
-
-for iTyp = 1:length(neurTypes);
-for iReg = 1:length(regTypes);
-
-
-bFold = 'Results\ForFigures\Valence\';
-cFiles = dir([bFold '*' regTypes{iReg} '*_' neurTypes{iTyp} '_B_V*.mat'])
-
-
-for iRun = 1:length(cFiles)
-
-load([bFold cFiles(iRun).name]);
-
-rSall(1:numel(rS),iRun,iTyp,iReg) = rS(:);
-
-% % % end
-
-% F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Valence\Valence_L1_Regularization_51Batch_Plus2_Minus2_minus01_movecost_NoHist_NEWLEARNINGPARAMS_softmax_B_V4.mat'
-
-
-% Loop through all results and calculate structure metrics
-% % % for iRun = 1:size(rSall,2)
-    for iM = 1:size(rSall,1)
-        try
-    rSall(iM,iRun,iTyp,iReg).s.plt.nPm = 1 ; % $$$ change to 100 if necessary later
-
-    [rSall(iM,iRun,iTyp,iReg),allNetAR(iM,iRun,iTyp,iReg),allSumBinNPFdist(iM,iRun,iTyp,iReg),allSumBinNPFpmdist(:,iM,iRun,iTyp,iReg),allBinNPF(:,:,iM,iRun,iTyp,iReg),allBinNPFpm(:,:,:,iM,iRun,iTyp,iReg)] = AssessStructure(rSall(iM,iRun,iTyp,iReg));
-
-
-% % %         [rSallTMP,allNetARTMP,allSumBinNPFdistTMP,allSumBinNPFpmdistTMP,allBinNPFTMP,allBinNPFpmTMP] = AssessStructure(rSall(iM,iRun,iTyp,iReg));
-
-        catch
-            if iTyp > 1
-                warning('whoops:')
-                iM
-                iRun
-                iTyp
-                iReg
-            end
-        end
-% % %     [TMPrSall,TMPallNetAR,TMPallSumBinNPFdist,TMPallSumBinNPFpmdist,TMPallBinNPF,TMPallBinNPFpm] = ...
-% % %         AssessStructure(rSall(iRun));
-    end
-
-end
-
-end
-end
-
-% % % % Save analysed neuron types
-% % % save('Results\ForFigures\NeurTypesAnalysed_V4.mat','-v7.3')
-% % % save('Results\ForFigures\NeurTypesAnalysed_BIGNETS_temp.mat','-v7.3')
-toc
-
-%% Calculate necessary variables for performing the LMEs
-
-tic
-clear layNum layNumDiff nodeDists stimPrefSim
-for iTyp = 1:length(neurTypes);
-for iReg = 1:length(regTypes);
-for iM = 1:size(allNetAR,1)
-    for iRun = 1:size(allNetAR,2)
-
-    netAR   = allNetAR(iM,iRun,iTyp,iReg);
-    rS      = rSall(iM,iRun,iTyp,iReg);
-
-    % Find performance of network
-    allPerf(iM,iRun,iTyp,iReg) = sum(rS(1).perf.rewPerAct(end,:));
-    allNetW(iM,iRun,iTyp,iReg) = rS(1).s.lp.netS(end);
-
-    % Make an indicator of layer depth
-    tmp = netAR.A_B_rat';
-    layNumTmp = [1:size(netAR.A_B_rat,1)] .*    ones(size(tmp));
-    layNumTmp = layNumTmp(:);
-    layNumTmp(isnan(tmp(:))) = [];
-    layNum(:,iM,iRun,iTyp,iReg) = layNumTmp;
-    layNumDiff(:,:,iM,iRun,iTyp,iReg)  = abs(bsxfun(@minus, layNumTmp', layNumTmp));
-
-    A_B_rat = NanRemFlatten(netAR.A_B_rat'); classType = 'rat';
-    G = netAR.G;
-
-    p = plot(G,'Layout','force','WeightEffect','inverse','UseGravity','on');
-
-    % First make a distance matrix
-    for iNode=1:size(G.Nodes,1)
-        nodeDists(:,iNode,iM,iRun,iTyp,iReg)    = sqrt(sum(([p.XData(iNode),p.YData(iNode)] - [p.XData(:),p.YData(:)])'.^2));
-    end
-% % %     % Also permute the distance matrix
-% % %     for iPm = 1:100
-% % %         permutedNodes = randperm(numel(p.XData));
-% % %         for iNode=1:size(G.Nodes,1)
-% % %             nodeDistsPm(:,iNode,iM,iRun,iTyp,iReg,iPm)    = sqrt(sum(([p.XData(permutedNodes(iNode)),p.YData(permutedNodes(iNode))] - [p.XData(:),p.YData(:)])'.^2));
-% % %         end
-% % %     end
-
-    % Then make a stimulus preference matrix
-    stimPrefSimTmp = 1 - abs(A_B_rat - A_B_rat');
-    stimPrefSim(:,:,iM,iRun,iTyp,iReg)  = stimPrefSimTmp;
-
-    % Calculate the correlation between the two
-    nodeDistsTmp = nodeDists(:,:,iM,iRun,iTyp,iReg);
-    [rho(iM,iRun,iTyp,iReg) pval(iM,iRun,iTyp,iReg)] = corr(stimPrefSimTmp(nodeDistsTmp ~= 0),nodeDistsTmp(nodeDistsTmp ~= 0));
-%     [rho(iM) pval(iM)] = corr(stimPrefSimTmp(:),nodeDistsTmp(:));
-    % $$$ I need to account for stimulus proximity being 0
-
-    end
-end
-end
-end
-toc
-
-[pValThr, pValcor, pValAdj] = fdr(pval(:));
-
-
-fprintf('%i out of %i networks show structure using this metric\n', sum(pValAdj(:) < 0.05), numel(pValAdj));
-
-disp('mean rho')
-nanmean(rho(:))
-disp('std rho')
-nanstd(rho(:))
-
-%% Perform LME for all models independently, accounting for layer differences
-
-% $$$ Adapt from here to work with the new shape of things
-
-overallModelNum    = repmat(  permute( reshape( 1:numel(allNetAR) , size(allNetAR) ), [5 6 1 2 3 4]) , [size(stimPrefSim,[1 2]) 1 1 1 1]);
-layNumOrg   = repmat(permute(layNum,[1 6 2 3 4 5]) , [1 size(layNum,1) 1 1]);
-
-allPerfRep  = repmat(permute(allPerf,[5 6 1 2 3 4 ]) , [size(layNumOrg,[1 2]) 1 1 1 1]);
-allNetWRep  = repmat(permute(allNetW,[5 6 1 2 3 4 ]) , [size(layNumOrg,[1 2]) 1 1 1 1]);
-
-allegedNoStructure      = pValAdj > 0.05;
-allegedNoStructureRep   = repmat(permute(allegedNoStructure,[5 6 1 2 3 4 ]) , [size(layNumOrg,[1 2]) 1 1 1 1]);
-
-% iM,iRun,iTyp,iReg
-allMod = arrayfun(@(i) i .* ones(size(layNumOrg(:,:,1,:,:,:)) ) , 1:size(layNumOrg,3) ,'UniformOutput', false );
-allMod = cat(3,allMod{:});
-allRun = arrayfun(@(i) i .* ones(size(layNumOrg(:,:,:,1,:,:)) ) , 1:size(layNumOrg,4) ,'UniformOutput', false );
-allRun = cat(4,allRun{:});
-allTyp = arrayfun(@(i) i .* ones(size(layNumOrg(:,:,:,:,1,:)) ) , 1:size(layNumOrg,5) ,'UniformOutput', false);
-allTyp = cat(5,allTyp{:});
-allReg = arrayfun(@(i) i .* ones(size(layNumOrg(:,:,:,:,:,1)) ) , 1:size(layNumOrg,6) ,'UniformOutput', false );
-allReg = cat(6,allReg{:});
-
-
-tbl                             = table(stimPrefSim(:));
-tbl.Properties.VariableNames    = {'StimulusPreferenceSimilarity'};
-% % % tbl.netOutputLayerWidth         = allNetW'; 
-tbl.nodeDists                   = nodeDists(:);
-
-% tbl.layNumDiff                  = abs(layNumDiff(:));
-% tbl.layNumDiff                  = layNumDiff(:);
-tbl.layNumDiff                  = categorical(abs(layNumDiff(:)));
-
-tbl.layNumOrg                   = layNumOrg(:);
-tbl.modelNum                    = modelNum(:);
-
-tbl.allPerf                     = allPerfRep(:);
-tbl.allNetW                     = categorical(allNetWRep(:));
-
-tbl.allegedNoStructure          = allegedNoStructureRep(:);
-
-tbl.allMod                      = allMod(:);
-tbl.allRun                      = allRun(:);
-tbl.allTyp                      = allTyp(:);
-tbl.allReg                      = allReg(:);
-
-
-tmpTbl = tbl(tbl.nodeDists ~= 0, :);
-% tmpTbl = tbl(tbl.nodeDists ~= 0 & tbl.layNumDiff == 0,:);
-% tmpTbl = tbl(tbl.nodeDists ~= 0 & tbl.layNumDiff == 0 & tbl.layNumOrg  == 4,:);
-% tmpTbl = tbl(tbl.nodeDists ~= 0 & tbl.layNumOrg  == 4,:);
-
-% lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists*layNumDiff + (1|modelNum)')
-% lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists + layNumDiff + (1|modelNum)')
-% lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists + (1|modelNum)')
-% lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists + allNetW + allPerf + (1|modelNum)')
-
-% lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists*allTyp*allReg + (1|modelNum)')
-
-% lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists + nodeDists:allNetW  + (1|modelNum)')
-
-% anova(lme)
-%%
-% Run LME for each network
-tic
-for iTyp = 1:length(neurTypes);
-for iReg = 1:length(regTypes);
-for iM = 1:size(allNetAR,1)
-    for iRun = 1:size(allNetAR,2)
-    tmpTbl          = tbl(tbl.nodeDists ~= 0 & ...
-                          tbl.allMod == iM   & ...
-                          tbl.allRun == iRun   & ...
-                          tbl.allReg == iReg   & ...
-                          tbl.allTyp == iTyp   ,:);
-
-tmpTbl.allMod = categorical(tmpTbl.allMod);
-tmpTbl.allRun = categorical(tmpTbl.allRun);
-tmpTbl.allTyp = categorical(tmpTbl.allTyp);
-tmpTbl.allReg = categorical(tmpTbl.allReg);
-
-
-%     tmpLme          = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists*layNumDiff + (1|modelNum)');
-    tmpLme          = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ layNumDiff:nodeDists + nodeDists + (1|modelNum)');
-
-
-% % %     tmpTbl          = tbl(tbl.nodeDists ~= 0 & tbl.modelNum == iM & tbl.layNumDiff == 0,:);
-% % %     tmpLme          = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists + (1|modelNum)');
-    tmpAnova                = anova(tmpLme);
-    estimateDistEff(iM,iRun,iTyp,iReg)     = tmpLme.Coefficients{2,2};
-    estimateStandErr(iM,iRun,iTyp,iReg)    = tmpLme.Coefficients{2,3};
-    pNodeDists(iM,iRun,iTyp,iReg)          = tmpLme.Coefficients{2,6};
-
-% % %     % Also do it for a permuted network, just to check the null distribution isn't way away from 0
-% % %     for iPm = 1:100
-% % %          nodeDistsTmp     = nodeDistsPm(:,:,:,iPm);
-% % %          nodeDistsTmp     = nodeDistsTmp(:);
-% % %          tmpTbl.nodeDists = nodeDistsTmp(tbl.nodeDists ~= 0 & tbl.modelNum == iM);
-% % %          tmpLme           = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists*layNumDiff + (1|modelNum)');
-% % %          
-% % %          pNodeDistsPm(iM,iPm)       = tmpLme.Coefficients{2,6};
-% % %          estimateDistEffPm(iM,iPm)  = tmpLme.Coefficients{2,2};
-% % %     end
-    end
-end
-end
-end
-toc
-
-[pValThr, pValcor, pValLMEAdj] = fdr(pNodeDists(:));
-
-
-fprintf('%i out of %i networks show structure using this metric\n', sum(pValLMEAdj(:) < 0.05), numel(pValLMEAdj));
-
-dimsToSum = [ 2];
-
-disp('Weighted mean estimate of node distance')
-meanEffs = squeeze(sum(  (estimateDistEff ./ estimateStandErr.^2) , dimsToSum) ./ sum(1 ./ estimateStandErr.^2  , dimsToSum ))
-disp('standard error of effect of node distance')
-sdEffs   = squeeze(sqrt(1 ./ sum(1 ./ estimateStandErr.^2  , dimsToSum )))
-
-%% $$$ Use the projection method to perform parametric stats for the PCA?
-
-% First project onto the goal and threat axes
-
-% Select the particalar comparisons and PCA dimensions of interest
-iV = 1;
-iD = 1;
-
-for iTyp = 1:length(neurTypes)
-
-
-for iReg = 1:length(regTypes)
-
-
-bFold = 'Results\ForFigures\Valence\';
-cFiles = dir([bFold '*' regTypes{iReg} '*_' neurTypes{iTyp} '_B_V*.mat']);
-
-
-for iRun = 1:length(cFiles)
-
-for iM = 1:size(rSall,1)
-
-load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
-          'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
-
-% % % load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
-% % %           'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
-
-% $$$ HERE figure out how to deal with the bloody model architectures --> I
-% think just store them separately?
-
-  % Create flattened activations for PCA
-    glByThrActFlat = permute(glByThrAct,[1 2 3 6 7 4 5]);
-    unwrapSize     = size(glByThrActFlat);
-    glByThrActFlat = permute(glByThrActFlat(:,:,:,:,:,:),[6 1 2 3 4 5]);
-    glByThrActFlat = glByThrActFlat(:,:);
-
-    
-% % %     % ============================I THINK THIS CAN GO =====================
-% % %     % Create 'explanatory variables'
-% % %     thrRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[1 2 3 7]) ] );  
-% % %     thrRow = permute(thrRow, [2 3 4 1 5]);
-% % %     
-% % %     golRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[2 3 6 7]) ] );  
-% % %     golRow = permute(golRow, [1 2 3 4 5]);   
-% % %     % ============================I THINK THIS CAN GO =====================
-
-
-    % Perform PCA
-    [coeff,score,~,~,explained] = pca(glByThrActFlat( ~isnan(glByThrActFlat(:,1)),:)');
-    % Replace with zero if the PCA doesn't work
-    if size(score,2) == 0
-        score = zeros([size(glByThrActFlat,2) 3]);
-    end
-
-
-
-    
-    % Downsample more here than when creating the basis vectors, because
-    % otherwise we end up with a stupidly large array of vectors between
-    % states
-    tmpScore = reshape(score', [size(score,2) unwrapSize(1:5)] );
-    tmpScore = tmpScore(:,2:3:end,2:3:end,1:3:end,2:3:end,2:3:end);
-    tmpScore = tmpScore(:,:)';
-
-
-
-    % Extract attributes of interest for given state
-    allVars     = {'thrRow','thrCol','lmbCol','lmbCol','golDist',...
-               'minStimDist','minStimDist'};
-    allVarsComp = {'golRow','golCol','thrCol','golCol','thrDist',...
-               'maxStimDist','avStimDist'};
-    eval(['tmpCl    = ' allVars{iV} '(2:3:end,2:3:end,1:3:end,2:3:end,2:3:end);']);
-    eval(['tmpSz    = ' allVarsComp{iV} '(2:3:end,2:3:end,1:3:end,2:3:end,2:3:end);']);
-    tmpCl    = tmpCl(:);
-    tmpSz    = tmpSz(:);
-
-
-    % Create a vector between each pair of points in the 1st 3 dimensions
-    % of the score
-    dS = 1;
-    dE = 3;
-    pointToPointVecs = tmpScore(:,dS:dE)' - permute(tmpScore(:,dS:dE)',[1 3 2]);
-    % Create a vector between each pair of points in goal-threat (fully
-    % orthogonal) space
-    goalThreatSpace         = [tmpCl, tmpSz];
-    pointToPointVecsGolThr  = goalThreatSpace' - permute(goalThreatSpace',[1 3 2]);
-
-    tic
-    % Remove diagonal (because distance is 0), and diagonally symmetric elements
-    for iR = 1:size(pointToPointVecsGolThr,2)
-        pointToPointVecs(:,iR:end,iR) = NaN;
-        pointToPointVecsGolThr(:,iR:end,iR) = NaN;
-    end
-    pointToPointVecs        = pointToPointVecs(:,:);
-    pointToPointVecsGolThr  = pointToPointVecsGolThr(:,:);
-    pointToPointVecs(:,isnan(pointToPointVecs(1,:))) = [];
-    pointToPointVecsGolThr(:,isnan(pointToPointVecsGolThr(1,:))) = [];
-    toc
-
-    % $$$ Calculate dot product between each pair of vectors? Will that
-    % make it huge? I think that will make it too huge...
-
-
-%     figure, histogram2(sqrt(sum(pointToPointVecsGolThr.^2)),sqrt(sum(pointToPointVecs.^2)),'Facecolor','flat')
-
-    figure, histogram2(pointToPointVecsGolThr(1,:),projOntoGoal,'Facecolor','flat')
-
-    figure, histogram2(pointToPointVecsGolThr(2,:),projOntoThreat,'Facecolor','flat')
-
-
-
-
-    % Remove zero distance
-    pointToPointVecsGolThr(:,sum(pointToPointVecs,1) == 0) = [];
-    pointToPointVecs(:,sum(pointToPointVecs,1) == 0) = [];
-
-
-
-
-    % Normalise
-    pointToPointVecs = pointToPointVecs ./ sqrt(sum(pointToPointVecs.^2 ,1));
-    
-
-    % Project that vector onto the goal and threat-preferring axes
-    % i.e. dot product
-    tmpGlVec        = b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) ./ sqrt(sum(b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM).^2,1));
-    tmpThrVec       = b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) ./ sqrt(sum(b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM).^2,1));
-    projOntoGoal    = sum(tmpGlVec .* pointToPointVecs , 1);
-%     projOntoGoal    = unique(abs(projOntoGoal),'stable');
-    projOntoThreat  = sum(tmpThrVec .* pointToPointVecs , 1);
-%     projOntoThreat  = unique(abs(projOntoThreat),'stable');
-
-    [rrr(iM,iRun,iTyp,iReg) ppp(iM,iRun,iTyp,iReg)] = corr(projOntoGoal',projOntoThreat');
-
-end
-end
-end
-end
-
-% $$$ Tomorrow, double check that the dot product isn't biased to being
-% smaller than 0.5 --> it is. 
-
-% $$$ WAIT A MINUTE, did I just create a random cloud of points and then use that to show that two vectors are more or less orthogonal?...
-
-% $$$ What do I do about it?
-
-% $$$ --> let's see what the shitty iTyps show. Cause there shouldn't be
-% much structure there
-
-
-
-%% $$$ Use PROPER permutation method to perform stats for the PCA?
-
-% First project onto the goal and threat axes
-
-% Select the particalar comparisons and PCA dimensions of interest
-iV = 1;
-iD = 1;
-
-
-% Create 'explanatory variables'
-thrRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[1 2 3 7]) ] );
-thrRow = permute(thrRow, [2 3 4 1 5]);
-
-golRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[2 3 6 7]) ] );
-golRow = permute(golRow, [1 2 3 4 5]);
-
-tic
-for iTyp = 1:length(neurTypes)
-
-
-for iReg = 1:length(regTypes)
-
-
-bFold = 'Results\ForFigures\Valence\';
-cFiles = dir([bFold '*' regTypes{iReg} '*_' neurTypes{iTyp} '_B_V*.mat']);
-
-
-for iRun = 1:length(cFiles)
-
-for iM = 1:size(rSall,1)
-
-load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
-          'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
-
-
-  % Create flattened activations for PCA
-    glByThrActFlat = permute(glByThrAct,[1 2 3 6 7 4 5]);
-    unwrapSize     = size(glByThrActFlat);
-    glByThrActFlat = permute(glByThrActFlat(:,:,:,:,:,:),[6 1 2 3 4 5]);
-    glByThrActFlat = glByThrActFlat(:,:);
-
-    
-
-    % Perform PCA
-    [coeff,score,~,~,explained] = pca(glByThrActFlat( ~isnan(glByThrActFlat(:,1)),:)');
-    % Replace with zero if the PCA doesn't work
-    if size(score,2) == 0
-        score = zeros([size(glByThrActFlat,2) 3]);
-    end
-
-
-    % Downsample more here than when creating the basis vectors, because
-    % otherwise we end up with a stupidly large array of vectors between
-    % states
-    tmpScore = reshape(score', [size(score,2) unwrapSize(1:5)] );
-    tmpScore = tmpScore(:,:,2:2:end,1:2:end,:,2:2:end);
-    tmpScore = tmpScore(:,:)';
-
-
-
-    % Extract attributes of interest for given state
-    allVars     = {'thrRow','thrCol','lmbCol','lmbCol','golDist',...
-               'minStimDist','minStimDist'};
-    allVarsComp = {'golRow','golCol','thrCol','golCol','thrDist',...
-               'maxStimDist','avStimDist'};
-    eval(['tmpCl    = ' allVars{iV} '(:,2:2:end,1:2:end,:,2:2:end);']);
-    eval(['tmpSz    = ' allVarsComp{iV} '(:,2:2:end,1:2:end,:,2:2:end);']);
-    tmpCl    = tmpCl(:);
-    tmpSz    = tmpSz(:);
-
-    
-    nPm = 1000;
-    b1ScaleDimSdExpVarPm = nan([size(b1ScaleDimSdExpVar), nPm]);
-    dS = 1; dE = 3;
-    clear dotProdPm
-    
-% % %     [b1BaseTmp, b1IntBase, ~, ~, stats1] = regress(tmpCl, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-% % %     [b2BaseTmp, b2IntBase, ~, ~, stats2] = regress(tmpSz, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-
-    % compute dot product 
-
-    for iPm = 1:nPm
-        permOrd = randperm(size(tmpCl,1));
-
-        % Find vector that best explains the variable of interest A
-        [b1Tmp, ~, ~, ~, stats] = regress(tmpCl(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-        % Rescale vector by the scale of the dimensions
-        b1ScaleDimSdTmp = b1Tmp .* [std(tmpScore(:,dS:dE)) 1]';
-% % %         % Rescale vector by the explained variance
-% % %         b1ScaleDimSdExpVarPm(:,iD,iV,iTyp,iReg,iRun,iM,iPm) = b1ScaleDimSdTmp .* sqrt(stats(1));
-
-        % Find vector that best explains the variable of interest B
-        [b2Tmp, ~, ~, ~, stats] = regress(tmpSz(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-% % %         % Rescale vector by the scale of the dimensions
-% % %         b2ScaleDimSdTmp = b2Tmp .* [std(tmpScore(:,dS:dE)) 1]';
-% % %         % Rescale vector by the explained variance
-% % %         b2ScaleDimSdExpVarPm(:,iD,iV,iTyp,iReg,iRun,iM,iPm) = b2ScaleDimSdTmp .* sqrt(stats(1));
-
-%         dotProdPm = dot(b1ScaleDimSdTmp(1:3), b2ScaleDimSdTmp(1:3))
-
-% % %         % Normalized vectors
-        dotProdPm(iPm)  = sum(b1Tmp(1:3)./norm(b1Tmp(1:3)) .* b2Tmp(1:3)./norm(b2Tmp(1:3)));
-        crossProdPm(iPm) = norm(cross(b1Tmp(1:3) , b2Tmp(1:3)));
-%         crossProdPm(iPm) = norm(cross(b1Tmp(1:3)./norm(b1Tmp(1:3)) , b2Tmp(1:3)./norm(b2Tmp(1:3))));
-
-        % SD scaled vectors [But why? not sure]
-%         dotProdPm(iPm) = sum(b1ScaleDimSdTmp(1:3)./norm(b1ScaleDimSdTmp(1:3)) .* b2ScaleDimSdTmp(1:3)./norm(b2ScaleDimSdTmp(1:3)));
-%         dotProdPm(iPm) = sum(b1ScaleDimSdTmp(1:3) .* b2ScaleDimSdTmp(1:3));
-
-        
-    end
-    
-toc
-
-    % SD scaled vectors [But why? not sure]
-%     dotProdBase = sum( b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM)) .* ...
-%         b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM)) );
-%     dotProdBase = sum( b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) .* ...
-%         b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) );
-
-
-    % Normalized vectors
-        dotProdBase = sum( b1(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b1(1:3,iD,iV,iTyp,iReg,iRun,iM)) .* ...
-        b2(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b2(1:3,iD,iV,iTyp,iReg,iRun,iM)) );
-
-        crossProdBase = norm(cross( b1(1:3,iD,iV,iTyp,iReg,iRun,iM) , ...
-            b2(1:3,iD,iV,iTyp,iReg,iRun,iM) ));
-%         crossProdBase = norm(cross( b1(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b1(1:3,iD,iV,iTyp,iReg,iRun,iM)) , ...
-%             b2(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b2(1:3,iD,iV,iTyp,iReg,iRun,iM)) ));
-
-        pDotProd(iM,iRun,iTyp,iReg,iD,iV)    = sum( abs(dotProdBase)   - abs(dotProdPm) > 0) ./ nPm;
-        pCrossProd(iM,iRun,iTyp,iReg,iD,iV)  = sum( abs(crossProdBase) - abs(crossProdPm) < 0) ./ nPm;
-        alldotProd(iM,iRun,iTyp,iReg,iD,iV)   = dotProdBase;
-        allcrossProd(iM,iRun,iTyp,iReg,iD,iV) = crossProdBase;
-        alldotProdPm(iM,iRun,iTyp,iReg,iD,iV,:)   = dotProdPm;
-        allcrossProdPm(iM,iRun,iTyp,iReg,iD,iV,:) = crossProdPm;
-
-
-        
-toc
-end
-end
-end
-end
-toc
-
-
-%% Plot the relevant effects
-
-fprintf('%i out of %i networks have goal and threat coding within 15 degrees of orthogonality in their 1st 3 PCs \n', sum(abs(alldotProd(:,1:15)) < abs(cos(deg2rad(75))),'all'), numel(alldotProd(:,1:15)));
-
-% (iD,iV,iTyp,iReg,iRun,iM)
-size(dotProdAbs(1,1,:,:,:,:))              
-
-% pValFunctionalSeparation = sum(dotProdAbs - dotProdAbsPerm > 0, 7) ./ size(dotProdAbsPerm,7);
-
-pValFunctionalSeparation = sum(crossProdSize - crossProdSizePerm < 0, 7) ./ size(dotProdAbsPerm,7);
-
-
-
-iTyp = 1; iReg = 1;
-tmpP = pValFunctionalSeparation(1,1,iTyp,iReg,:,:);
-[pValThr, pValcor, pValPCAadj] = fdr(tmpP(:));
-
-pValFunctionalSeparationOverall = sum( sum(dotProdAbs,[5 6]) - sum(dotProdAbsPerm, [5 6]) > 0, 7) ./ size(dotProdAbsPerm,7);
-
-% $$$ just sum the number that is lower! So simple why was my brain stuck
-
-
-% $$$ Then display the number of networks which have structure for each
-% $$$ regularization and type
-
-% $$$Then plot them allll
-% against eachother baby
-% % % fprintf('%i out of %i networks show structure using this metric\n', sum(pValLMEAdj < 0.05), 45);
-
 
 %% Plot performance vs orthogonality and structure
 
@@ -2805,6 +2284,7 @@ cM = 1:3;
 cReg = 1;
 
 iPl = 1;
+
 
 figure(f.PCAvsRew.f)
 % PCA ORTHOGONALITY -------------------------------------------------------

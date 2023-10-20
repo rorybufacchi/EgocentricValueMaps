@@ -1448,17 +1448,7 @@ nanmean(rho)
 disp('std rho')
 nanstd(rho)
 
-%% Try an LME
-
-% $$$ NOW create a bunch of criteria, and name those criteria.
-% $$$ Each criterion should be one network, and then there should be one
-% with all networks combined. [Make sure to include regressors]. Then we
-% can count how many networks have the effect
-
-% $$$ THEN in the main text, I can jsut have ONE SINGLE measure of network
-% structure, maybe, e asta? --> not sure
-
-
+%% Perform LME for all models independently, accounting for layer differences
 
 modelNum = repmat( permute((1:numel(allNetAR)), [1 3 2]), [size(stimPrefSim,[1 2]) 1]);
 layNumOrg                       = repmat(permute(layNum,[1 3 2]) , [1 size(layNum,1) 1]);
@@ -1513,20 +1503,21 @@ for iM = 1:length(allNetAR)
 
 % % %     tmpTbl          = tbl(tbl.nodeDists ~= 0 & tbl.modelNum == iM & tbl.layNumDiff == 0,:);
 % % %     tmpLme          = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists + (1|modelNum)');
-    tmpAnova            = anova(tmpLme);
-    estimateDistEff(iM) = tmpLme.Coefficients{2,2};
+    tmpAnova                = anova(tmpLme);
+    estimateDistEff(iM)     = tmpLme.Coefficients{2,2};
+    estimateStandErr(iM)    = tmpLme.Coefficients{2,3};
     pNodeDists(iM)          = tmpLme.Coefficients{2,6};
 
-    % Also do it for a permuted network?5
-    for iPm = 1:100
-         nodeDistsTmp     = nodeDistsPm(:,:,:,iPm);
-         nodeDistsTmp     = nodeDistsTmp(:);
-         tmpTbl.nodeDists = nodeDistsTmp(tbl.nodeDists ~= 0 & tbl.modelNum == iM);
-         tmpLme           = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists*layNumDiff + (1|modelNum)');
-         
-         pNodeDistsPm(iM,iPm)       = tmpLme.Coefficients{2,6};
-         estimateDistEffPm(iM,iPm)  = tmpLme.Coefficients{2,2};
-    end
+% % %     % Also do it for a permuted network, just to check the null distribution isn't way away from 0
+% % %     for iPm = 1:100
+% % %          nodeDistsTmp     = nodeDistsPm(:,:,:,iPm);
+% % %          nodeDistsTmp     = nodeDistsTmp(:);
+% % %          tmpTbl.nodeDists = nodeDistsTmp(tbl.nodeDists ~= 0 & tbl.modelNum == iM);
+% % %          tmpLme           = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists*layNumDiff + (1|modelNum)');
+% % %          
+% % %          pNodeDistsPm(iM,iPm)       = tmpLme.Coefficients{2,6};
+% % %          estimateDistEffPm(iM,iPm)  = tmpLme.Coefficients{2,2};
+% % %     end
 end
 toc
 
@@ -1535,27 +1526,18 @@ toc
 fprintf('%i out of %i networks show structure using this metric\n', sum(pValLMEAdj < 0.05), 45);
 
 
+disp('Weighted mean estimate of node distance')
+sum(  (estimateDistEff ./ estimateStandErr.^2)) ./ sum(1 ./ estimateStandErr.^2)
+disp('standard error of effect of node distance')
+sqrt(1 ./ sum(1 ./ estimateStandErr.^2))
 
 
 %%
 
-% $$$ Could I account for layer differences with an LME?
+tmpTbl = tbl(tbl.nodeDists ~= 0, :);
 
-% Try an LME
-tbl                             = table(stimPrefSim(:));
-tbl.Properties.VariableNames    = {'StimulusPreferenceSimilarity'};
-% % % tbl.netOutputLayerWidth         = allNetW'; 
-tbl.nodeDists                   = nodeDists(:);
-tmpLayNumDiff                   = abs(bsxfun(@minus, layNum', layNum));
-% tmpLayNumDiff                   = bsxfun(@minus, layNum', layNum);
-% tbl.layNumDiff                  = categorical(tmpLayNumDiff(:));
-tbl.layNumDiff                  = tmpLayNumDiff(:);
-
-tmpTbl = tbl;
-tmpTbl = tbl(tbl.layNumDiff == 0,:);
-
-% lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists*layNumDiff + 1')
-lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists + 1')
+% lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists*layNumDiff + nodeDists*allPerf +  (1|modelNum)')
+lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists*allPerf*layNumFi +  (1|modelNum)')
 
 anova(lme)
 

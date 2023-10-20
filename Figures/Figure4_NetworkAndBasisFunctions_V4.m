@@ -243,7 +243,7 @@ f.NetSep.cb.TickLabels = {'Goal preferring','Threat preferring'};
 
 
 
-%% General separability
+%% OLD: General separability
 
 
 
@@ -267,6 +267,33 @@ end
 box off
 
 legend('Narrowing networks', 'constant width networks', 'Widening networks')
+
+
+%% NEW: Structure of network and correlation with performance
+
+% $$$ Make plots of structure vs performance, and also PCA-orthogonality vs
+% performance. Then put the histograms on the respective axes. SUPER NEAT
+% $$$ --> so next is to do the PCA stuff --> find out how and where I did
+% it before
+% $$$ BUT I need to check L1 regularization!! --> does that still work?
+
+
+
+netShapes = unique(allNetW);
+nNS = length(netShapes)
+f.NetSepHist.f = figure('Position',[20 20 800 400]),
+
+tmpPM = estimateDistEff(inclM);
+%     histogram(tmpPM(:),linspace(-4,8,7),'Normalization','probability'); hold on
+histogram(estimateDistEff,'Normalization','probability'); hold on
+title('Functional sub-networks naturally arise, and are more likely to arise when information is condensed')
+xlabel('Increase in network order over chance')
+
+box off
+
+figure,plot(estimateDistEff,allPerf,'o')
+
+% legend('Narrowing networks', 'constant width networks', 'Widening networks')
 
 %% Save figures
 
