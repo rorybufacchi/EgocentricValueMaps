@@ -2433,6 +2433,7 @@ tmpTbl.allReg = categorical(tmpTbl.allReg);
     tmpAnova                = anova(tmpLme);
     estimateDistEff(iM,iRun,iTyp,iReg)     = tmpLme.Coefficients{2,2};
     estimateStandErr(iM,iRun,iTyp,iReg)    = tmpLme.Coefficients{2,3};
+    tStatsStructure(iM,iRun,iTyp,iReg)     = tmpLme.Coefficients{2,4};
     pNodeDists(iM,iRun,iTyp,iReg)          = tmpLme.Coefficients{2,6};
 
 % % %     % Also do it for a permuted network, just to check the null distribution isn't way away from 0
@@ -2698,37 +2699,36 @@ load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
 % % %     [b1BaseTmp, b1IntBase, ~, ~, stats1] = regress(tmpCl, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
 % % %     [b2BaseTmp, b2IntBase, ~, ~, stats2] = regress(tmpSz, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
 
-    % compute dot product 
 
-    % Perform permutations
-    for iPm = 1:nPm
-        permOrd = randperm(size(tmpCl,1));
-
-        % Find vector that best explains the variable of interest A
-        [b1Tmp, ~, ~, ~, stats] = regress(tmpCl(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-        % Rescale vector by the scale of the dimensions
-        b1ScaleDimSdTmp = b1Tmp .* [std(tmpScore(:,dS:dE)) 1]';
-% % %         % Rescale vector by the explained variance
-% % %         b1ScaleDimSdExpVarPm(:,iD,iV,iTyp,iReg,iRun,iM,iPm) = b1ScaleDimSdTmp .* sqrt(stats(1));
-
-        % Find vector that best explains the variable of interest B
-        [b2Tmp, ~, ~, ~, stats] = regress(tmpSz(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
+% % %     % Perform permutations
+% % %     for iPm = 1:nPm
+% % %         permOrd = randperm(size(tmpCl,1));
+% % % 
+% % %         % Find vector that best explains the variable of interest A
+% % %         [b1Tmp, ~, ~, ~, stats] = regress(tmpCl(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
 % % %         % Rescale vector by the scale of the dimensions
-% % %         b2ScaleDimSdTmp = b2Tmp .* [std(tmpScore(:,dS:dE)) 1]';
-% % %         % Rescale vector by the explained variance
-% % %         b2ScaleDimSdExpVarPm(:,iD,iV,iTyp,iReg,iRun,iM,iPm) = b2ScaleDimSdTmp .* sqrt(stats(1));
-
-%         dotProdPm = dot(b1ScaleDimSdTmp(1:3), b2ScaleDimSdTmp(1:3))
-
-% % %         % Normalized vectors
-        dotProdPm(iPm)  = sum(b1Tmp(1:3)./norm(b1Tmp(1:3)) .* b2Tmp(1:3)./norm(b2Tmp(1:3)));
-        crossProdPm(iPm) = norm(cross(b1Tmp(1:3) , b2Tmp(1:3)));
-%         crossProdPm(iPm) = norm(cross(b1Tmp(1:3)./norm(b1Tmp(1:3)) , b2Tmp(1:3)./norm(b2Tmp(1:3))));
-
-        % SD scaled vectors [But why? not sure]
-%         dotProdPm(iPm) = sum(b1ScaleDimSdTmp(1:3)./norm(b1ScaleDimSdTmp(1:3)) .* b2ScaleDimSdTmp(1:3)./norm(b2ScaleDimSdTmp(1:3)));
-%         dotProdPm(iPm) = sum(b1ScaleDimSdTmp(1:3) .* b2ScaleDimSdTmp(1:3));
-    end
+% % %         b1ScaleDimSdTmp = b1Tmp .* [std(tmpScore(:,dS:dE)) 1]';
+% % % % % %         % Rescale vector by the explained variance
+% % % % % %         b1ScaleDimSdExpVarPm(:,iD,iV,iTyp,iReg,iRun,iM,iPm) = b1ScaleDimSdTmp .* sqrt(stats(1));
+% % % 
+% % %         % Find vector that best explains the variable of interest B
+% % %         [b2Tmp, ~, ~, ~, stats] = regress(tmpSz(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
+% % % % % %         % Rescale vector by the scale of the dimensions
+% % % % % %         b2ScaleDimSdTmp = b2Tmp .* [std(tmpScore(:,dS:dE)) 1]';
+% % % % % %         % Rescale vector by the explained variance
+% % % % % %         b2ScaleDimSdExpVarPm(:,iD,iV,iTyp,iReg,iRun,iM,iPm) = b2ScaleDimSdTmp .* sqrt(stats(1));
+% % % 
+% % % %         dotProdPm = dot(b1ScaleDimSdTmp(1:3), b2ScaleDimSdTmp(1:3))
+% % % 
+% % % % % %         % Normalized vectors
+% % %         dotProdPm(iPm)  = sum(b1Tmp(1:3)./norm(b1Tmp(1:3)) .* b2Tmp(1:3)./norm(b2Tmp(1:3)));
+% % %         crossProdPm(iPm) = norm(cross(b1Tmp(1:3) , b2Tmp(1:3)));
+% % % %         crossProdPm(iPm) = norm(cross(b1Tmp(1:3)./norm(b1Tmp(1:3)) , b2Tmp(1:3)./norm(b2Tmp(1:3))));
+% % % 
+% % %         % SD scaled vectors [But why? not sure]
+% % % %         dotProdPm(iPm) = sum(b1ScaleDimSdTmp(1:3)./norm(b1ScaleDimSdTmp(1:3)) .* b2ScaleDimSdTmp(1:3)./norm(b2ScaleDimSdTmp(1:3)));
+% % % %         dotProdPm(iPm) = sum(b1ScaleDimSdTmp(1:3) .* b2ScaleDimSdTmp(1:3));
+% % %     end
 
     % Perform bootstrapping
     for iPm = 1:nPm
@@ -2768,11 +2768,11 @@ toc
         allcrossProd(iM,iRun,iTyp,iReg,iD,iV) = crossProdBase;
 
 
-        pDotProd(iM,iRun,iTyp,iReg,iD,iV)    = sum( abs(dotProdBase)   - abs(dotProdPm) > 0) ./ nPm;
-        pCrossProd(iM,iRun,iTyp,iReg,iD,iV)  = sum( abs(crossProdBase) - abs(crossProdPm) < 0) ./ nPm;
+% % %         pDotProd(iM,iRun,iTyp,iReg,iD,iV)    = sum( abs(dotProdBase)   - abs(dotProdPm) > 0) ./ nPm;
+% % %         pCrossProd(iM,iRun,iTyp,iReg,iD,iV)  = sum( abs(crossProdBase) - abs(crossProdPm) < 0) ./ nPm;
 
-        alldotProdPm(iM,iRun,iTyp,iReg,iD,iV,:)   = dotProdPm;
-        allcrossProdPm(iM,iRun,iTyp,iReg,iD,iV,:) = crossProdPm;
+% % %         alldotProdPm(iM,iRun,iTyp,iReg,iD,iV,:)   = dotProdPm;
+% % %         allcrossProdPm(iM,iRun,iTyp,iReg,iD,iV,:) = crossProdPm;
 
         alldotProdBs(iM,iRun,iTyp,iReg,iD,iV,:)   = dotProdBs;
         allcrossProdBs(iM,iRun,iTyp,iReg,iD,iV,:) = crossProdBs;
@@ -2788,11 +2788,43 @@ end
 toc
 
 
+
 %% Finalise pca stants and plot scatter plus histograms
 
 
 % First demonstrate PCA consistency
-pValBootstrapPCA = sum(abs(alldotProdBs) > abs(cos(deg2rad(75))),7) ./ nPm;
+
+
+% % % pValBootstrapPCA = sum(abs(alldotProdBs) > abs(cos(deg2rad(75))),7) ./ nPm;
+iD = 1; iV = 1;
+
+for iTyp = 1:length(neurTypes)
+for iReg = 1:length(regTypes)
+for iRun = 1:length(cFiles)
+for iM = 1:size(rSall,1)
+
+    [pTmp,hTmp,stats] = signrank( ...
+        abs(squeeze(alldotProdBs(iM,iRun,iTyp,iReg,iD,iV,:))),  ...
+    abs(cos(deg2rad(75))) ...
+    ,'method','approximate','tail','left');
+    pValBootstrapPCA(iM,iRun,iTyp,iReg,iD,iV) = pTmp;
+    signRankPCA(iM,iRun,iTyp,iReg,iD,iV) = stats.signedrank;
+    zPCA(iM,iRun,iTyp,iReg,iD,iV) = stats.zval;
+
+end
+end
+end
+end
+
+disp('effect size')
+effSizePCA = zPCA ./ sqrt(nPm)
+effSizePCA = abs(alldotProd) -  abs(cos(deg2rad(75))) ./ ...
+    std(...
+    abs(alldotProdBs - abs(cos(deg2rad(75))) ...
+    ,0,7)
+
+disp('mean Z')
+nanmean(zPCA(:),7)
 
 tmpP = pValBootstrapPCA(:,1:15);
 tmpCos = alldotProd(:);
@@ -2807,14 +2839,21 @@ rad2deg(atan2(mean(tmpSin(:)) , mean(tmpCos(:))))
 disp('std rho')
 rad2deg(atan2(std(tmpSin(:)) , std(tmpCos(:))))
 
-%%
+% % % metDefs = {'estimateDistEff','alldotProd','estimateDistEff'};
+% % % yDefs   = {'allPerf'        ,'allPerf'   ,'alldotProd'};
 
-metDefs = {'estimateDistEff','alldotProd'};
-y
+absalldotProd = abs(alldotProd);
+logpNodeDists = log(pNodeDists.^20)
+% metDefs = {'estimateDistEff','alldotProd'};
+% yDefs   = {'allPerf'        ,'allPerf'   };
+metDefs = {'tStatsStructure','absalldotProd'};
+yDefs   = {'allPerf'        ,'allPerf'   };
+
+
+
 rowDefs = 1;
 
-
-figure
+f.StructureVsReward.f        = figure('Position',[50,200,1200,500]); 
 
 % Metric count
 iRow = 1; % dmy variable/placeholder
@@ -2822,95 +2861,66 @@ for iMet = 1:length(metDefs)
 
     % Now scatter plot with side histograms
     eval([' tmpX = ' metDefs{iMet} '(:,1:15);']);
-    tmpY = allPerf(:,1:15);
+    eval([' tmpY = ' yDefs{iMet}   '(:,1:15);']);
     tmpX = tmpX(:);
     tmpY = tmpY(:);
 
     axS.xOffset = 0.05;
     axS.yOffset = 0.05;
 
-    axS.xSpace  = 0.2./2;
-    axS.ySpace  = 0.2;
-
+    axS.xSpace  = 0.2;
+    axS.ySpace  = 0.4;
 
 
     ax{1} = axes('Position',[axS.xOffset + ...
         axS.xSpace  + (iMet-1) .* ((1 - 2.*axS.xOffset) ./ length(metDefs)) , ...
-        axS.ySpace + (iRow-1) .* ((1 - 2.*axS.yOffset) ./ length(rowDefs)), ...
+        axS.yOffset + (iRow-1) .* ((1 - 2.*axS.yOffset) ./ length(rowDefs)), ...
         (  ((1 - 2.*axS.xOffset) ./ length(metDefs)) - axS.xSpace ) , ...
         (  ((1 - 2.*axS.yOffset) ./ length(rowDefs)) - axS.ySpace ) ]);
 
     plot(tmpX,tmpY,'o')
-    lsline
     set(ax{1},'Visible','off')
 
     xLims = xlim;
     yLims = ylim;
+    if iMet == 1
+        xlim(max(abs(xLims)) .* [-1 1] );
+        %     ylim(max(abs(yLims)) .* [-1 1] );
+        xLims = xlim;
+        %     yLims = ylim;
+    end
+
+    lsline
 
 
-    ax{2} = axes('Position',ax{1}.Position .* [1 1 1 0] + [0 -axS.ySpace.*.9 0 axS.ySpace.*.9]  );
-    histogram(tmpX,10);
-    set(ax{2},'ydir','r')
+    ax{2} = axes('Position',ax{1}.Position .* [1 1 1 0] + [0 -axS.ySpace.*.9 0 axS.ySpace.*.9] + [0 axS.ySpace+ax{1}.Position(4) 0 0] );
+    histogram(tmpX,linspace(xLims(1),xLims(2),11));
+    % set(ax{2},'ydir','r')
     box off
     xlim(xLims);
-
+    title(metDefs{iMet});
 
     ax{3} = axes('Position',ax{1}.Position .* [1 1 0 1] + [-axS.xSpace.*.9  0 axS.xSpace.*.9  0]  );
-    histogram(tmpY,10,'orientation','horizontal');
+    histogram(tmpY,linspace(yLims(1),yLims(2),11),'orientation','horizontal');
     set(ax{3},'xdir','r')
     box off
     ylim(yLims);
+    title(yDefs{iMet});
 end
 
+% Also plot angle distributions
+f.PCAangles.f        = figure('Position',[50,200,500,500]); 
+allAngle = acos(alldotProd);
+allAngleBs = acos(alldotProdPm);
 
-%%
-
-subplot(1,2,1)
-
-ax{1} = gca;
-
-%%
-
-
-    % Plot average OR line through Q-values
-    ax{2} = axes('Position',ax{1}.Position .* [1 1 1 0] + [0 -0.1 0 0.1]  );
-% % %     plQhoriz = flip(squeeze(nanmean(Q(1,rS.s.plt.lmbCol,2:11,2:end-1,:),[2 3 5]))); % lmb R, C, stim R, C, A
-    plQhoriz = flip(squeeze(nanmean(Q(1,rS.s.plt.lmbCol,:,3:end-2,:),[2 3 5]))); % lmb R, C, stim R, C, A
-    plot((1:numel(plQhoriz))' - 0.5  , [plQhoriz],'-','LineWidth',2); hold on
-    xLims = xlim;
-    xlim([0 numel(plQhoriz) ]);
-    hold on
-    ylim(fS.lineYLim);
-    grid on
-    ax{2}.XAxis.Visible = 'off';
-    ax{2}.YAxis.Visible = 'off';
-    ax{3} = axes('Position',ax{1}.Position .* [1 1 0 1] + [-0.03 0 0.03 0]  );
-% % %     plQvert = squeeze(nanmean(Q(1,rS.s.plt.lmbCol,2:end-1,2:end-1,:),[2 4 5])); % lmb R, C, stim R, C, A
-    plQvert = squeeze(nanmean(Q(1,rS.s.plt.lmbCol,2:end-1,:,:),[2 4 5])); % lmb R, C, stim R, C, A
-    plot( plQvert, (numel(plQvert):-1:1)' - 0.5 , '-','LineWidth',2); hold on
-    xlim(fS.lineXLim);
-    ylim([0 12])
-    grid on
-    ax{3}.XAxis.Visible = 'off';
-    ax{3}.YAxis.Visible = 'off';
-
-
-        axS.xOffset = 0.00;
-    axS.yOffset = 0.05;
-
-% % %     axes('Position',[axS.xOffset + (iAct-1) .* ((1 - 2.*axS.xOffset) ./ length(actNames)) , ...
-% % %         axS.yOffset + (iTask-1) .* ((1 - 2.*axS.yOffset) ./ length(taskDefs)), ...
-% % %         ((1 - 2.*axS.xOffset) ./ length(actNames)), ...
-% % %         ((1 - 2.*axS.yOffset) ./ length(taskDefs))]);
-
-    newAx = axes('Position',[axS.xOffset + (iTask-1) .* ((1 - 2.*axS.xOffset) ./ length(taskDefs)) , ...
-                     axS.yOffset + (iAct-1) .* ((1 - 2.*axS.yOffset) ./ length(actNames)), ...
-                     ((1 - 2.*axS.xOffset) ./ length(taskDefs)), ...
-                     ((1 - 2.*axS.yOffset) ./ length(actNames))]);
+allAngToPl = squeeze(allAngleBs(:,1:15,1,1,1,1,:));
+% allAngToPl = squeeze(allAngle(:,1:15,1,1,1,1,:));
+polarhistogram(allAngToPl,13,'Normalization','probability');
 
 
 
-%% Plot the relevant effects
+
+%% $$$ OLD Plot the relevant effects
 
 fprintf('%i out of %i networks have goal and threat coding within 15 degrees of orthogonality in their 1st 3 PCs \n', sum(abs(alldotProd(:,1:15)) < abs(cos(deg2rad(75))),'all'), numel(alldotProd(:,1:15)));
 
