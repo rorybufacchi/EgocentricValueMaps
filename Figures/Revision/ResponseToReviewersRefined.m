@@ -1548,7 +1548,7 @@ end
 clear dotProd dotProdAbs cosTheta cosThetaAbs theta thetaAbs crossProd crossProdSize crossProdRelMax
 
 clear b1 b1ScaleDimSd b1ScaleDimSdExpVar b2 b2ScaleDimSd b2ScaleDimSdExpVar
-
+tic
 for iTyp = 1:length(neurTypes)
 
 
@@ -1682,11 +1682,11 @@ load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
             % Save figure
 % % %             saveas(gcf,['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\' ...
 % % %                 'Results\ForFigures\DimensionReduction\PCAs\NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) ] , 'fig')
-            saveas(gcf,['F:\Projects\DPPS\DefenseAgent\' ...
-                'Results\ForFigures\DimensionReduction\PCAs\NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) ] , 'fig')
+            saveas(gcf,['Results\ForFigures\DimensionReduction\PCAs\NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) ] , 'fig')
 
             close all
         end
+        toc
 
     end
 
@@ -1708,9 +1708,9 @@ end
 %           'b1','b1ScaleDimSd','b1ScaleDimSdExpVar','b2','b2ScaleDimSd','b2ScaleDimSdExpVar','-v7.3');
 
 
-save(['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\Similarities\' ...
-          'SimilarityScores_BigNetworks.mat'], ...
-          'b1','b1ScaleDimSd','b1ScaleDimSdExpVar','b2','b2ScaleDimSd','b2ScaleDimSdExpVar','-v7.3');
+% % % save(['Results\ForFigures\DimensionReduction\Similarities\' ...
+% % %           'SimilarityScores_BigNetworks.mat'], ...
+% % %           'b1','b1ScaleDimSd','b1ScaleDimSdExpVar','b2','b2ScaleDimSd','b2ScaleDimSdExpVar','-v7.3');
 
 
 
@@ -1961,35 +1961,35 @@ for iTyp = 1:length(neurTypes) % Neuron type
 
 
         figure(f.NeurTypesPCA.f);
-        subplot(numel(neurTypes),numel(regNames),iPl)
-
-        for iM = cM
-            % $$$ Here think about how to properly plot the effects? Maybe just two
-            % distributions? That could be neat, one blue, one red?
-            %         tmpPM = nanmean(crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:),7);
-            %         tmpPM = crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:);
-            %         tmpPM = crossProdSize(1,iV,iTyp,iReg,:,iM);
-
-% % % % % %                         tmpPM = crossProdSize(1,iV,iTyp,iReg,:,iM) - crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:);
-% % %             tmpPM = dotProdAbs(1,iV,iTyp,iReg,:,iM) - nanmean(dotProdAbsPerm(1,iV,iTyp,iReg,:,iM,:),7);
-            tmpPM = dotProdAbs(1,iV,iTyp,iReg,:,iM) - dotProdAbsPerm(1,iV,iTyp,iReg,:,iM,:);
-
-            tmpPM = tmpPM(:);
-
-            h = histogram(tmpPM(:),'Normalization','probability','BinEdges',binEdges,...
-                'FaceColor',cOrder{iM},'FaceAlpha',0.3, ...
-                'EdgeColor','k','EdgeAlpha', 0.2 ); hold on
-            % % %                     h = histogram(tmpPM(:),'Normalization','probability',...
-            % % %                         'FaceColor',cOrder{iM},'FaceAlpha',0.3, ...
-            % % %                         'EdgeColor','k','EdgeAlpha', 0.2 ); hold on
-            % % %                             tmpPM2(1:numel(tmpPM(:)),iM) = tmpPM(:);
-            hold on
-            splineH{iM} = PlotHistSpline(h,'LineWidth',2,'Color',cOrder{iM});
-            % % %         xlim([binEdges(1) binEdges(end)])
-            xlim([binEdges(1) -binEdges(1)]);
-            ylim([0 0.7]);
-            plot([0 0],[0 0.7],'-.k')
-        end
+% % %         subplot(numel(neurTypes),numel(regNames),iPl)
+% % % 
+% % %         for iM = cM
+% % %             % $$$ Here think about how to properly plot the effects? Maybe just two
+% % %             % distributions? That could be neat, one blue, one red?
+% % %             %         tmpPM = nanmean(crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:),7);
+% % %             %         tmpPM = crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:);
+% % %             %         tmpPM = crossProdSize(1,iV,iTyp,iReg,:,iM);
+% % % 
+% % % % % % % % %                         tmpPM = crossProdSize(1,iV,iTyp,iReg,:,iM) - crossProdSizePerm(1,iV,iTyp,iReg,:,iM,:);
+% % % % % %             tmpPM = dotProdAbs(1,iV,iTyp,iReg,:,iM) - nanmean(dotProdAbsPerm(1,iV,iTyp,iReg,:,iM,:),7);
+% % %             tmpPM = dotProdAbs(1,iV,iTyp,iReg,:,iM) - dotProdAbsPerm(1,iV,iTyp,iReg,:,iM,:);
+% % % 
+% % %             tmpPM = tmpPM(:);
+% % % 
+% % %             h = histogram(tmpPM(:),'Normalization','probability','BinEdges',binEdges,...
+% % %                 'FaceColor',cOrder{iM},'FaceAlpha',0.3, ...
+% % %                 'EdgeColor','k','EdgeAlpha', 0.2 ); hold on
+% % %             % % %                     h = histogram(tmpPM(:),'Normalization','probability',...
+% % %             % % %                         'FaceColor',cOrder{iM},'FaceAlpha',0.3, ...
+% % %             % % %                         'EdgeColor','k','EdgeAlpha', 0.2 ); hold on
+% % %             % % %                             tmpPM2(1:numel(tmpPM(:)),iM) = tmpPM(:);
+% % %             hold on
+% % %             splineH{iM} = PlotHistSpline(h,'LineWidth',2,'Color',cOrder{iM});
+% % %             % % %         xlim([binEdges(1) binEdges(end)])
+% % %             xlim([binEdges(1) -binEdges(1)]);
+% % %             ylim([0 0.7]);
+% % %             plot([0 0],[0 0.7],'-.k')
+% % %         end
 
         % % %         figure(f.NeurTypesPCAAngles.f);
         % % %         subplot(numel(neurTypes),numel(regNames),iPl)
@@ -2021,6 +2021,8 @@ for iTyp = 1:length(neurTypes) % Neuron type
             %         tmpMin = nanmin(squeeze(tmpPMforChoosePlot),[],'all');
             %         tmpMin = nanmedian(squeeze(tmpPMforChoosePlot),'all');
             [cRun cM] = find(tmpMin == tmpPMforChoosePlot,1);
+
+%             cRun = 3; cM = 2;
 
             if isempty(cRun)
                 cRun = 1;
@@ -2114,7 +2116,7 @@ for iTyp = 1:length(neurTypes) % Neuron type
 
                 
                 % Make clearer mini-example
-                if iExampFig == 1 & iTyp == 1 & iReg == 2
+                if iExampFig == 1 & iTyp == 1 & iReg == 1
                     figure(f.NeurTypesPCAExamplesLeastSubSection.f);
 
                     if iVar == 1
@@ -2126,8 +2128,8 @@ for iTyp = 1:length(neurTypes) % Neuron type
                     scatter3(tmpScore(:,1), tmpScore(:,2), tmpScore(:,3), tmpSz , colors , 'filled');
 
                     view([az el]);
-                    xlim([-3 3.8]);
-                    ylim([-4.5, 2]);
+% % %                     xlim([-3 3.8]);
+% % %                     ylim([-4.5, 2]);
 
                     if iVar == 1
                         title('Goal row')
@@ -2171,7 +2173,8 @@ end
 
 %% Collect data for performance vs PCA orthogonality
 
-% % %  load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat')
+% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat')
+% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_BIGNETS_temp.mat')
 
 % % % % FOR SMALL NETWORKS
 % % % neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
@@ -2345,7 +2348,9 @@ nanstd(rho(:))
 
 %% Perform LME for all models independently, accounting for layer differences
 
-% $$$ Adapt from here to work with the new shape of things
+% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat')
+% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_BIGNETS_temp.mat')
+
 
 overallModelNum    = repmat(  permute( reshape( 1:numel(allNetAR) , size(allNetAR) ), [5 6 1 2 3 4]) , [size(stimPrefSim,[1 2]) 1 1 1 1]);
 layNumOrg   = repmat(permute(layNum,[1 6 2 3 4 5]) , [1 size(layNum,1) 1 1]);
@@ -2377,7 +2382,7 @@ tbl.nodeDists                   = nodeDists(:);
 tbl.layNumDiff                  = categorical(abs(layNumDiff(:)));
 
 tbl.layNumOrg                   = layNumOrg(:);
-tbl.modelNum                    = modelNum(:);
+tbl.modelNum                    = overallModelNum(:);
 
 tbl.allPerf                     = allPerfRep(:);
 tbl.allNetW                     = categorical(allNetWRep(:));
@@ -2405,7 +2410,7 @@ tmpTbl = tbl(tbl.nodeDists ~= 0, :);
 % lme = fitlme(tmpTbl,'StimulusPreferenceSimilarity ~ nodeDists + nodeDists:allNetW  + (1|modelNum)')
 
 % anova(lme)
-%%
+
 % Run LME for each network
 tic
 for iTyp = 1:length(neurTypes);
@@ -2455,6 +2460,7 @@ toc
 pTmp        = pNodeDists(:,1:15);
 estTmp      = estimateDistEff(:,1:15);
 estErrTmp   = estimateStandErr(:,1:15);
+tStatTmp    = tStatsStructure(:,1:15); 
 
 [pValThr, pValcor, pValLMEAdj] = fdr(pTmp(:));
 
@@ -2467,6 +2473,12 @@ disp('Weighted mean estimate of node distance')
 meanEffs = squeeze(sum(  (estTmp ./ estErrTmp.^2) , dimsToSum) ./ sum(1 ./ estErrTmp.^2  , dimsToSum ))
 disp('standard error of effect of node distance')
 sdEffs   = squeeze(sqrt(1 ./ sum(1 ./ estErrTmp.^2  , dimsToSum )))
+
+
+disp('Weighted mean tstat of node distance')
+meanEffs = mean(tStatTmp(:))
+disp('standard deviation of tstat of node distance')
+sdEffs   = std(tStatTmp(:))
 
 %% $$$ Use the projection method to perform parametric stats for the PCA?
 
@@ -2643,6 +2655,7 @@ for iTyp = 1:length(neurTypes)
 for iReg = 1:length(regTypes)
 
 
+% % % bFold = 'Results\ForFigures\Valence\';
 bFold = 'Results\ForFigures\Valence\';
 cFiles = dir([bFold '*' regTypes{iReg} '*_' neurTypes{iTyp} '_B_V*.mat']);
 
@@ -2692,43 +2705,23 @@ load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
 
     
     nPm = 1000;
-    b1ScaleDimSdExpVarPm = nan([size(b1ScaleDimSdExpVar), nPm]);
     dS = 1; dE = 3;
     clear dotProdPm
-    
-% % %     [b1BaseTmp, b1IntBase, ~, ~, stats1] = regress(tmpCl, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-% % %     [b2BaseTmp, b2IntBase, ~, ~, stats2] = regress(tmpSz, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
 
+    % Perform permutations
+    for iPm = 1:nPm
+        permOrd = randperm(size(tmpCl,1));
 
-% % %     % Perform permutations
-% % %     for iPm = 1:nPm
-% % %         permOrd = randperm(size(tmpCl,1));
-% % % 
-% % %         % Find vector that best explains the variable of interest A
-% % %         [b1Tmp, ~, ~, ~, stats] = regress(tmpCl(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-% % %         % Rescale vector by the scale of the dimensions
-% % %         b1ScaleDimSdTmp = b1Tmp .* [std(tmpScore(:,dS:dE)) 1]';
-% % % % % %         % Rescale vector by the explained variance
-% % % % % %         b1ScaleDimSdExpVarPm(:,iD,iV,iTyp,iReg,iRun,iM,iPm) = b1ScaleDimSdTmp .* sqrt(stats(1));
-% % % 
-% % %         % Find vector that best explains the variable of interest B
-% % %         [b2Tmp, ~, ~, ~, stats] = regress(tmpSz(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-% % % % % %         % Rescale vector by the scale of the dimensions
-% % % % % %         b2ScaleDimSdTmp = b2Tmp .* [std(tmpScore(:,dS:dE)) 1]';
-% % % % % %         % Rescale vector by the explained variance
-% % % % % %         b2ScaleDimSdExpVarPm(:,iD,iV,iTyp,iReg,iRun,iM,iPm) = b2ScaleDimSdTmp .* sqrt(stats(1));
-% % % 
-% % % %         dotProdPm = dot(b1ScaleDimSdTmp(1:3), b2ScaleDimSdTmp(1:3))
-% % % 
-% % % % % %         % Normalized vectors
-% % %         dotProdPm(iPm)  = sum(b1Tmp(1:3)./norm(b1Tmp(1:3)) .* b2Tmp(1:3)./norm(b2Tmp(1:3)));
-% % %         crossProdPm(iPm) = norm(cross(b1Tmp(1:3) , b2Tmp(1:3)));
-% % % %         crossProdPm(iPm) = norm(cross(b1Tmp(1:3)./norm(b1Tmp(1:3)) , b2Tmp(1:3)./norm(b2Tmp(1:3))));
-% % % 
-% % %         % SD scaled vectors [But why? not sure]
-% % % %         dotProdPm(iPm) = sum(b1ScaleDimSdTmp(1:3)./norm(b1ScaleDimSdTmp(1:3)) .* b2ScaleDimSdTmp(1:3)./norm(b2ScaleDimSdTmp(1:3)));
-% % % %         dotProdPm(iPm) = sum(b1ScaleDimSdTmp(1:3) .* b2ScaleDimSdTmp(1:3));
-% % %     end
+        % Find vector that best explains the variable of interest A
+        [b1Tmp, ~, ~, ~, stats] = regress(tmpCl(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
+
+        % Find vector that best explains the variable of interest B        
+        [b2Tmp, ~, ~, ~, stats] = regress(tmpSz(permOrd), [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
+
+        % Calculate dot and (non-normalised) cross-products
+        dotProdPm(iPm)  = sum(b1Tmp(1:3)./norm(b1Tmp(1:3)) .* b2Tmp(1:3)./norm(b2Tmp(1:3)));
+        crossProdPm(iPm) = norm(cross(b1Tmp(1:3) , b2Tmp(1:3)));
+    end
 
     % Perform bootstrapping
     for iPm = 1:nPm
@@ -2739,7 +2732,7 @@ load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
               % Find vector that best explains the variable of interest B
         [b2Tmp, ~, ~, ~, stats] = regress(tmpSz(permOrd), [tmpScore(permOrd,dS:dE), ones(size(tmpScore, 1), 1)]);
 
-        % Normalized vectors
+        % Calculate dot and (non-normalised) cross-products
         dotProdBs(iPm)  = sum(b1Tmp(1:3)./norm(b1Tmp(1:3)) .* b2Tmp(1:3)./norm(b2Tmp(1:3)));
         crossProdBs(iPm) = norm(cross(b1Tmp(1:3) , b2Tmp(1:3)));
     end
@@ -2747,37 +2740,27 @@ load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
     
 toc
 
-    % SD scaled vectors [But why? not sure]
-%     dotProdBase = sum( b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM)) .* ...
-%         b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM)) );
-%     dotProdBase = sum( b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) .* ...
-%         b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) );
 
 
-    % Normalized vectors
-        dotProdBase = sum( b1(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b1(1:3,iD,iV,iTyp,iReg,iRun,iM)) .* ...
+    
+    % Calculate dot and (non-normalised) cross-products
+    dotProdBase = sum( b1(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b1(1:3,iD,iV,iTyp,iReg,iRun,iM)) .* ...
         b2(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b2(1:3,iD,iV,iTyp,iReg,iRun,iM)) );
-
-        crossProdBase = norm(cross( b1(1:3,iD,iV,iTyp,iReg,iRun,iM) , ...
-            b2(1:3,iD,iV,iTyp,iReg,iRun,iM) ));
-%         crossProdBase = norm(cross( b1(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b1(1:3,iD,iV,iTyp,iReg,iRun,iM)) , ...
-%             b2(1:3,iD,iV,iTyp,iReg,iRun,iM)./norm(b2(1:3,iD,iV,iTyp,iReg,iRun,iM)) ));
-
-
-        alldotProd(iM,iRun,iTyp,iReg,iD,iV)   = dotProdBase;
-        allcrossProd(iM,iRun,iTyp,iReg,iD,iV) = crossProdBase;
-
-
-% % %         pDotProd(iM,iRun,iTyp,iReg,iD,iV)    = sum( abs(dotProdBase)   - abs(dotProdPm) > 0) ./ nPm;
-% % %         pCrossProd(iM,iRun,iTyp,iReg,iD,iV)  = sum( abs(crossProdBase) - abs(crossProdPm) < 0) ./ nPm;
-
-% % %         alldotProdPm(iM,iRun,iTyp,iReg,iD,iV,:)   = dotProdPm;
-% % %         allcrossProdPm(iM,iRun,iTyp,iReg,iD,iV,:) = crossProdPm;
-
-        alldotProdBs(iM,iRun,iTyp,iReg,iD,iV,:)   = dotProdBs;
-        allcrossProdBs(iM,iRun,iTyp,iReg,iD,iV,:) = crossProdBs;
-
-
+    
+    crossProdBase = norm(cross( b1(1:3,iD,iV,iTyp,iReg,iRun,iM) , ...
+        b2(1:3,iD,iV,iTyp,iReg,iRun,iM) ));
+    
+    alldotProd(iM,iRun,iTyp,iReg,iD,iV)   = dotProdBase;
+    allcrossProd(iM,iRun,iTyp,iReg,iD,iV) = crossProdBase;
+    
+    pDotProd(iM,iRun,iTyp,iReg,iD,iV)    = sum( abs(dotProdBase)   - abs(dotProdPm) > 0) ./ nPm;
+    pCrossProd(iM,iRun,iTyp,iReg,iD,iV)  = sum( abs(crossProdBase) - abs(crossProdPm) < 0) ./ nPm;
+    
+    alldotProdPm(iM,iRun,iTyp,iReg,iD,iV,:)   = dotProdPm;
+    allcrossProdPm(iM,iRun,iTyp,iReg,iD,iV,:) = crossProdPm;
+    
+    alldotProdBs(iM,iRun,iTyp,iReg,iD,iV,:)   = dotProdBs;
+    allcrossProdBs(iM,iRun,iTyp,iReg,iD,iV,:) = crossProdBs;
 
         
 toc
@@ -2790,6 +2773,8 @@ toc
 
 
 %% Finalise pca stats and plot scatter plus histograms
+
+% $$$ HERE
 
 
 % First demonstrate PCA consistency
@@ -2841,6 +2826,12 @@ rad2deg(atan2(mean(tmpSin(:)) , mean(tmpCos(:))))
 disp('std rho')
 rad2deg(atan2(std(tmpSin(:)) , std(tmpCos(:))))
 
+
+disp('correlation between structure t-stat and network performance')
+[rhorho pvalpval] = corr(tStatsStructure(:),allPerf(:))
+
+
+
 % % % metDefs = {'estimateDistEff','alldotProd','estimateDistEff'};
 % % % yDefs   = {'allPerf'        ,'allPerf'   ,'alldotProd'};
 
@@ -2880,7 +2871,8 @@ for iMet = 1:length(metDefs)
         (  ((1 - 2.*axS.xOffset) ./ length(metDefs)) - axS.xSpace ) , ...
         (  ((1 - 2.*axS.yOffset) ./ length(rowDefs)) - axS.ySpace ) ]);
 
-    plot(tmpX,tmpY,'o')
+%     plot(tmpX,tmpY,'o')
+    plot(tmpX,tmpY,'.')
     set(ax{1},'Visible','off')
 
     xLims = xlim;
@@ -2896,14 +2888,16 @@ for iMet = 1:length(metDefs)
 
 
     ax{2} = axes('Position',ax{1}.Position .* [1 1 1 0] + [0 -axS.ySpace.*.9 0 axS.ySpace.*.9] + [0 axS.ySpace+ax{1}.Position(4) 0 0] );
-    histogram(tmpX,linspace(xLims(1),xLims(2),11));
+    h = histogram(tmpX,linspace(xLims(1),xLims(2),11)); hold on
     % set(ax{2},'ydir','r')
     box off
     xlim(xLims);
+    [splineHandle] = PlotHistSpline(h,'LineWidth',2,'Color','b')
     title(metDefs{iMet});
 
     ax{3} = axes('Position',ax{1}.Position .* [1 1 0 1] + [-axS.xSpace.*.9  0 axS.xSpace.*.9  0]  );
-    histogram(tmpY,linspace(yLims(1),yLims(2),11),'orientation','horizontal');
+    h = histogram(tmpY,linspace(yLims(1),yLims(2),11),'orientation','horizontal'); hold on
+    [splineHandle] = PlotHistSpline(h,'LineWidth',2,'Color','b')
     set(ax{3},'xdir','r')
     box off
     ylim(yLims);
@@ -2917,45 +2911,18 @@ allAngleBs = acos(alldotProdBs);
 f.PCAangles.f        = figure('Position',[50,200,1200,500]); 
 subplot(1,2,1)
 allAngToPl = squeeze(allAngleBs(:,1:15,1,1,1,1,:));
-polarhistogram(allAngToPl,13,'Normalization','probability');
+h = polarhistogram(allAngToPl,13,'Normalization','probability'); hold on
+[splineHandle] = PlotHistSpline(h,'LineWidth',2,'Color','b')
+rLims = rlim;
 title('angle between goal and threat')
 
 subplot(1,2,2)
 allAngToPl = squeeze(allAnglePm(:,1:15,1,1,1,1,:));
-polarhistogram(allAngToPl,13,'Normalization','probability');
+h = polarhistogram(allAngToPl,13,'Normalization','probability'); hold on
+[splineHandle] = PlotHistSpline(h,'LineWidth',2,'Color','b')
 title('permuted angle between goal and threat')
+rlim(rLims);
 
-
-
-
-%% $$$ OLD Plot the relevant effects
-
-fprintf('%i out of %i networks have goal and threat coding within 15 degrees of orthogonality in their 1st 3 PCs \n', sum(abs(alldotProd(:,1:15)) < abs(cos(deg2rad(75))),'all'), numel(alldotProd(:,1:15)));
-
-% (iD,iV,iTyp,iReg,iRun,iM)
-size(dotProdAbs(1,1,:,:,:,:))              
-
-% pValFunctionalSeparation = sum(dotProdAbs - dotProdAbsPerm > 0, 7) ./ size(dotProdAbsPerm,7);
-
-pValFunctionalSeparation = sum(crossProdSize - crossProdSizePerm < 0, 7) ./ size(dotProdAbsPerm,7);
-
-
-
-iTyp = 1; iReg = 1;
-tmpP = pValFunctionalSeparation(1,1,iTyp,iReg,:,:);
-[pValThr, pValcor, pValPCAadj] = fdr(tmpP(:));
-
-pValFunctionalSeparationOverall = sum( sum(dotProdAbs,[5 6]) - sum(dotProdAbsPerm, [5 6]) > 0, 7) ./ size(dotProdAbsPerm,7);
-
-% $$$ just sum the number that is lower! So simple why was my brain stuck
-
-
-% $$$ Then display the number of networks which have structure for each
-% $$$ regularization and type
-
-% $$$Then plot them allll
-% against eachother baby
-% % % fprintf('%i out of %i networks show structure using this metric\n', sum(pValLMEAdj < 0.05), 45);
 
 
 %% Plot performance vs orthogonality and structure
@@ -2974,8 +2941,8 @@ iPl = 1;
 
 figure(f.PCAvsRew.f)
 % PCA ORTHOGONALITY -------------------------------------------------------
-tmpX = log(squeeze(dotProdAbs(1,1,:,cReg,:,cM)));
-tmpY = rewPerAct(:,cReg,:,cM);
+tmpX = log(squeeze(tStatsStructure(cM,:,cReg,:)));
+tmpY = allPerf(cM,:,cReg,:);
 scatter(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'.k'); hold on
 lsline
 xlabel('Dot product (paralellity)')
