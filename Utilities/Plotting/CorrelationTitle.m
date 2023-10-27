@@ -1,4 +1,4 @@
-rafunction [figString, rhoVal, pVal, fullStats] = CorrelationTitle(xVals,yVals,opts)
+function [figString, rhoVal, pVal, fullStats] = CorrelationTitle(xVals,yVals,opts)
 %CORRELATIONTITLE Returns the correlation between two matrices, and also a
 %string for use in a figure title
 %

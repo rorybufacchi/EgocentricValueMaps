@@ -27,7 +27,7 @@ else
 end
 
 if nargin < 4
-    window_size = (maxX - minX) ./4;  % Default window size
+    window_size = (maxX - minX) ./3;  % Default window size
 else
     window_size = varargin{2};
 end

@@ -2775,7 +2775,7 @@ toc
 %% Finalise pca stats and plot scatter plus histograms
 
 % $$$ HERE
-
+% $$$ Next plot PCA and structure stuff for all the little networks here
 
 % First demonstrate PCA consistency
 
@@ -2788,6 +2788,7 @@ for iReg = 1:length(regTypes)
 for iRun = 1:length(cFiles)
 for iM = 1:size(rSall,1)
 
+    try
     [pTmp,hTmp,stats] = signrank( ...
         abs(squeeze(alldotProdBs(iM,iRun,iTyp,iReg,iD,iV,:))),  ...
     abs(cos(deg2rad(75))) ...
@@ -2795,6 +2796,11 @@ for iM = 1:size(rSall,1)
     pValBootstrapPCA(iM,iRun,iTyp,iReg,iD,iV) = pTmp;
     signRankPCA(iM,iRun,iTyp,iReg,iD,iV) = stats.signedrank;
     zPCA(iM,iRun,iTyp,iReg,iD,iV) = stats.zval;
+    catch
+        pValBootstrapPCA(iM,iRun,iTyp,iReg,iD,iV) = 1;
+        signRankPCA(iM,iRun,iTyp,iReg,iD,iV) = 0;
+        zPCA(iM,iRun,iTyp,iReg,iD,iV) = 0;
+    end
 
 end
 end
@@ -2836,33 +2842,39 @@ disp('correlation between structure t-stat and network performance')
 % % % yDefs   = {'allPerf'        ,'allPerf'   ,'alldotProd'};
 
 absalldotProd = abs(alldotProd);
-logpNodeDists = log(pNodeDists.^20)
 % metDefs = {'estimateDistEff','alldotProd'};
 % yDefs   = {'allPerf'        ,'allPerf'   };
-metDefs = {'tStatsStructure','absalldotProd'};
-yDefs   = {'allPerf'        ,'allPerf'   };
+% metDefs = {'tStatsStructure','absalldotProd'};
+% yDefs   = {'allPerf'        ,'allPerf'   };
+metDefs = {'tStatsStructure'};
+yDefs   = {'allPerf'        };
 
 
 
-rowDefs = 1;
 
-f.StructureVsReward.f        = figure('Position',[50,200,1200,500]); 
 
-% Metric count
-iRow = 1; % dmy variable/placeholder
+%% Metric count
+
+% f.StructureVsReward.f        = figure('Position',[50,200,1200,500]); 
+
+
+rowDefs = neurTypes;
+for iReg =1:length(regTypes)
+    f.(['StructureVsReward' regTypes{iReg}]).f        = figure('Position',[50,20,300,1800]); 
+for iRow = 1:numel(rowDefs) 
 for iMet = 1:length(metDefs)
 
     % Now scatter plot with side histograms
-    eval([' tmpX = ' metDefs{iMet} '(:,1:15);']);
-    eval([' tmpY = ' yDefs{iMet}   '(:,1:15);']);
+    eval([' tmpX = ' metDefs{iMet} '(:,1:15,' num2str(iRow) ',' num2str(iReg) ');']);
+    eval([' tmpY = ' yDefs{iMet}   '(:,1:15,' num2str(iRow) ',' num2str(iReg) ');']);
     tmpX = tmpX(:);
     tmpY = tmpY(:);
 
     axS.xOffset = 0.05;
     axS.yOffset = 0.05;
 
-    axS.xSpace  = 0.2;
-    axS.ySpace  = 0.4;
+    axS.xSpace  = 0.4./length(metDefs);
+    axS.ySpace  = 0.4./length(rowDefs);
 
 
     ax{1} = axes('Position',[axS.xOffset + ...
@@ -2874,18 +2886,24 @@ for iMet = 1:length(metDefs)
 %     plot(tmpX,tmpY,'o')
     plot(tmpX,tmpY,'.')
     set(ax{1},'Visible','off')
+    yLims = [-.1 .1];
+    ylim(yLims)
 
-    xLims = xlim;
-    yLims = ylim;
+    xLims = [-20 20];
+%     xLims = xlim;
+%     yLims = ylim;
     if iMet == 1
         xlim(max(abs(xLims)) .* [-1 1] );
         %     ylim(max(abs(yLims)) .* [-1 1] );
         xLims = xlim;
         %     yLims = ylim;
     end
-
     lsline
+%     % Put correlation in the title
+%     title(CorrelationTitle(tmpX,tmpY));
 
+
+    
 
     ax{2} = axes('Position',ax{1}.Position .* [1 1 1 0] + [0 -axS.ySpace.*.9 0 axS.ySpace.*.9] + [0 axS.ySpace+ax{1}.Position(4) 0 0] );
     h = histogram(tmpX,linspace(xLims(1),xLims(2),11)); hold on
@@ -2893,7 +2911,9 @@ for iMet = 1:length(metDefs)
     box off
     xlim(xLims);
     [splineHandle] = PlotHistSpline(h,'LineWidth',2,'Color','b')
-    title(metDefs{iMet});
+%     title(metDefs{iMet});
+    % Put correlation in the title
+    title(CorrelationTitle(tmpX,tmpY));
 
     ax{3} = axes('Position',ax{1}.Position .* [1 1 0 1] + [-axS.xSpace.*.9  0 axS.xSpace.*.9  0]  );
     h = histogram(tmpY,linspace(yLims(1),yLims(2),11),'orientation','horizontal'); hold on
@@ -2901,31 +2921,50 @@ for iMet = 1:length(metDefs)
     set(ax{3},'xdir','r')
     box off
     ylim(yLims);
-    title(yDefs{iMet});
+    title([yDefs{iMet} ' ' rowDefs{iRow}]);
+
 end
+end
+sgtitle(regTypes{iReg})
+
+
+f.(['PCAangles' regTypes{iReg}]).f        = figure('Position',[50,20,400,1800]); 
+for iRow = 1:numel(rowDefs) 
 
 % Also plot angle distributions
 allAnglePm = acos(alldotProdPm);
 allAngleBs = acos(alldotProdBs);
 
-f.PCAangles.f        = figure('Position',[50,200,1200,500]); 
-subplot(1,2,1)
-allAngToPl = squeeze(allAngleBs(:,1:15,1,1,1,1,:));
-h = polarhistogram(allAngToPl,13,'Normalization','probability'); hold on
+
+subplot(numel(rowDefs) ,2,(iRow -1) .* 2 + 1)
+allAngToPl = squeeze(allAngleBs(:,1:15,iRow,iReg,1,1,:));
+h = polarhistogram(real(allAngToPl),13,'Normalization','probability'); hold on
 [splineHandle] = PlotHistSpline(h,'LineWidth',2,'Color','b')
 rLims = rlim;
-title('angle between goal and threat')
+pAx = gca;
+pAx.ThetaLim = [0 180];
+% title('angle between goal and threat')
+title('pValues?')
 
-subplot(1,2,2)
-allAngToPl = squeeze(allAnglePm(:,1:15,1,1,1,1,:));
-h = polarhistogram(allAngToPl,13,'Normalization','probability'); hold on
+subplot(numel(rowDefs) ,2,(iRow -1) .* 2 + 2)
+allAngToPl = squeeze(allAnglePm(:,1:15,iRow,iReg,1,1,:));
+h = polarhistogram(real(allAngToPl),13,'Normalization','probability'); hold on
 [splineHandle] = PlotHistSpline(h,'LineWidth',2,'Color','b')
 title('permuted angle between goal and threat')
 rlim(rLims);
+pAx = gca;
+pAx.ThetaLim = [0 180];
 
 
+end
+sgtitle(regTypes{iReg})
 
-%% Plot performance vs orthogonality and structure
+end
+
+
+% Plot performance vs orthogonality and structure
+metDefs = {'tStatsStructure'};
+yDefs   = {'allPerf'        };
 
 % $$$ FOr structure, check out line 128
 
@@ -2941,14 +2980,18 @@ iPl = 1;
 
 figure(f.PCAvsRew.f)
 % PCA ORTHOGONALITY -------------------------------------------------------
-tmpX = log(squeeze(tStatsStructure(cM,:,cReg,:)));
-tmpY = allPerf(cM,:,cReg,:);
-scatter(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'.k'); hold on
+tmpX = absalldotProd(cM,:,:,cReg);
+tmpY = allPerf(cM,:,:,cReg);
+scatter(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'filled'); hold on
 lsline
-xlabel('Dot product (paralellity)')
+tmpX = permute(absalldotProd(cM,:,:,cReg),[3 1 2]); tmpX = tmpX(:,:);
+tmpY = permute(allPerf(cM,:,:,cReg),[3 1 2]); tmpY = tmpY(:,:);
+scatter(tmpX',tmpY','filled'); hold on
+xlabel('AbsdDot product (paralellity)')
+ylabel('Performance(reward/timestep)')
 % [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:), linspace(min(tmpX(:)),max(tmpX(:)),100), min(tmpX(:)-))
 [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:));
-[xQuery, yStd] = SlidingWindowFunction(tmpX(:), tmpY(:),@(x)std(x));
+[xQuery, yStd] = SlidingWindowFunction(tmpX(:), tmpY(:),@(x)std(x)./sqrt(numel(x)) );
 shOpts.PlotMean = 0; shOpts.c = [0.7 0.7 0.7];
 plot(xQuery,yAvg,'k','LineWidth',2); hold on
 ShadedPlot(xQuery,yAvg, yAvg - yStd, yAvg + yStd, shOpts)
@@ -2957,21 +3000,25 @@ ShadedPlot(xQuery,yAvg, yAvg - yStd, yAvg + yStd, shOpts)
 
 % NETWORK STRUCTURE -------------------------------------------------------
 figure(f.StructvsRew.f)
-tmpX = permute(squeeze(sum(abs(allBinNPF(:,:,cM,:,:,cReg)),[1 2])), [3 2 1]);
-tmpY = rewPerAct(:,cReg,:,cM);
+tmpX =  tStatsStructure(cM,:,:,cReg);
+tmpY = allPerf(cM,:,:,cReg);
 scatter(tmpX(:), tmpY(:),'filled'); hold on
 lsline
-ylim([-0.1 0.1])
-xlim([0 20])
+tmpX = permute(tStatsStructure(cM,:,:,cReg),[3 1 2]); tmpX = tmpX(:,:);
+tmpY = permute(allPerf(cM,:,:,cReg),[3 1 2]); tmpY = tmpY(:,:);
+scatter(tmpX',tmpY','filled'); hold on
+% ylim([-0.1 0.1])
+% xlim([-20 20])
 [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:));
-[xQuery, yStd] = SlidingWindowFunction(tmpX(:), tmpY(:),@(x)std(x));
+[xQuery, yStd] = SlidingWindowFunction(tmpX(:), tmpY(:),@(x)std(x)./sqrt(numel(x)) );
 plot(xQuery,yAvg,'k','LineWidth',2); hold on
 ShadedPlot(xQuery,yAvg, yAvg - yStd, yAvg + yStd, shOpts)
-xlabel('Network structure')
+xlabel('Network structure (t-stat)')
+ylabel('Performance(reward/timestep)')
 
 
 
-
+%%
 for iTyp = 1:length(neurTypes)
 
 %     subplot(1,length(neurTypes),iPl)
