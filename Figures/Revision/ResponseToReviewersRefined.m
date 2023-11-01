@@ -2961,6 +2961,9 @@ sgtitle(regTypes{iReg})
 
 end
 
+%%
+
+cReg = 1:2;
 
 % Plot performance vs orthogonality and structure
 metDefs = {'tStatsStructure'};
@@ -2974,7 +2977,7 @@ f.StructvsRew.f     = figure('Position',[50,200,600,600]);
 f.PCAvsStructvsRew.f = figure('Position',[50,200,600,600]);
 
 cM = 1:3;
-cReg = 1;
+cReg = 1:2;
 
 iPl = 1;
 
@@ -2984,8 +2987,8 @@ tmpX = absalldotProd(cM,:,:,cReg);
 tmpY = allPerf(cM,:,:,cReg);
 scatter(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'filled'); hold on
 lsline
-tmpX = permute(absalldotProd(cM,:,:,cReg),[3 1 2]); tmpX = tmpX(:,:);
-tmpY = permute(allPerf(cM,:,:,cReg),[3 1 2]); tmpY = tmpY(:,:);
+tmpX = permute(absalldotProd(cM,:,:,cReg),[3 1 2 4]); tmpX = tmpX(:,:);
+tmpY = permute(allPerf(cM,:,:,cReg),[3 1 2 4]); tmpY = tmpY(:,:);
 scatter(tmpX',tmpY','filled'); hold on
 xlabel('AbsdDot product (paralellity)')
 ylabel('Performance(reward/timestep)')
@@ -3004,8 +3007,8 @@ tmpX =  tStatsStructure(cM,:,:,cReg);
 tmpY = allPerf(cM,:,:,cReg);
 scatter(tmpX(:), tmpY(:),'filled'); hold on
 lsline
-tmpX = permute(tStatsStructure(cM,:,:,cReg),[3 1 2]); tmpX = tmpX(:,:);
-tmpY = permute(allPerf(cM,:,:,cReg),[3 1 2]); tmpY = tmpY(:,:);
+tmpX = permute(tStatsStructure(cM,:,:,cReg),[3 1 2 4]); tmpX = tmpX(:,:);
+tmpY = permute(allPerf(cM,:,:,cReg),[3 1 2 4]); tmpY = tmpY(:,:);
 scatter(tmpX',tmpY','filled'); hold on
 % ylim([-0.1 0.1])
 % xlim([-20 20])
@@ -3019,6 +3022,9 @@ ylabel('Performance(reward/timestep)')
 
 
 %%
+
+cReg = 1:2;
+
 for iTyp = 1:length(neurTypes)
 
 %     subplot(1,length(neurTypes),iPl)
