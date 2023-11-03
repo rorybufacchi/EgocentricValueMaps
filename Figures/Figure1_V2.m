@@ -7,7 +7,57 @@ addpath(genpath('Scripts\EgocentricValueMaps'))
 
 
 % Make 2 plots, one with original gammas, and one with gamma == 1
-allGammas = [0.7 0.7 ; 1 1; 0.3 0.7]
+allGammas = [0.3 0.7 ; 0.3 1; 0.3 0.7]
+
+s.clc.startRew = 1;
+
+s.plt.colorLims = [-0.7 0.7];
+
+
+
+% -------------------------------------------------------------------------
+
+% Data fitting variables
+
+s.clc.RewardBehindSurfaceFl = 0;
+
+s.clc.startRew = -1;
+s.clc.startSR  = 12;
+s.clc.startSC  =  8;
+s.clc.startSZ  =  1;
+
+s.clc.nearPos = [s.wrld.size(1)-0 8 1]';
+s.clc.nReps = 1;
+
+s.clc.stepUpdateFl = 1; % Whether to update in timesteps - especially important for hitprob and multisens integration
+s.clc.nSteps = 20;
+
+s.clc.baseVel    = [1 0 0];
+
+% Random stimulus dynamics
+rSpr = 0;
+rSprPr = 1;
+cSpr = 0;
+cSprPr = 1;
+zSpr = 0; %%% zSpr = [ -1 0 1 ];
+zSprPr = 1;
+% x y z, Deterministic stimulus dynamics
+s.clc.stimDynams =     @(pos) pos + s.clc.baseVel; % For approaching, set speed positive
+s.clc.randSpread =     {rSpr cSpr zSpr}; % Put a little biit of x and z variability in? Kind of arbitrary
+s.clc.spreadProb =     {rSprPr cSprPr  zSprPr}; % x y z, probabilities of spread
+% Random sensory uncertainties
+s.clc.sensSpread = {[0] , [0] , [0]};
+s.clc.sensProb   = {[1] , [1] , [1]};
+
+
+s.clc.actConsequence = ...
+    [0  0  0 ];     % action 3 right
+
+
+s.wrld.size = [14 15 1];
+% -------------------------------------------------------------------------
+
+
 
 for iFig = 1:3
 
@@ -63,56 +113,61 @@ set(spl, 'Position', [spX(2) spY(2) fS.sub.w(2)+wSpace/4 fS.sub.h(2) ]);
 sFP.plt.plAct=1;
 sFP.plt.lmbCol=8;
 
-s.clc.startSC = 12;
 s.clc.gammaVal = allGammas(iFig,1);
-s.clc.randSpread =     [0];
-s.clc.spreadProb = 1 ./[1];
-s.clc.actConsequence = [0];
-[newQ optQ] = CalcQDirect(s);
-DisplActValsFun(sFP,w,newQ); hold on
+s.clc.randSpread =     {0 0 0};
+s.clc.spreadProb =     {1 1 1};
+s.clc.actConsequence = [0 0 0];
+newQ  = CalcHPDirect(s);
+newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
+DisplActValsFun(sFP,w,-newQ); hold on
 GridOverImage(fS,spl);
+cLims = caxis;
+caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 spl = subplot(40,1000,1)
 set(spl, 'Position', [spX(3)-wSpace/4 spY(2) fS.sub.w(3)+wSpace/4 fS.sub.h(2) ]);
 s.clc.gammaVal = allGammas(iFig,2);
-[newQ optQ] = CalcQDirect(s);
-DisplActValsFun(sFP,w,newQ); hold on
+newQ = CalcHPDirect(s);
+newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
+DisplActValsFun(sFP,w,-newQ); hold on
 GridOverImage(fS,spl);
+cLims = caxis;
+caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 spl = subplot(40,1000,1)
 set(spl, 'Position', [spX(4) spY(2) fS.sub.w(4)+wSpace/4 fS.sub.h(2) ]);
 s.clc.gammaVal = allGammas(iFig,1);
-s.clc.actConsequence = [-1 0 1];
-[newQ optQ] = CalcQDirect(s);
+s.clc.actConsequence = [0  0  0 ; ... % action 1 stay
+                        0  1  0 ; ... % action 2 left
+                        0 -1  0];     % action 3 right
+newQ = CalcHPDirect(s);
+newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 % Create average value across actions
 if iFig == 3
-    tmpNewQ = repmat(newQ,[1 1 1 1 3]);
-    tmpNewQ(:,:,:,2:end  ,1)   = newQ(:,:,:,1:end-1);
-    tmpNewQ(:,:,:,1:end-1,3) = newQ(:,:,:,2:end);
-    newQ = nanmean(tmpNewQ,5);
-    caxis([0 0.7]);
+    newQ = nanmean(newQ,5);
 end
-DisplActValsFun(sFP,w,newQ); hold on
+DisplActValsFun(sFP,w,-newQ); hold on
 GridOverImage(fS,spl);
+cLims = caxis;
+caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 spl = subplot(40,1000,1)
 set(spl, 'Position', [spX(5)-wSpace/4 spY(2) fS.sub.w(5)+wSpace/4 fS.sub.h(2) ]);
 
 s.clc.gammaVal = allGammas(iFig,2);
-[newQ optQ] = CalcQDirect(s);
+newQ = CalcHPDirect(s);
+newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 % Create average value across actions
 if iFig == 3
-    tmpNewQ = repmat(newQ,[1 1 1 1 3]);
-    tmpNewQ(:,:,:,2:end  ,1)   = newQ(:,:,:,1:end-1);
-    tmpNewQ(:,:,:,1:end-1,3) = newQ(:,:,:,2:end);
-    newQ = nanmean(tmpNewQ,5);
-    caxis([0 0.7]);
+    newQ = nanmean(newQ,5);
 end
-DisplActValsFun(sFP,w,newQ); hold on
+DisplActValsFun(sFP,w,-newQ); hold on
 GridOverImage(fS,spl);
+cLims = caxis;
+caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 %%%  ------------------------------------------------------------------------
@@ -123,58 +178,65 @@ GridOverImage(fS,spl);
 spl = subplot(40,1000,1)
 set(spl, 'Position', [spX(2) spY(3) fS.sub.w(2)+wSpace/4 fS.sub.h(3) ]);
 
-s.clc.startSC = 12;
 s.clc.gammaVal = allGammas(iFig,1);
-s.clc.randSpread =     [-1 0 1];
-s.clc.spreadProb = 1 ./[ 3 3 3];
-s.clc.actConsequence = [0];
-[newQ optQ] = CalcQDirect(s);
-DisplActValsFun(sFP,w,newQ); hold on
+s.clc.randSpread =     {0,     [-1 0 1] , 0};
+s.clc.spreadProb =     {1, 1 ./[ 3 3 3] ,  1};
+s.clc.actConsequence = [0 0 0];
+newQ = CalcHPDirect(s);
+newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
+DisplActValsFun(sFP,w,-newQ); hold on
 GridOverImage(fS,spl);
+cLims = caxis;
+caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 
 spl = subplot(40,1000,1)
 set(spl, 'Position', [spX(3)-wSpace/4 spY(3) fS.sub.w(3)+wSpace/4 fS.sub.h(2) ]);
 s.clc.gammaVal = allGammas(iFig,2);
-[newQ optQ] = CalcQDirect(s);
-DisplActValsFun(sFP,w,newQ); hold on
+newQ = CalcHPDirect(s);
+newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
+DisplActValsFun(sFP,w,-newQ); hold on
 GridOverImage(fS,spl);
+cLims = caxis;
+caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 spl = subplot(40,1000,1)
 set(spl, 'Position', [spX(4) spY(3) fS.sub.w(4)+wSpace/4 fS.sub.h(2) ]);
 s.clc.gammaVal = allGammas(iFig,1);
-s.clc.actConsequence = [-1 0 1];    
-[newQ optQ] = CalcQDirect(s);
+s.clc.actConsequence = [0  0  0 ; ... % action 1 stay
+                        0  1  0 ; ... % action 2 left
+                        0 -1  0];     % action 3 right 
+newQ = CalcHPDirect(s);
+newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 % Create average value across actions
 if iFig == 3
-    tmpNewQ = repmat(newQ,[1 1 1 1 3]);
-    tmpNewQ(:,:,:,2:end  ,1)   = newQ(:,:,:,1:end-1);
-    tmpNewQ(:,:,:,1:end-1,3) = newQ(:,:,:,2:end);
-    newQ = nanmean(tmpNewQ,5);
-    caxis([0 0.7]);
+    newQ = nanmean(newQ,5);
 end
-DisplActValsFun(sFP,w,newQ); hold on
+DisplActValsFun(sFP,w,-newQ); hold on
 GridOverImage(fS,spl);
+cLims = caxis;
+caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 
 spl = subplot(40,1000,1)
 set(spl, 'Position', [spX(5)-wSpace/4 spY(3) fS.sub.w(5)+wSpace/4 fS.sub.h(2) ]);
 s.clc.gammaVal = allGammas(iFig,2);
-s.clc.actConsequence = [-1 0 1];
-[newQ optQ] = CalcQDirect(s);
+s.clc.actConsequence = [0  0  0 ; ... % action 1 stay
+                        0  1  0 ; ... % action 2 left
+                        0 -1  0];     % action 3 right
+newQ = CalcHPDirect(s);
+newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 % Create average value across actions
 if iFig == 3
-    tmpNewQ = repmat(newQ,[1 1 1 1 3]);
-    tmpNewQ(:,:,:,2:end  ,1)   = newQ(:,:,:,1:end-1);
-    tmpNewQ(:,:,:,1:end-1,3) = newQ(:,:,:,2:end);
-    newQ = nanmean(tmpNewQ,5);
-    caxis([0 0.7]);
+    newQ = nanmean(newQ,5);
 end
-DisplActValsFun(sFP,w,newQ); hold on
+DisplActValsFun(sFP,w,-newQ); hold on
 GridOverImage(fS,spl);
+cLims = caxis;
+caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 
@@ -299,7 +361,8 @@ FNT = {'HorizontalAlignment', 'center', ...
     'FontSize', 12, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
 txt=text(spl,0, 0, 'Rewards','VerticalAlignment', 'middle',  FNT{:});
 
-colormap(whitetocol(100,[0 0 .7]))
+% colormap(whitetocol(100,[0 0 .7]))
+colormap(redbluecmapRory)
 
 end
 
@@ -308,8 +371,8 @@ end
 
 for iF = 1:length(fig)
     set(fig{iF}, 'Renderer', 'painters'); % default, opengl
-    saveas(fig{iF},['Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '.eps'] , 'epsc')
-    saveas(fig{iF},['Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '.pdf'] , 'pdf')
+    saveas(fig{iF},['Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '_startRew' num2str(s.clc.startRew) '.eps'] , 'epsc')
+    saveas(fig{iF},['Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '_startRew' num2str(s.clc.startRew) '.pdf'] , 'pdf')
 end
 
 %% FUNCTIONS
@@ -328,8 +391,8 @@ optQ = zeros([s.wrld.size s.wrld.size]);
 
 % first initialise with the contact reward
 for iLC = 1:length(newQ)
-    newQ(:,iLC,s.clc.startSC,iLC) = 1;
-    optQ(:,iLC,s.clc.startSC,iLC) = 1;
+    newQ(:,iLC,s.clc.startSC,iLC) = s.clc.startRew;
+    optQ(:,iLC,s.clc.startSC,iLC) = s.clc.startRew;
 end
 
 % next, loop through rows backwards and add sums

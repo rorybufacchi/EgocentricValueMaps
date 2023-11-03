@@ -20,15 +20,29 @@ end
 % first initialise with the contact reward. Also behind the 'skin surface'
 % [hence the startSR:end in the 2nd dimension]
 for iVol = 1:length(s.clc.startSZ)
-    if numel(s.clc.startRew) == 1
-        newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew;
-    else
-        % If there are multiple rewards, it is the hand sliding over the
-        % body situation, so I shouls split the rewards accordingly
-        for iSplitInd = 1:length(s.clc.rewSplitInd)
-        if iVol >= s.clc.rewSplitInd(iSplitInd) & iVol < s.clc.rewSplitInd(iSplitInd+1)
-            newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew(iSplitInd);
+    if s.clc.RewardBehindSurfaceFl == 1
+        if numel(s.clc.startRew) == 1
+            newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew;
+        else
+            % If there are multiple rewards, it is the hand sliding over the
+            % body situation, so I shouls split the rewards accordingly
+            for iSplitInd = 1:length(s.clc.rewSplitInd)
+            if iVol >= s.clc.rewSplitInd(iSplitInd) & iVol < s.clc.rewSplitInd(iSplitInd+1)
+                newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew(iSplitInd);
+            end
+            end
         end
+    else
+        if numel(s.clc.startRew) == 1
+            newQ(:,s.clc.startSR(iVol),s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew;
+        else
+            % If there are multiple rewards, it is the hand sliding over the
+            % body situation, so I shouls split the rewards accordingly
+            for iSplitInd = 1:length(s.clc.rewSplitInd)
+            if iVol >= s.clc.rewSplitInd(iSplitInd) & iVol < s.clc.rewSplitInd(iSplitInd+1)
+                newQ(:,s.clc.startSR(iVol),s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew(iSplitInd);
+            end
+            end
         end
     end
 end
@@ -148,15 +162,15 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
 
                     % DEBUGGING
                     if iAct == 1 & ...
-                            iSR == 47 & ...
-                            iSC == 11 & ... 11
-                            iSZ == 15 %13
+                            iSR == 11 & ...
+                            iSC == 7 & ... 11
+                            iSZ == 1 %13
 
 % %                                        any(s.clc.startSR - 1 == iSR) & ...
 % %                                        any(s.clc.startSC)     == iSC & ...
 % %                                        any(s.clc.startSZ)     == iSZ,
 
-                        disp('test')
+%                         disp('test')
                     end
 
                     % Find expected value across future possible states: loop

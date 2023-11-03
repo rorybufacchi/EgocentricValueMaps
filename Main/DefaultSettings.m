@@ -203,17 +203,17 @@ s.plt.nPm = 100; % number of perumtations for fpermutation tests
 
 % -------------------------------------------------------------------------
 % For newer figure settings
-s.plt.varargs = {};
-s.plt.fS.c = [0 0 0.7];
-s.plt.fS.nBins = 5;
-s.plt.fS.pltType = 'shadeplot';
-s.plt.grid = 0; % if 1, plots a grid over any imagesc image
-s.plt.showLimb = 0; % if is 1, plots a circle at the position of the limb
-s.plt.showBodyCol = []; % the number of the column where to plot the body
-s.plt.fancyWorld = 0; % For plotting of the actual world state
-s.plt.otherStateVars = [s.plt.lmbRow-6 5]; % For calculating neural activation with the threats/goals in additional positions
-s.plt.contours = 0;
-s.plt.contourVals = [-0.3, 0.3];
+s.plt.varargs           = {};
+s.plt.fS.c              = [0 0 0.7];
+s.plt.fS.nBins          = 5;
+s.plt.fS.pltType        = 'shadeplot';
+s.plt.grid              = 0; % if 1, plots a grid over any imagesc image
+s.plt.showLimb          = 0; % if is 1, plots a circle at the position of the limb
+s.plt.showBodyCol       = []; % the number of the column where to plot the body
+s.plt.fancyWorld        = 0; % For plotting of the actual world state
+s.plt.otherStateVars    = [s.plt.lmbRow-6 5]; % For calculating neural activation with the threats/goals in additional positions
+s.plt.contours          = 0;
+s.plt.contourVals       = [-0.3, 0.3];
 
 % -------------------------------------------------------------------------
 % Figure settins I'm not sure about $$$
@@ -221,18 +221,18 @@ s.plt.nSubCols = 2;
 
 % -------------------------------------------------------------------------
 % Settings for graph/network analysis
-s.nta.useNetWeight = 'Norm';  % options: 'Norm','Raw','Ranked'
-s.nta.comparison = 'Valence'; % options: 'Valence','Bodypart'
-s.nta.compScale = 'Graded'; % options: 'Graded','Absolute'
+s.nta.useNetWeight  = 'Norm';  % options: 'Norm','Raw','Ranked'
+s.nta.comparison    = 'Valence'; % options: 'Valence','Bodypart'
+s.nta.compScale     = 'Graded'; % options: 'Graded','Absolute'
 
 % -------------------------------------------------------------------------
 % Performance testing parameters
-s.prf.maxActions = 1e3;
-s.prf.newNet = 0;
-s.prf.newTable = 1;
-s.prf.epsilon = 0;
-s.prf.nRep = 100;
-s.prf.skipBatches = 1;
+s.prf.maxActions    = 1e3;
+s.prf.newNet        = 0;
+s.prf.newTable      = 1;
+s.prf.epsilon       = 0;
+s.prf.nRep          = 100;
+s.prf.skipBatches   = 1;
 
 % -------------------------------------------------------------------------
 % Video plot variables
@@ -241,21 +241,25 @@ s.prf.skipBatches = 1;
 
 % -------------------------------------------------------------------------
 % Data fitting variables
-s.clc.startRew =  1;
-s.clc.nearPos = [s.wrld.size(1)-12 11 13]';
-s.clc.nReps = 1; 
-s.clc.stepUpdateFl = 0; % Whether to update in timesteps - especially important for hitprob and multisens integration
-s.clc.nSteps = 1; 
-s.clc.gammaVal   = 0.8;
-s.clc.baseVel    = [4 0 0]; 
-s.clc.actConsequence = [0  0  0];
+s.clc.startRew              =  1;
+s.clc.nearPos               = [s.wrld.size(1)-12 11 13]';
+s.clc.startSR               = 12; % Limb row
+s.clc.startSC               =  8; % Limb column
+s.clc.startSZ               =  1; % Limb hieght (not important in 2D)
+s.clc.nReps                 = 1; 
+s.clc.stepUpdateFl          = 0; % Whether to update in timesteps - especially important for hitprob and multisens integration
+s.clc.RewardBehindSurfaceFl = 0; % Whether or not to have more depth to the body
+s.clc.nSteps                = 1; 
+s.clc.gammaVal              = 0.8;
+s.clc.baseVel               = [4  0  0]; 
+s.clc.actConsequence        = [0  0  0];
 % Random stimulus dynamics
-rSpr = [-1 0 1];
-rSprPr = gaussmf(rSpr,[1 0]) ./ sum(gaussmf(rSpr,[1 0]));
-cSpr = [-1 0 1]; %%% cSpr = [ -1 0 1 ];
-cSprPr = gaussmf(cSpr,[1 0]) ./ sum(gaussmf(cSpr,[1 0]));
-zSpr = [-1 0 1]; %%% zSpr = [ -1 0 1 ];
-zSprPr = gaussmf(zSpr,[1 0]) ./ sum(gaussmf(zSpr,[1 0]));
+rSpr    = [-1 0 1];
+rSprPr  = gaussmf(rSpr,[1 0]) ./ sum(gaussmf(rSpr,[1 0]));
+cSpr    = [-1 0 1]; %%% cSpr = [ -1 0 1 ];
+cSprPr  = gaussmf(cSpr,[1 0]) ./ sum(gaussmf(cSpr,[1 0]));
+zSpr    = [-1 0 1]; %%% zSpr = [ -1 0 1 ];
+zSprPr  = gaussmf(zSpr,[1 0]) ./ sum(gaussmf(zSpr,[1 0]));
 % x y z, Deterministic stimulus dynamics
 s.clc.stimDynams =     @(pos) pos + s.clc.baseVel; % For approaching, set speed positive
 s.clc.randSpread =     {rSpr cSpr zSpr}; % Put a little biit of x and z variability in? Kind of arbitrary
