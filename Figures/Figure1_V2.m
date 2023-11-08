@@ -11,7 +11,7 @@ allGammas = [0.3 0.7 ; 0.3 1; 0.3 0.7]
 
 s.clc.startRew = 1;
 
-s.plt.colorLims = [-0.7 0.7];
+s.plt.colorLims = [0 0.7];
 
 
 
@@ -20,8 +20,8 @@ s.plt.colorLims = [-0.7 0.7];
 % Data fitting variables
 
 s.clc.RewardBehindSurfaceFl = 0;
+s.clc.checkCollisionFl      = 0;
 
-s.clc.startRew = -1;
 s.clc.startSR  = 12;
 s.clc.startSC  =  8;
 s.clc.startSZ  =  1;
@@ -29,8 +29,8 @@ s.clc.startSZ  =  1;
 s.clc.nearPos = [s.wrld.size(1)-0 8 1]';
 s.clc.nReps = 1;
 
-s.clc.stepUpdateFl = 1; % Whether to update in timesteps - especially important for hitprob and multisens integration
-s.clc.nSteps = 20;
+s.clc.stepUpdateFl = 0; %; % Whether to update in timesteps - especially important for hitprob and multisens integration
+s.clc.nSteps = 1; %20;
 
 s.clc.baseVel    = [1 0 0];
 
@@ -119,10 +119,10 @@ s.clc.spreadProb =     {1 1 1};
 s.clc.actConsequence = [0 0 0];
 newQ  = CalcHPDirect(s);
 newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-DisplActValsFun(sFP,w,-newQ); hold on
+DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-cLims = caxis;
-caxis(max(abs(cLims)) .* [-1, 1] );
+% % % cLims = caxis;
+% % % caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 spl = subplot(40,1000,1)
@@ -130,10 +130,10 @@ set(spl, 'Position', [spX(3)-wSpace/4 spY(2) fS.sub.w(3)+wSpace/4 fS.sub.h(2) ])
 s.clc.gammaVal = allGammas(iFig,2);
 newQ = CalcHPDirect(s);
 newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-DisplActValsFun(sFP,w,-newQ); hold on
+DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-cLims = caxis;
-caxis(max(abs(cLims)) .* [-1, 1] );
+% % % cLims = caxis;
+% % % caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 spl = subplot(40,1000,1)
@@ -148,10 +148,10 @@ newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 if iFig == 3
     newQ = nanmean(newQ,5);
 end
-DisplActValsFun(sFP,w,-newQ); hold on
-GridOverImage(fS,spl);
-cLims = caxis;
-caxis(max(abs(cLims)) .* [-1, 1] );
+DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
+% % % GridOverImage(fS,spl);
+% % % cLims = caxis;
+% % % caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 spl = subplot(40,1000,1)
@@ -164,10 +164,10 @@ newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 if iFig == 3
     newQ = nanmean(newQ,5);
 end
-DisplActValsFun(sFP,w,-newQ); hold on
+DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-cLims = caxis;
-caxis(max(abs(cLims)) .* [-1, 1] );
+% % % cLims = caxis;
+% % % caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 %%%  ------------------------------------------------------------------------
@@ -184,10 +184,10 @@ s.clc.spreadProb =     {1, 1 ./[ 3 3 3] ,  1};
 s.clc.actConsequence = [0 0 0];
 newQ = CalcHPDirect(s);
 newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-DisplActValsFun(sFP,w,-newQ); hold on
+DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-cLims = caxis;
-caxis(max(abs(cLims)) .* [-1, 1] );
+% % % cLims = caxis;
+% % % caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 
@@ -196,10 +196,10 @@ set(spl, 'Position', [spX(3)-wSpace/4 spY(3) fS.sub.w(3)+wSpace/4 fS.sub.h(2) ])
 s.clc.gammaVal = allGammas(iFig,2);
 newQ = CalcHPDirect(s);
 newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-DisplActValsFun(sFP,w,-newQ); hold on
+DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-cLims = caxis;
-caxis(max(abs(cLims)) .* [-1, 1] );
+% % % cLims = caxis;
+% % % caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 spl = subplot(40,1000,1)
@@ -214,10 +214,10 @@ newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 if iFig == 3
     newQ = nanmean(newQ,5);
 end
-DisplActValsFun(sFP,w,-newQ); hold on
+DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-cLims = caxis;
-caxis(max(abs(cLims)) .* [-1, 1] );
+% % % cLims = caxis;
+% % % caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 
@@ -233,10 +233,10 @@ newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 if iFig == 3
     newQ = nanmean(newQ,5);
 end
-DisplActValsFun(sFP,w,-newQ); hold on
+DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-cLims = caxis;
-caxis(max(abs(cLims)) .* [-1, 1] );
+% % % cLims = caxis;
+% % % caxis(max(abs(cLims)) .* [-1, 1] );
 % % colorbar
 
 
@@ -361,9 +361,42 @@ FNT = {'HorizontalAlignment', 'center', ...
     'FontSize', 12, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
 txt=text(spl,0, 0, 'Rewards','VerticalAlignment', 'middle',  FNT{:});
 
-% colormap(whitetocol(100,[0 0 .7]))
-colormap(redbluecmapRory)
+if sign(s.clc.startRew) > 0
+    colormap(whitetocol(100,[ 0   0   0.7 ]))
+else
+    colormap(whitetocol(100,[ 0.7 0   0   ]))
+end
+% colormap(redbluecmapRory)
 
+end
+
+%% Create line plots
+
+iFig = 4;
+fig{iFig} = figure('Units', 'centimeters', 'Position', [5 5 20 4 ]);
+
+
+qMults    = [1./3 2./3 1];
+discFacts = [0.3 0.7 1];
+
+
+for iDiscFact = 1:numel(discFacts)
+    s.clc.gammaVal          = discFacts(iDiscFact);
+    s.clc.randSpread        = {0 0 0};
+    s.clc.spreadProb        = {1 1 1};
+    s.clc.actConsequence    = [0 0 0];
+    newQ                    = CalcHPDirect(s);
+    qForLine(:,iDiscFact,:) = repmat( newQ(1,3:11,8) , [1 1 numel(qMults)]) .* permute(qMults,[1 3 2]) ;
+end
+
+for iQMult = 1:numel(qMults)
+    subplot(1, numel(qMults), iQMult);
+    plot(9:-1:1, qForLine(:,:,iQMult),'-o'); hold on
+
+    bar(flipud(qForLine(:,:,iQMult)));
+
+    ylim([0 1.1]);
+    xlim([0.5 5.5]);
 end
 
 %% Save figures
