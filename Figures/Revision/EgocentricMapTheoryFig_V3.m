@@ -1,7 +1,7 @@
 
 load('Results\ForFigures\Fig1_Results_v3')
-s=rS(end).s;
-w=rS(end).w;
+s = DefaultSettings(rS(end).s);
+% w = rS(end).w;
 %
 %%
 
@@ -9,6 +9,15 @@ w=rS(end).w;
 allGammas = [0.7];
 
 iGamma = 1;
+
+
+% New settings - let's see if this make things look neater
+s.clc.RewardBehindSurfaceFl = 0;
+s.clc.checkCollisionFl      = 0;
+
+s.clc.maximiseSimilarityType = 'OverallQ'; %'WinningQ' ; %'ChosenAction'; % 'OverallQ'
+
+
 
 
 % settings for plot
@@ -26,8 +35,7 @@ fS.gridXstep = 1;
 fS.gridYstart = 3.5;
 fS.gridYstep = 1;
 
-fS.cAxis = allGammas(iGamma) .* [-1 1];
-% fS.cAxis = allGammas(iGamma) .* [-.7 .7];
+
 
 sFP.plt.lmbCol=8;
 
@@ -40,8 +48,8 @@ s.clc.startSZ =  1;
 s.clc.nearPos = [s.wrld.size(1)-0 8 1]';
 s.clc.nReps = 1;
 
-s.clc.stepUpdateFl = 1; % Whether to update in timesteps - especially important for hitprob and multisens integration
-s.clc.nSteps = 20;
+s.clc.stepUpdateFl = 0; % Whether to update in timesteps - especially important for hitprob and multisens integration
+s.clc.nSteps = 1;
 
 s.clc.gammaVal   = allGammas(iGamma);
 s.clc.baseVel    = [1 0 0];
@@ -50,8 +58,10 @@ s.clc.baseVel    = [1 0 0];
 rSpr = 0;
 rSprPr = 1;
 % % % rSpr = [-1 0 1];
-% % % % rSprPr = 1./3 .* [1 1 1];
-% % % rSprPr = [.1 .8 .1];
+% % % rSprPr = 1./3 .* [1 1 1];
+% % % % rSprPr = [.1 .8 .1];
+% % % rSpr = [0 1];
+% % % rSprPr = 1./2 .* [1 1];
 
 
 cSpr = 0;
@@ -95,14 +105,22 @@ s.clc.actConsequence = ...
     0 -1  0];     % action 3 right
 
 
+fS.cAxis = allGammas(iGamma) .* [-1 1] .* max(cSprPr);
+% fS.cAxis = allGammas(iGamma) .* [-1 1] ./3;
+% fS.cAxis = allGammas(iGamma) .* [-.7 .7];
+
+
 s.wrld.size = [14 15 1];
+
+clear baseTasks
 
 % POLICY: grab goal
 % --------------------------------
 % Task: grab goal
+s.clc.useAltPolicyFl = 0;
 s.clc.startRew = 1;
-polGtaskGQ = CalcHPDirect(s);
-polGtaskGQ = repmat(permute(polGtaskGQ,[4 5 2 3 1]),[14 15 1 1]);
+polGtaskGQtmp = CalcHPDirect(s);
+polGtaskGQ = repmat(permute(polGtaskGQtmp,[4 5 2 3 1]),[14 15 1 1]);
 baseTasks{1,1}.allQ = polGtaskGQ;
 baseTasks{1,1}.name = 'Pol: Goal, Task: Goal';
 
@@ -111,12 +129,25 @@ polGtaskTQ = -polGtaskGQ;
 baseTasks{1,2}.allQ = polGtaskTQ;
 baseTasks{1,2}.name = 'Pol: Goal, Task: Threat';
 
+% Task: wide goal
+sTmp = s;
+sTmp.clc.useAltPolicyFl = 1;
+sTmp.clc.startSC =  [ 7  8  9];
+sTmp.clc.startSR =  [12 12 12];
+sTmp.clc.startSZ =  [ 1  1  1];
+sTmp.clc.startRew = 1;
+polGtaskWideGQtmp = CalcHPDirect(sTmp, [], polGtaskGQtmp);
+polGtaskWideGQ = repmat(permute(polGtaskWideGQtmp,[4 5 2 3 1]),[14 15 1 1]);
+baseTasks{1,3}.allQ = polGtaskWideGQ;
+baseTasks{1,3}.name = 'Pol: Goal,Task: Wide Goal';
+
+
 % POLICY: avoid threat
 % --------------------------------
 % Task: avoid threat
 s.clc.startRew = -1;
-polTtaskTQ = CalcHPDirect(s);
-polTtaskTQ = repmat(permute(polTtaskTQ,[4 5 2 3 1]),[14 15 1 1]);
+polTtaskTQtmp = CalcHPDirect(s);
+polTtaskTQ = repmat(permute(polTtaskTQtmp,[4 5 2 3 1]),[14 15 1 1]);
 baseTasks{2,2}.allQ = polTtaskTQ;
 baseTasks{2,2}.name = 'Pol: Threat, Task: Goal';
 
@@ -124,6 +155,58 @@ baseTasks{2,2}.name = 'Pol: Threat, Task: Goal';
 polTtaskGQ = -polTtaskTQ;
 baseTasks{2,1}.allQ = polTtaskGQ;
 baseTasks{2,1}.name = 'Pol: Threat, Task: Threat';
+
+% Task: wide goal
+sTmp = s;
+sTmp.clc.useAltPolicyFl = 1;
+sTmp.clc.startSC =  [ 7  8  9];
+sTmp.clc.startSR =  [12 12 12];
+sTmp.clc.startSZ =  [ 1  1  1];
+sTmp.clc.startRew = 1;
+polTtaskWideGQtmp = CalcHPDirect(sTmp, [], polTtaskTQtmp);
+polTtaskWideGQ = repmat(permute(polTtaskWideGQtmp,[4 5 2 3 1]),[14 15 1 1]);
+baseTasks{2,3}.allQ = polTtaskWideGQ ; %widepolGtaskTQ(:,:,:,:,1);
+baseTasks{2,3}.name = 'Pol: Threat,Task: Wide Goal';
+
+
+
+% POLICY: grab WIDE goal
+% --------------------------------
+% Task: wide goal
+sTmp = s;
+sTmp.clc.useAltPolicyFl = 0;
+sTmp.clc.startSC =  [ 7  8  9];
+sTmp.clc.startSR =  [12 12 12];
+sTmp.clc.startSZ =  [ 1  1  1];
+sTmp.clc.startRew = 1;
+polWideGtaskWideGQtmp = CalcHPDirect(sTmp);
+polWideGtaskWideGQ = repmat(permute(polWideGtaskWideGQtmp,[4 5 2 3 1]),[14 15 1 1]);
+baseTasks{3,3}.allQ = polWideGtaskWideGQ;
+baseTasks{3,3}.name = 'Pol: Wide Goal,Task: WideGoal';
+
+
+
+% Task: grab goal
+s.clc.useAltPolicyFl = 1;
+s.clc.startRew = 1;
+polWideGtaskGQtmp = CalcHPDirect(s,[], polWideGtaskWideGQtmp);
+polWideGtaskGQ = repmat(permute(polWideGtaskGQtmp,[4 5 2 3 1]),[14 15 1 1]);
+baseTasks{3,1}.allQ = polWideGtaskGQ;
+baseTasks{3,1}.name = 'Pol: Wide Goal, Task: Goal';
+
+% Task: avoid threat
+s.clc.useAltPolicyFl = 1;
+s.clc.startRew = -1;
+polWideGtaskTQtmp = CalcHPDirect(s,[], polWideGtaskWideGQtmp);
+polWideGtaskTQ = repmat(permute(polWideGtaskTQtmp,[4 5 2 3 1]),[14 15 1 1]);
+baseTasks{3,2}.allQ = polWideGtaskTQ;
+baseTasks{3,2}.name = 'Pol: Wide Goal, Task: Threat';
+
+
+
+
+% Reset alternative policy use
+s.clc.useAltPolicyFl = 0;
 
 
 % Create baseQ (matrix of basis tasks)
@@ -177,9 +260,9 @@ tasksToRecreate{2}.name = 'WideThreat';
 s.clc.startSC =  8;
 
 % Task: Pass 2 blocks by the right of the stimulus
-stationaryQ              = zeros(size(polGtaskGQ(:,:,:,:,1)));
-stationaryQ(:,:,:,3:15)  = polGtaskGQ(:,:,:,1:13,1);
-stationaryQ(:,:,:,1)     = polGtaskGQ(:,:,:,15,1);
+stationaryQ              = zeros(size(polGtaskGQ(:,:,:,:,:)));
+stationaryQ(:,:,:,3:15,:)  = polGtaskGQ(:,:,:,1:13,:);
+stationaryQ(:,:,:,1,:)     = polGtaskGQ(:,:,:,15,:);
 tasksToRecreate{3}.allQtoRecreate = stationaryQ;  %stationaryQ(:,:,:,:,1);
 tasksToRecreate{3}.name  = 'PassByRight2blocks';
 
@@ -195,7 +278,7 @@ tasksToRecreate{4}.name     = 'FlickerStim';
 % Plot the original Q-values
 f.EgocentricTheory.f = figure('Position',[20 -20 1800 1800]),
 sFP.act.Name = {'Stay','Left','Right','Up','Down','LeftUp','RightUp','LeftDown','RightDown'};
-sFP.nCols = 3 + numel(baseTasks) ;
+sFP.nCols = 3 + size(baseTasks,1) .* size(s.clc.actConsequence,1) ;
 sFP.nRows = 5;
 iCol = 1;
 for iPol = 1:size(baseTasks,1)
@@ -211,7 +294,7 @@ for iPol = 1:size(baseTasks,1)
             title(['Q: ' sFP.act.Name{iAct}]);
             set(gca,'box','off');
             axis square
-            title([ baseTasks{iTask}.name ]);
+            title([ baseTasks{iPol,iTask}.name ]);
             if iCol == 1
                 ylabel([ sFP.act.Name{iAct} ]);
             end
@@ -221,7 +304,8 @@ for iPol = 1:size(baseTasks,1)
 end
 
 
-sFP.plt.plAct=1;
+sFP.plt.plAct = 1;
+cAct = sFP.plt.plAct;
 
 % Plot the Q values to be fitted
 for iFig = 1:numel(tasksToRecreate)
@@ -229,7 +313,7 @@ for iFig = 1:numel(tasksToRecreate)
     allQtoRecreate  = tasksToRecreate{iFig}.allQtoRecreate; %polGtaskTQ(:,:,:,:,1);
     allQtoPlot      = allQtoRecreate(:,:,:,:,cAct);
 
-    subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(iFig - 1) + 7  );
+    subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(iFig - 1) + size(baseTasks,1) .* size(s.clc.actConsequence,1) + 3 );
     DisplActValsFun(sFP,w,allQtoPlot); hold on
     GridOverImage(fS,gca);
     colormap(flip(redbluecmapRory));
@@ -257,13 +341,14 @@ for iFig = 1:numel(tasksToRecreate)
 % % %     % ==================================================================
 
     % ==================================================================
-    % FIT THE DATA IN THE BARRETO METHOD
+    % FIT THE DATA MORE CLOSE TO THE BARRETO METHOD (i.e. don't use actions
+    % as separate features)
     % Define function to be optimised
     FunToOpt = @(p) ErrFun(baseQ, allQtoRecreate, p, cAct, sFP);
 
     % Set optimisation options - keep it simple
     A = []; b = []; Aeq = []; beq = []; a = tic;
-    w0 = [1 2]';
+    w0 = ones([size(baseQ,7), 1]);
     lb = -[Inf Inf]';
     ub = [Inf Inf]';
     % Run optimisation
@@ -292,7 +377,7 @@ for iFig = 1:numel(tasksToRecreate)
     % ==================================================================
 
 
-    subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(iFig - 1) + 6  );
+    subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(iFig - 1) + size(baseTasks,1) .* size(s.clc.actConsequence,1) + 2  );
     DisplActValsFun(sFP,w,fittedData); hold on
     GridOverImage(fS,gca);
     colormap(flip(redbluecmapRory));
@@ -302,46 +387,50 @@ for iFig = 1:numel(tasksToRecreate)
     axis square
 
     % Plot the chosen policy
-    subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(iFig - 1) + 5  );
+    subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(iFig - 1) + size(baseTasks,1) .* size(s.clc.actConsequence,1) + 1 );
     DisplActValsFun(sFP,w,bestPsi); hold on
     GridOverImage(fS,gca);
-    caxis([1 2])
+%     caxis([1 2])
     title(['Optimal Psi'] );
     set(gca,'box','off')
     axis square
 
 end
 
-% Show the weighted sum of the successor representation
-subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(numel(tasksToRecreate)) + 6  );
-psiVals = max(abs(baseQtmp),[],5);
-sFP.plt.plAct = 1;
-DisplActValsFun(sFP,w,psiVals); hold on
-GridOverImage(fS,gca);
-colormap(flip(redbluecmapRory));
-caxis(fS.cAxis);
-title(['PSI']);
-set(gca,'box','off')
-axis square
+% % % % Show the weighted sum of the successor representation
+% % % subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(numel(tasksToRecreate)) + 6  );
+% % % psiVals = max(abs(baseQtmp),[],5);
+% % % sFP.plt.plAct = 1;
+% % % DisplActValsFun(sFP,w,psiVals); hold on
+% % % GridOverImage(fS,gca);
+% % % colormap(flip(redbluecmapRory));
+% % % caxis(fS.cAxis);
+% % % title(['PSI']);
+% % % set(gca,'box','off')
+% % % axis square
 
 
-% Show 'data'
-subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(numel(tasksToRecreate)) + 7  );
-rng('default');
-psiVals = max(abs(baseQtmp),[],5) + (rand(size(psiVals))-0.5)./4;
-sFP.plt.plAct = 1;
-DisplActValsFun(sFP,w,psiVals); hold on
-GridOverImage(fS,gca);
+% % % % Show 'data'
+% % % subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(numel(tasksToRecreate)) + 7  );
+% % % rng('default');
+% % % psiVals = max(abs(baseQtmp),[],5) + (rand(size(psiVals))-0.5)./4;
+% % % sFP.plt.plAct = 1;
+% % % DisplActValsFun(sFP,w,psiVals); hold on
+% % % GridOverImage(fS,gca);
+% % % colormap(flip(redbluecmapRory));
+% % % caxis(fS.cAxis);
+% % % title(['empirical data']);
+% % % set(gca,'box','off')
+% % % axis square
+
 colormap(flip(redbluecmapRory));
-caxis(fS.cAxis);
-title(['empirical data']);
-set(gca,'box','off')
-axis square
 
 % Go through the optimal policies and change colour maps locally
 for iFig = 1:numel(tasksToRecreate)
-            subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(iFig - 1) + 5  );
-            colormap(gca,coltocol(100,[0.8 0.8 0.8],[0.2 0.2 0.2]));
+            subplot(sFP.nRows, sFP.nCols, sFP.nCols.*(iFig - 1) + size(baseTasks,1) .* size(s.clc.actConsequence,1) + 1  );
+%             colormap(gca,coltocol(100,[0.8 0.8 0.8],[0.2 0.2 0.2]));
+%             caxis([.5 3])
+            colormap(gca,[.3 .3 .8 ; .8 .3 .3; 0 0 .6])
 end
 
 %% Save figures
@@ -349,8 +438,8 @@ allFields = fields(f);
 for iF = 1:length(allFields)
     cF = allFields{iF};
     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['Results\ForFigures\TheoreticalFigMap\' cF '.eps'] , 'epsc')
-    saveas(f.(cF).f,['Results\ForFigures\TheoreticalFigMap\' cF '.pdf'] , 'pdf')
+    saveas(f.(cF).f,['Results\ForFigures\TheoreticalFigMap\' cF 'BIGGER.eps'] , 'epsc')
+    saveas(f.(cF).f,['Results\ForFigures\TheoreticalFigMap\' cF 'BIGGER.pdf'] , 'pdf')
 end
 
 
@@ -412,8 +501,48 @@ function [sSqErr bestPsi] = ErrFun(baseQ, allQtoRecreate, w, cAct, s)
 % if sFP.clc.useActsAsBases
 % % % allSSqErr = (sum(baseQ(:,:,:,:,cAct,:,:,:) .* permute(w,[2 3 4 5 6 7 1]),7) - allQtoRecreate) .^ 2;
 
-% Optimise weights over all actions, so sum over the actions and the tasks
-allSSqErr = sum( (sum(baseQ .* permute(w,[2 3 4 5 6 7 1]),7) - allQtoRecreate) .^ 2 , 5);
+newQ = sum(baseQ .* permute(w,[2 3 4 5 6 7 1]),7);
+
+switch s.clc.maximiseSimilarityType
+    case 'OverallQ'
+        % Optimise weights over all actions, so sum over the actions and the tasks
+        allSSqErr = sum( (newQ - allQtoRecreate) .^ 2 , 5);
+    case 'ChosenAction'
+        [~, chosenAct]           = max(newQ, [] ,5);
+        [~, chosenActToRecreate] = max(allQtoRecreate , [], 5);
+
+        allSSqErr = sum( ((chosenAct - chosenActToRecreate) ~= 0) , 5);
+
+    case 'WinningQ' 
+        [maxQs, chosenAct]   = max( newQ, [] ,5);
+        [maxQToRecreate, chosenActToRecreate] = max(allQtoRecreate  , [], 5);
+        
+        % Compare to most valuable alternative
+        winningQ            = zeros(size(maxQs));
+        winningQToRecreate  = zeros(size(maxQToRecreate));
+        for iR = 1:size(newQ,1)
+            for iC = 1:size(newQ,2)
+                for iRR = 1:size(newQ,3)
+                    for iCC  = 1:size(newQ,4)
+                        for iPol = 1:size(newQ,6)
+                            otherActs = (1:size(newQ,5) ~= chosenAct(iR,iC,iRR,iCC,:,iPol));
+                            winningQ(iR, iC, iRR, iCC,:,iPol)  = ...
+                                maxQs(iR, iC, iRR, iCC,:,iPol) - ...
+                                max(newQ(iR, iC, iRR, iCC,otherActs,iPol), [], 5);
+
+
+                            otherActsToRecreate = (1:size(newQ,5) ~= chosenActToRecreate(iR,iC,iRR,iCC));
+                            winningQToRecreate(iR, iC, iRR, iCC,:) = ...
+                                maxQToRecreate(iR, iC, iRR, iCC,:) - ...
+                                max(allQtoRecreate(iR, iC, iRR, iCC,otherActsToRecreate), [], 5);
+                        end
+                    end
+                end
+            end
+        end
+        
+     allSSqErr = sum( (winningQ - winningQToRecreate).^2 , 5);
+end
 
 [minErrs, bestPsi] =  min( allSSqErr , [] ,6);
 

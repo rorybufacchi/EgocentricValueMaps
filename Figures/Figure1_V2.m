@@ -1,7 +1,7 @@
 % $$$ NEXT is make model type 5 use the network for plotting :) $$$
 
 load('Results\ForFigures\Fig1_Results_v3')
-s=rS(end).s;
+s=DefaultSettings(rS(end).s);
 w=rS(end).w;
 addpath(genpath('Scripts\EgocentricValueMaps'))
 
@@ -9,7 +9,7 @@ addpath(genpath('Scripts\EgocentricValueMaps'))
 % Make 2 plots, one with original gammas, and one with gamma == 1
 allGammas = [0.3 0.7 ; 0.3 1; 0.3 0.7]
 
-s.clc.startRew = 1;
+s.clc.startRew = -1;
 
 s.plt.colorLims = [0 0.7];
 

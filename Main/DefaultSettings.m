@@ -250,10 +250,13 @@ s.clc.nReps                 = 1;
 s.clc.stepUpdateFl          = 0; % Whether to update in timesteps - especially important for hitprob and multisens integration
 s.clc.RewardBehindSurfaceFl = 1; % Whether or not to have more depth to the body
 s.clc.checkCollisionFl      = 1; % Whether to check if a collision has happened anywhere along the line
+s.clc.useAltPolicyFl        = 0; % Whether to use the alternate Q-values supplied as the policy
 s.clc.nSteps                = 1; 
 s.clc.gammaVal              = 0.8;
 s.clc.baseVel               = [4  0  0]; 
 s.clc.actConsequence        = [0  0  0];
+s.clc.maximiseSimilarityType = 'OverallQ'; % Alternatives: 'ChosenAction', For Policy improvement (e.g. egocentric map use).  
+
 % Random stimulus dynamics
 rSpr    = [-1 0 1];
 rSprPr  = gaussmf(rSpr,[1 0]) ./ sum(gaussmf(rSpr,[1 0]));

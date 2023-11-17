@@ -1,11 +1,12 @@
 function [newQ, optQ] = CalcHPDirect(s, varargin)
 % -------------------------------------------------------------------------
-% CalcHPDirect(s)
+% CalcHPDirect(s, newQ, altQ)
 % Calculate Hit probabilities, using the method of CalcQDirect
 
 nA = size(s.clc.actConsequence,1); % Number of actions
 
-if isempty(varargin)
+% Allow loading of previously calculated Q values
+if isempty(varargin{1})
     newQ = zeros([nA s.wrld.size]);
 else
     newQ = varargin{1};
@@ -14,6 +15,19 @@ else
     if size(newQ,1) < nA
         actDiff = nA - size(newQ,1);
         newQ(end+ [1 : actDiff],:,:,:) = zeros([actDiff size(newQ,[2 3 4]) ] );
+    end
+end
+
+
+% Provide alternative Q values for following a different policy
+if isempty(varargin{2})
+    altQ = zeros([nA s.wrld.size]);
+else
+    altQ = varargin{2};
+    % Take into account the possibility of adding actions
+    if size(altQ,1) < nA
+        actDiff = nA - size(altQ,1);
+        altQ(end+ [1 : actDiff],:,:,:) = zeros([actDiff size(altQ,[2 3 4]) ] );
     end
 end
 
@@ -229,12 +243,26 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 % indicates that a collision has happened
                                 
                                 for iRR = 1:numel(rR)
-                                    if squeeze( max( checkCollision(:,...
-                                        rR(iRR) , ...
-                                        cC(iRR) , ...
-                                        zZ(iRR)  ) )) == 1,
-                                        tmpQ = s.clc.startRew;
-                                    end
+                                    % Allow for using alternative policy
+                                    if s.clc.useAltPolicyFl == 1
+                                        [dmyQ, nextAct] = squeeze( max( altQ(:,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) ));
+                                        if squeeze( checkCollision(nextAct,...
+                                                rR(iRR) , ...
+                                                cC(iRR) , ...
+                                                zZ(iRR)  ) ) == 1,
+                                            tmpQ = s.clc.startRew;
+                                        end
+                                    else
+                                        if squeeze( max( checkCollision(:,...
+                                                rR(iRR) , ...
+                                                cC(iRR) , ...
+                                                zZ(iRR)  ) )) == 1,
+                                            tmpQ = s.clc.startRew;
+                                        end
+                                    end 
                                 end
                                 end
 
@@ -243,10 +271,23 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 % q-value of the place the stimulus ends up
                                 % in
                                 if isnan(tmpQ)
-                                    tmpQ = squeeze( max( oldQ(:,...
-                                    actNextR , ...
-                                    actNextC , ...
-                                    actNextZ  ) ));
+                                    % Allow for using alternative policy
+                                    if s.clc.useAltPolicyFl == 1
+                                        [dmyQ, nextAct] = squeeze( max( altQ(:,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) ));
+
+                                        tmpQ = squeeze( oldQ(nextAct,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) );
+                                    else
+                                        tmpQ = squeeze( max( oldQ(:,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) ));
+                                    end
                                 end
 
                                 % Then update the next possible Q value

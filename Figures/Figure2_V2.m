@@ -2,10 +2,10 @@
 % load('D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\WorkSpaceForProxPos.mat')
 % load('D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\WorkSpaceForProxPos_3.mat')
 
-addpath('D:\Old_D\DPPS\DefenseAgent\Scripts\rlsimplepps')
-addpath('D:\Old_D\DPPS\DefenseAgent\Scripts')
-addpath('D:\Old_D\Programs\Matlab\Utilities\')
-addpath('D:\Old_D\Programs\Matlab\Utilities\plotting\colormaps\')
+% % % addpath('D:\Old_D\DPPS\DefenseAgent\Scripts\rlsimplepps')
+% % % addpath('D:\Old_D\DPPS\DefenseAgent\Scripts')
+% % % addpath('D:\Old_D\Programs\Matlab\Utilities\')
+% % % addpath('D:\Old_D\Programs\Matlab\Utilities\plotting\colormaps\')
 
 
 % % % %% Old HBR data
