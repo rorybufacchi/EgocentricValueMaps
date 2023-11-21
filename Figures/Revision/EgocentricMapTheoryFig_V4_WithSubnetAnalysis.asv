@@ -3,6 +3,73 @@ load('Results\ForFigures\Fig1_Results_v3')
 s = DefaultSettings(rS(end).s);
 % w = rS(end).w;
 %
+%% Load subnets
+
+
+% % % load('Results\ForFigures\SuccessorState\NetworkAnalysisWorkSpace2.mat')
+% % % clear allBinNPFpm allBinNPFpm
+
+% all Threat Presences to test the extents with. 0 is just goal, 1 is just
+% 'threat' (which could also have positive valence)
+aTP = [0 1];
+
+
+squishAct = nan([14 15 7 18 2 (length(rS)-1)]);
+
+for iM = 1:1 %length(rS)
+    for iV = 1:2 %length(aTP)
+    
+    
+        sFP = DefaultSettings(rS(iM).s); 
+        sFP.plt.otherStateVars = 3;
+        w = rS(iM).w;
+        net = rS(iM).net;
+        Qtable = rS(iM).Qtable;
+        
+        sFP.plt.plotThrFl = aTP(iV);
+           
+        sFP.plt.rowLims = [1.5 sFP.wrld.size(1)-0.5];
+        sFP.plt.stimRow=[3:size(w.world2D,1)-3];
+        
+        % -------------------------------------------------------------------------
+        % Calculate the correlati-ness of each velocity, for Q-values and neural
+        % activity
+        sFP.plt.meanLimbCols = 1;
+        sFP.plt.fitSigmoid = 0;
+        sFP.plt.lmbCol = [2:(sFP.wrld.size(2)-1)];
+        sFP.plt.stimCol= [2:(sFP.wrld.size(2)-1)] ;
+        [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
+
+        sFP.plt.plAct = 1;
+        sFP.plt.ON = 0;
+        for iL = 1:size(allNeurAct,5)
+            for iN = 1:size(allNeurAct,6)
+                [dmy, squishAct(:,:,iL,iN,iV,iM)] = DisplActValsFun(sFP,w,permute(allNeurAct(:,:,:,:,iL,iN), [3 4 1 2 5 6]));
+            end
+        end
+
+        % Divide the neurons up in different ways
+        % (first make sure I'm only taking the 2nd half of the network
+        netLastHalf = ceil(size(allNeurAct,5)./2) : size(allNeurAct,5);
+        tmpABrat    = allNetAR(iM).A_B_rat(netLastHalf,:);
+        for cL = netLastHalf
+            % Most unselective
+            tmpNeurs            = allNetAR(iM).A_B_rat(netLastHalf,:);
+            [difSize sortInds]       = sort(abs(tmpNeurs(:) - 0.5));
+            tmpRanks = 1:numel(selectRanking);
+            selectRanks = tmpRanks(sortInds)';
+            selectRanking = reshape(selectRanks,size(tmpNeurs));
+        end
+
+
+
+    end
+end
+
+allNetAR(iM).A_B_rat
+squishAct(:,:,iL,iN,iV,iM)
+
+
 %%
 
 

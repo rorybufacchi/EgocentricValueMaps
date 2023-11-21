@@ -29,7 +29,9 @@ sFP.plt.plAct          = 2;
 allRowLags = rS(cM).s.gol.alSpR;
 
 condN = {'Low Valence' , 'High Valence'};
-plCols = {[0 0 1] , [.8 0 0]};
+% plCols = {[0 0 1] , [.8 0 0]};
+plCols = {[0 0 .7] , [0 0 0.7]};
+
 opts.FaceAlpha = 0.3;
 
 for iCond = 1:2

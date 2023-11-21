@@ -120,6 +120,8 @@ switch s.plt.pltType
                     
                     colormap jet
                 end
+                squishQs=squeeze(Q(handRow,handCol,:,:,:));
+                bestQ=[];
             else
                 
                 x=1:size(w.world2D,1);

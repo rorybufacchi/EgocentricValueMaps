@@ -1,11 +1,16 @@
 function [newQ, optQ] = CalcHPDirect(s, varargin)
 % -------------------------------------------------------------------------
-% CalcHPDirect(s)
+% CalcHPDirect(s, newQ, altQ)
 % Calculate Hit probabilities, using the method of CalcQDirect
 
 nA = size(s.clc.actConsequence,1); % Number of actions
 
 if isempty(varargin)
+    varargin = {[],[]};
+end
+
+% Allow loading of previously calculated Q values
+if isempty(varargin{1})
     newQ = zeros([nA s.wrld.size]);
 else
     newQ = varargin{1};
@@ -14,6 +19,19 @@ else
     if size(newQ,1) < nA
         actDiff = nA - size(newQ,1);
         newQ(end+ [1 : actDiff],:,:,:) = zeros([actDiff size(newQ,[2 3 4]) ] );
+    end
+end
+
+
+% Provide alternative Q values for following a different policy
+if isempty(varargin{2})
+    altQ = zeros([nA s.wrld.size]);
+else
+    altQ = varargin{2};
+    % Take into account the possibility of adding actions
+    if size(altQ,1) < nA
+        actDiff = nA - size(altQ,1);
+        altQ(end+ [1 : actDiff],:,:,:) = zeros([actDiff size(altQ,[2 3 4]) ] );
     end
 end
 
@@ -129,10 +147,16 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                 sprPrZ  = s.clc.spreadProb{3};
 
 
-                % Define sensory spread
-                snsSprR = s.clc.sensSpread{1};
-                snsSprC = s.clc.sensSpread{2};
-                snsSprZ = s.clc.sensSpread{3};
+% % %                 % Define sensory spread
+% % %                 if s.clc.sensSpreadPostFl == 1
+% % %                     snsSprR = 0;
+% % %                     snsSprC = 0;
+% % %                     snsSprZ = 0;
+% % %                 else
+                    snsSprR = s.clc.sensSpread{1};
+                    snsSprC = s.clc.sensSpread{2};
+                    snsSprZ = s.clc.sensSpread{3};
+% % %                 end
 
                 snsPrR  = s.clc.sensProb{1};
                 snsPrC  = s.clc.sensProb{2};
@@ -161,8 +185,8 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                 for iAct = 1:nA
 
                     % DEBUGGING
-                    if iAct == 1 & ...
-                            iSR == 11 & ...
+                    if iAct == 2 & ...
+                            iSR == 12 & ... 11 & ...
                             iSC == 7 & ... 11
                             iSZ == 1 %13
 
@@ -170,7 +194,7 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
 % %                                        any(s.clc.startSC)     == iSC & ...
 % %                                        any(s.clc.startSZ)     == iSZ,
 
-%                         disp('test')
+                        disp('test')
                     end
 
                     % Find expected value across future possible states: loop
@@ -205,6 +229,8 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 actNextC = nextC + s.clc.actConsequence(iAct,2);
                                 actNextZ = nextZ + s.clc.actConsequence(iAct,3);
 
+                                tmpQ = NaN;
+                                if s.clc.checkCollisionFl == 1
                                 % DO it with collision:
                                 % First calculate which blocks are in the line  
                                 dR = actNextR - iSR;
@@ -219,14 +245,29 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 % And check the Q value at ANY of those
                                 % points is equal the starting reward: that
                                 % indicates that a collision has happened
-                                tmpQ = NaN;
+                                
                                 for iRR = 1:numel(rR)
-                                    if squeeze( max( checkCollision(:,...
-                                        rR(iRR) , ...
-                                        cC(iRR) , ...
-                                        zZ(iRR)  ) )) == 1,
-                                        tmpQ = s.clc.startRew;
-                                    end
+                                    % Allow for using alternative policy
+                                    if s.clc.useAltPolicyFl == 1
+                                        [dmyQ, nextAct] = max( altQ(:,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) );
+                                        if squeeze( checkCollision(nextAct,...
+                                                rR(iRR) , ...
+                                                cC(iRR) , ...
+                                                zZ(iRR)  ) ) == 1,
+                                            tmpQ = s.clc.startRew;
+                                        end
+                                    else
+                                        if squeeze( max( checkCollision(:,...
+                                                rR(iRR) , ...
+                                                cC(iRR) , ...
+                                                zZ(iRR)  ) )) == 1,
+                                            tmpQ = s.clc.startRew;
+                                        end
+                                    end 
+                                end
                                 end
 
                                 % SO if there is any possible collision,
@@ -234,10 +275,23 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 % q-value of the place the stimulus ends up
                                 % in
                                 if isnan(tmpQ)
-                                    tmpQ = squeeze( max( oldQ(:,...
-                                    actNextR , ...
-                                    actNextC , ...
-                                    actNextZ  ) ));
+                                    % Allow for using alternative policy
+                                    if s.clc.useAltPolicyFl == 1
+                                        [dmyQ, nextAct] = max( altQ(:,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) );
+
+                                        tmpQ = squeeze( oldQ(nextAct,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) );
+                                    else
+                                        tmpQ = squeeze( max( oldQ(:,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) ));
+                                    end
                                 end
 
                                 % Then update the next possible Q value
@@ -274,10 +328,27 @@ end
 % iIt
 end
 
+% % % % Do sensory/uncertainty blurring after calculation, if the appropriate flag has
+% % % % been set
+% % % if s.clc.sensSpreadPostFl == 1
+% % %     snsSprR = s.clc.sensSpread{1};
+% % %     snsSprC = s.clc.sensSpread{2};
+% % %     snsSprZ = s.clc.sensSpread{3};
+% % % 
+% % %     % Initialise 'noise matrix', which is then added to 'real' Q values
+% % % 
+% % %     for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
+% % %         for iSC = colOrder
+% % %             for iSZ = 1 + (maxActDists(3)-1) : s.wrld.size(3) - (maxActDists(3)-1)
+% % %             end
+% % %         end
+% % %     end
+% % % 
+% % % end
 
-% $$$
-% !!!!!!!!!!!!!!!!!!!!!!!! THIS NEEDS TO BE CHANGED BACK !!!!!!!!!!!!!!!!!!
-% $$$
+
+
+
 
 % Then set the value of the touch condition back to 0
 for iVol = 1:length(s.clc.startSZ)
