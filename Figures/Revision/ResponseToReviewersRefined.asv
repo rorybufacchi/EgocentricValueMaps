@@ -318,10 +318,10 @@ cAx = [-6 -1];
 
 f.TwoDimPlot.f        = figure('Position',[20 20 1200 1200]);
 
-for iHP = 1:nHandPos
+for iHP = 2 %1:nHandPos
 
     cHP = allHP(iHP);
-    for iDynam = 1:nDynam
+    for iDynam = 1 %1:nDynam
 
         iPl = iPl + 1
 
@@ -396,18 +396,32 @@ colormap(custom_colormap);
 % cAx = [-1 1];
 
 
+% % %         xlim([20  41]);
+% % %         ylim([40  61]);
+
+% % %         xlim([23  38]);
+% % %         ylim([43  58]);
+
+xLims = [12 49];
+yLims = [22 59];
+
+% % % xLims = [20 41];
+% % % yLims = [41 60];
+
+
 for iAct = 1:6
 figN = ['TwoDimPlotQAct' num2str(iAct)];
 % % % figN = ['TwoDimPlotQmean'];
 
-f.(figN).f        = figure('Position',[20 20 1200 1200]);
+% f.(figN).f        = figure('Position',[20 20 1200 1200]);
+f.(figN).f        = figure('Position',[20 20 750 1200]);
 
 iPl = 0;
 
 for iHP = 1:nHandPos
 
     cHP = allHP(iHP);
-    for iDynam = 1:nDynam
+    for iDynam = 1 %1:nDynam
 
         if ~ (iDynam == 1 & iAct == 6)
 
@@ -438,9 +452,16 @@ for iHP = 1:nHandPos
 % % %         % For moving, give all actions some tiny penalty
 % % %         newQtmp(2:end,:,:,:) = newQtmp(2:end,:,:,:) - 0.001;
         newQ2                   = newQtmp(iAct,:,:,:) - max(newQtmp(blAct,:,:,:),[],1);        
-        newQ2(newQ2 < 0)        = 0;
+% % %         newQ2(newQ2 == 0)       = 0.00000001; % If there is a tie, set it to a tiny value
+
+% % %         newQ2(newQ2 < 0)        = 0;
+% % %         % Set tot NaN for graying out later
+% % %         newQ2(newQ2 == 0 )       = NaN;
+
+        newQ2(newQ2 < 0)        = NaN;
         % Set tot NaN for graying out later
-        newQ2(newQ2 == 0)       = NaN;
+        newQ2(newQ2 == 0 )       = NaN;
+        
 
 
         f.(figN).ax{iPl}    = subplot(nHandPos,nDynam,iPl);
@@ -454,7 +475,6 @@ for iHP = 1:nHandPos
 
         imagesc(squeeze(newQ2(1,:,:,zPos )) ); hold on
 %         GridOverImage(fS,f.TwoDimPlot.ax{1});
-
 
         % Show where the hand and the body are
         hold on
@@ -477,18 +497,8 @@ for iHP = 1:nHandPos
 
 % % %         title(['Act' num2str(iAct) '.col' num2str(cAXES)])
 
-% % %         xlim([20  41]);
-% % %         ylim([40  61]);
-
-% % %         xlim([23  38]);
-% % %         ylim([43  58]);
-
-% % %         xlim([12 49]);
-% % %         ylim([22 60]);
-
-        xlim([20 41]);
-        ylim([41 60]);
-
+        xlim(xLims);
+        ylim(yLims);
 
         % PLOT THE mask for when the action is not taken
         maskDat = isnan(squeeze(newQ2(1,:,:,zPos )));
@@ -497,6 +507,9 @@ for iHP = 1:nHandPos
         % Adjust the AlphaData property of the image object
         set(h, 'AlphaData', 0.2 .* maskDat);
         colormap(ax2,whitetocol(2,[0 0 0]));
+
+        xlim(xLims);
+        ylim(yLims);
 
         axis off;
         linkaxes([f.(figN).ax{iPl}, ax2]); % link the two axes for zooming, panning, etc.
@@ -540,8 +553,8 @@ for iF = 1:length(allFields)5
     cF = allFields{iF};
   
     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['C:\Users\Rory Bufacchi\OneDrive\Projects\DPPS\DefenseAgent\Documentation\Figures\Revision\Wasp\' cF '.eps'] , 'epsc')
-    saveas(f.(cF).f,['C:\Users\Rory Bufacchi\OneDrive\Projects\DPPS\DefenseAgent\Documentation\Figures\Revision\Wasp' cF '.pdf'] , 'pdf')
+    saveas(f.(cF).f,['Documentation\Figures\Revision\Wasp\' cF '.eps'] , 'epsc')
+    saveas(f.(cF).f,['Documentation\Figures\Revision\Wasp' cF '.pdf'] , 'pdf')
 % % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.eps'] , 'epsc')
 % % %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\NeurTypes\CartDist' cF '.pdf'] , 'pdf')
 

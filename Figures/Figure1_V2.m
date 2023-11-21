@@ -9,15 +9,10 @@ addpath(genpath('Scripts\EgocentricValueMaps'))
 % Make 2 plots, one with original gammas, and one with gamma == 1
 allGammas = [0.3 0.7 ; 0.3 1; 0.3 0.7]
 
-<<<<<<< HEAD
-s.clc.startRew = 1;
-endCol = [0 0 0.7];
-=======
+
 s.clc.startRew = -1;
 
 s.plt.colorLims = [0 0.7];
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
-
 
 
 % -------------------------------------------------------------------------
@@ -126,13 +121,8 @@ newQ  = CalcHPDirect(s);
 newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-<<<<<<< HEAD
-% cLims = caxis;
-% caxis(max(abs(cLims)) .* [-1, 1] );
-=======
 % % % cLims = caxis;
 % % % caxis(max(abs(cLims)) .* [-1, 1] );
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
 % % colorbar
 
 spl = subplot(40,1000,1)
@@ -142,13 +132,8 @@ newQ = CalcHPDirect(s);
 newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-<<<<<<< HEAD
-% cLims = caxis;
-% caxis(max(abs(cLims)) .* [-1, 1] );
-=======
 % % % cLims = caxis;
 % % % caxis(max(abs(cLims)) .* [-1, 1] );
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
 % % colorbar
 
 spl = subplot(40,1000,1)
@@ -164,15 +149,9 @@ if iFig == 3
     newQ = nanmean(newQ,5);
 end
 DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
-<<<<<<< HEAD
 GridOverImage(fS,spl);
 % cLims = caxis;
 % caxis(max(abs(cLims)) .* [-1, 1] );
-=======
-% % % GridOverImage(fS,spl);
-% % % cLims = caxis;
-% % % caxis(max(abs(cLims)) .* [-1, 1] );
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
 % % colorbar
 
 spl = subplot(40,1000,1)
@@ -187,13 +166,8 @@ if iFig == 3
 end
 DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-<<<<<<< HEAD
-% cLims = caxis;
-% caxis(max(abs(cLims)) .* [-1, 1] );
-=======
 % % % cLims = caxis;
 % % % caxis(max(abs(cLims)) .* [-1, 1] );
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
 % % colorbar
 
 %%%  ------------------------------------------------------------------------
@@ -212,13 +186,8 @@ newQ = CalcHPDirect(s);
 newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-<<<<<<< HEAD
-% cLims = caxis;
-% caxis(max(abs(cLims)) .* [-1, 1] );
-=======
 % % % cLims = caxis;
 % % % caxis(max(abs(cLims)) .* [-1, 1] );
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
 % % colorbar
 
 
@@ -229,13 +198,8 @@ newQ = CalcHPDirect(s);
 newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
 DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-<<<<<<< HEAD
-% cLims = caxis;
-% caxis(max(abs(cLims)) .* [-1, 1] );
-=======
 % % % cLims = caxis;
 % % % caxis(max(abs(cLims)) .* [-1, 1] );
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
 % % colorbar
 
 spl = subplot(40,1000,1)
@@ -252,13 +216,8 @@ if iFig == 3
 end
 DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-<<<<<<< HEAD
-% cLims = caxis;
-% caxis(max(abs(cLims)) .* [-1, 1] );
-=======
 % % % cLims = caxis;
 % % % caxis(max(abs(cLims)) .* [-1, 1] );
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
 % % colorbar
 
 
@@ -276,13 +235,8 @@ if iFig == 3
 end
 DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
 GridOverImage(fS,spl);
-<<<<<<< HEAD
-% cLims = caxis;
-% caxis(max(abs(cLims)) .* [-1, 1] );
-=======
 % % % cLims = caxis;
 % % % caxis(max(abs(cLims)) .* [-1, 1] );
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
 % % colorbar
 
 
@@ -407,15 +361,12 @@ FNT = {'HorizontalAlignment', 'center', ...
     'FontSize', 12, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
 txt=text(spl,0, 0, 'Rewards','VerticalAlignment', 'middle',  FNT{:});
 
-<<<<<<< HEAD
-colormap(whitetocol(100,endCol))
-=======
+
 if sign(s.clc.startRew) > 0
     colormap(whitetocol(100,[ 0   0   0.7 ]))
 else
     colormap(whitetocol(100,[ 0.7 0   0   ]))
 end
->>>>>>> d7743b4b159be085e7641fc6b61fbd3183e95b6b
 % colormap(redbluecmapRory)
 
 end
