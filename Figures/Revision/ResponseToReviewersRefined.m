@@ -1,4 +1,4 @@
-%% Effects of policy
+fig%% Effects of policy
 
 addpath(genpath('Scripts\EgocentricValueMaps'))
 
@@ -2862,6 +2862,7 @@ absalldotProd = abs(alldotProd);
 % yDefs   = {'allPerf'        ,'allPerf'   };
 metDefs = {'tStatsStructure'};
 yDefs   = {'allPerf'        };
+% yDefs   = {'rhoNewTasks'        };
 
 
 
