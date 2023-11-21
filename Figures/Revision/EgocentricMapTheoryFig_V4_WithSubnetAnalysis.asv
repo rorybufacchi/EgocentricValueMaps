@@ -51,9 +51,14 @@ for iM = 1:1 %length(rS)
         % Divide the neurons up in different ways
         % (first make sure I'm only taking the 2nd half of the network
         netLastHalf = ceil(size(allNeurAct,5)./2) : size(allNeurAct,5);
+        tmpABrat    = allNetAR(iM).A_B_rat(netLastHalf,:);
         for cL = netLastHalf
             % Most unselective
-            unselectNeurs
+            tmpNeurs            = allNetAR(iM).A_B_rat(netLastHalf,:);
+            [difSize sortInds]       = sort(abs(tmpNeurs(:) - 0.5));
+            tmpRanks = 1:numel(selectRanking);
+            selectRanks = tmpRanks(sortInds)';
+            selectRanking = reshape(selectRanks,size(tmpNeurs));
         end
 
 

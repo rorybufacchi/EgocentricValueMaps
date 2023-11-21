@@ -52,10 +52,16 @@ for iM = 1:1 %length(rS)
         % (first make sure I'm only taking the 2nd half of the network
         netLastHalf = ceil(size(allNeurAct,5)./2) : size(allNeurAct,5);
         tmpABrat    = allNetAR(iM).A_B_rat(netLastHalf,:);
-        for cL = netLastHalf
-            % Most unselective
-            unselectNeurs
-        end
+        
+        % General selectivity rankings
+        tmpNeurs            = allNetAR(iM).A_B_rat(netLastHalf,:);
+        toSort = abs(tmpNeurs - 0.5);
+        [dmy sortInds]       = sort(toSort(:));
+        [dmy selectRanks]       = sort(sortInds);
+        selectRanks = reshape(selectRanks,size(tmpNeurs));
+
+        % Most unselective
+        % $$$ HERE DO THIS NEXT
 
 
 
