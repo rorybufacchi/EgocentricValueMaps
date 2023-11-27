@@ -215,8 +215,7 @@ for kBatch=1:s.rl.maxRetr
                 end
             end
             
-% % %             % $$$ PUT THIS HERE:
-% % %             s.lp.alg = 'Q'; %Options: 'Q','SARSA'
+            % Training algorithm. Options: 'Q','SARSA'
             switch s.lp.alg
                 case 'Q'
                     % maximum Q-value for each poststate

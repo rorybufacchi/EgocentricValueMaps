@@ -15,45 +15,45 @@ aTP = [0 1];
 
 
 squishAct = nan([14 15 7 18 2 size(rSall,[1 2])]);
-allNS     = nan([7 18 size(rSall,[1 2])]);
 
 tic
 for iM = 1:size(allNetAR,1)
     for iRun = 1:size(allNetAR,2)
-    for iV = 1:2 %length(aTP)
-    
-    
-        sFP = DefaultSettings(rSall(iM,iRun).s); 
-        sFP.plt.otherStateVars = 3;
-        w = rSall(iM,iRun).w;
-        net = rSall(iM,iRun).net;
-        Qtable = rSall(iM,iRun).Qtable;
-        
-        sFP.plt.plotThrFl = aTP(iV);
-           
-        sFP.plt.rowLims = [1.5 sFP.wrld.size(1)-0.5];
-        sFP.plt.stimRow=[3:size(w.world2D,1)-3];
-        
-        % -------------------------------------------------------------------------
-        % Calculate the correlati-ness of each velocity, for Q-values and neural
-        % activity
-        sFP.plt.meanLimbCols = 1;
-        sFP.plt.fitSigmoid = 0;
-        sFP.plt.lmbCol = [2:(sFP.wrld.size(2)-1)];
-        sFP.plt.stimCol= [2:(sFP.wrld.size(2)-1)] ;
-        [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
+        for iTyp = 1:size(allNetAR,3)
+            for iReg = 1:size(allNetAR,4)
+                for iV = 1:2 %length(aTP)
 
-        sFP.plt.plAct = 1;
-        sFP.plt.ON = 0;
-        for iL = 1:size(allNeurAct,5)
-            for iN = 1:size(allNeurAct,6)
-                [dmy, squishAct(:,:,iL,iN,iV,iM,iRun)] = DisplActValsFun(sFP,w,permute(allNeurAct(:,:,:,:,iL,iN), [3 4 1 2 5 6]));
+                    sFP = DefaultSettings(rSall(iM,iRun,iTyp,iReg).s);
+                    sFP.plt.otherStateVars = 3;
+                    w = rSall(iM,iRun,iTyp,iReg).w;
+                    net = rSall(iM,iRun,iTyp,iReg).net;
+                    Qtable = rSall(iM,iRun,iTyp,iReg).Qtable;
+
+                    sFP.plt.plotThrFl = aTP(iV);
+
+                    sFP.plt.rowLims = [1.5 sFP.wrld.size(1)-0.5];
+                    sFP.plt.stimRow=[3:size(w.world2D,1)-3];
+
+                    % -------------------------------------------------------------------------
+                    % Calculate the correlati-ness of each velocity, for Q-values and neural
+                    % activity
+                    sFP.plt.meanLimbCols = 1;
+                    sFP.plt.fitSigmoid = 0;
+                    sFP.plt.lmbCol = [2:(sFP.wrld.size(2)-1)];
+                    sFP.plt.stimCol= [2:(sFP.wrld.size(2)-1)] ;
+                    [Q,allNeurAct] = CalcNetOutput(sFP,w,net);
+
+                    sFP.plt.plAct = 1;
+                    sFP.plt.ON = 0;
+                    for iL = 1:size(allNeurAct,5)
+                        for iN = 1:size(allNeurAct,6)
+                            [dmy, squishAct(:,:,iL,iN,iV,iM,iRun,iTyp,iReg)] = DisplActValsFun(sFP,w,permute(allNeurAct(:,:,:,:,iL,iN), [3 4 1 2 5 6]));
+                        end
+                    end
+
+                end
             end
         end
-
-
-    end
-
     end
 end
 toc
@@ -63,88 +63,103 @@ toc
 
 clear neurSelectivity allNS
 
-% allNS = nan([7 18 3 17]);
-allNS = nan([7 18 3 17 2]);
+allNS = nan([7 18 3 17 7 2]);
+% allNS = nan([7 18 3 17 7 2 2]);
 
 for iM = 1:size(allNetAR,1)
     for iRun = 1:size(allNetAR,2)
-        % Divide the neurons up in different ways
-        % (first make sure I'm only taking the 2nd half of the network
-        netLastHalf = ceil(size(allNeurAct,5)./2) : size(allNeurAct,5);
-        % General selectivity rankings
-        tmpNeurs            = allNetAR(iM,iRun).A_B_rat(netLastHalf,:);
-        toSort              = abs(tmpNeurs - 0.5);
-        [dmy, sortInds]     = sort(toSort(:));
-        [dmy, selectRanks]  = sort(sortInds);
-        selectRanks         = reshape(selectRanks,size(tmpNeurs));
+        for iTyp = 1:size(allNetAR,3)
+            for iReg = 1:size(allNetAR,4)
+                % Divide the neurons up in different ways
+                % (first make sure I'm only taking the 2nd half of the network
+% % %                 netLastHalf = ceil(size(allNeurAct,5)./2) : size(allNeurAct,5);
+%                 netLastHalf = [3 4];
+                netLastHalf = [1 2 3 4];
 
-        % Goal selectivity rankings
-        toSort            = tmpNeurs;
-        [dmy, sortInds]   = sort(toSort(:));
-        [dmy, goalRanks]  = sort(sortInds);
-        goalRanks         = reshape(goalRanks,size(tmpNeurs));
+                % General selectivity rankings
+                tmpNeurs            = allNetAR(iM,iRun).A_B_rat(netLastHalf,:);
+                toSort              = abs(tmpNeurs - 0.5);
+                [dmy, sortInds]     = sort(toSort(:));
+                [dmy, selectRanks]  = sort(sortInds);
+                selectRanks         = reshape(selectRanks,size(tmpNeurs));
 
-        % Threat selectivity rankings
-        toSort             = 1 - tmpNeurs;
-        [dmy, sortInds]    = sort(toSort(:));
-        [dmy, threatRanks] = sort(sortInds);
-        threatRanks        = reshape(threatRanks,size(tmpNeurs));
+                % Goal selectivity rankings
+                toSort            = tmpNeurs;
+                [dmy, sortInds]   = sort(toSort(:));
+                [dmy, goalRanks]  = sort(sortInds);
+                goalRanks         = reshape(goalRanks,size(tmpNeurs));
 
-
-        % Keep track of how many entries are Not a Neuron (ha)
-        nanNums = sum(~isnan(tmpNeurs(:))) + 1;
-
-% % %             % Most Unselective vs Most Selective (median split)
-% % %             neurSelectivity                           = selectRanks;
-% % %             neurSelectivity(selectRanks > nanNums)    = NaN;
-% % %             neurSelectivity(selectRanks < nanNums./2) = 0;
-% % %             neurSelectivity(selectRanks > nanNums./2 & selectRanks <= nanNums) = 1;
-
-% % %             % Most Unselective vs Most Selective (N selective neurons)
-% % %             N = 10;
-% % %             neurSelectivity                               = selectRanks;
-% % %             neurSelectivity(selectRanks >  nanNums | (selectRanks > N & selectRanks < nanNums-N+1) )   = NaN;
-% % %             neurSelectivity(selectRanks <= N)         = 0;
-% % %             neurSelectivity(selectRanks >= nanNums-N+1 & selectRanks <= nanNums) = 1;
-
-        % Most Goal-y and threat-y vs vs Only Goal-y --> this one works for
-        % CORRELATION for some reason
-        N = 24;
-        neurSelectivity                                      = selectRanks;
-        neurSelectivity(selectRanks >  nanNums)              = NaN;
-        neurSelectivity(goalRanks <= N./2 | threatRanks <= N./2) = 1;
-        neurSelectivity(goalRanks > N./2 & threatRanks > N./2) = NaN;
-        tmpSelectivity = selectRanks;
-        tmpSelectivity(threatRanks > N)               = NaN;
-        tmpSelectivity(threatRanks <= N)              = 1;
-        neurSelectivity(:,:,2) = tmpSelectivity;
-
-% % %         % 2nd half vs 1st half
-% % %         neurSelectivity                               = selectRanks;
-% % %         neurSelectivity(1:floor(end/2),:)             = 0;
-% % %         neurSelectivity(floor(end/2) + 1 : end,:)           = 1;
-% % % % % %         neurSelectivity(1 : end,:)           = 1;
-% % %         neurSelectivity(selectRanks >  nanNums)       = NaN;
+                % Threat selectivity rankings
+                toSort             = 1 - tmpNeurs;
+                [dmy, sortInds]    = sort(toSort(:));
+                [dmy, threatRanks] = sort(sortInds);
+                threatRanks        = reshape(threatRanks,size(tmpNeurs));
 
 
-% % %         % 2nd half vs 1st half
-% % %         neurSelectivity                               = selectRanks;
-% % %         neurSelectivity(1:floor(end/2),:)             = 0;
-% % %         neurSelectivity(floor(end/2) + 1 : end,:)           = 1;
-% % % % % %         neurSelectivity(1 : end,:)           = 1;
-% % %         neurSelectivity(selectRanks >  nanNums)       = NaN;
+                % Keep track of how many entries are Not a Neuron (ha)
+                nanNums = sum(~isnan(tmpNeurs(:))) + 1;
+
+                % % %             % Most Unselective vs Most Selective (median split)
+                % % %             neurSelectivity                           = selectRanks;
+                % % %             neurSelectivity(selectRanks > nanNums)    = NaN;
+                % % %             neurSelectivity(selectRanks < nanNums./2) = 0;
+                % % %             neurSelectivity(selectRanks > nanNums./2 & selectRanks <= nanNums) = 1;
+
+                % % %             % Most Unselective vs Most Selective (N selective neurons)
+                % % %             N = 10;
+                % % %             neurSelectivity                               = selectRanks;
+                % % %             neurSelectivity(selectRanks >  nanNums | (selectRanks > N & selectRanks < nanNums-N+1) )   = NaN;
+                % % %             neurSelectivity(selectRanks <= N)         = 0;
+                % % %             neurSelectivity(selectRanks >= nanNums-N+1 & selectRanks <= nanNums) = 1;
+
+% % %                 % Most Goal-y and threat-y vs vs Only Goal-y --> this one works for
+% % %                 % CORRELATION for some reason
+% % %                 N = 4;
+% % %                 neurSelectivity                                      = selectRanks;
+% % %                 neurSelectivity(selectRanks >  nanNums)              = NaN;
+% % %                 neurSelectivity(goalRanks <= N./2 | threatRanks <= N./2) = 1;
+% % %                 neurSelectivity(goalRanks > N./2 & threatRanks > N./2) = NaN;
+% % %                 tmpSelectivity = selectRanks;
+% % %                 tmpSelectivity(threatRanks > N)               = NaN;
+% % %                 tmpSelectivity(threatRanks <= N)              = 1;
+% % %                 neurSelectivity(:,:,2) = tmpSelectivity;
+
+                        % 2nd half vs 1st half
+                        neurSelectivity                               = selectRanks;
+                        neurSelectivity(1:floor(end/2),:)             = 0;
+                        neurSelectivity(floor(end/2) + 1 : end,:)           = 1;
+                % % %         neurSelectivity(1 : end,:)           = 1;
+                        neurSelectivity(selectRanks >  nanNums)       = NaN;
 
 
-% % %         % $$$ FIGURE OUT how to create a proper divide here
-% % %         % Most Goal-y and threat-y vs Only Goal-y
-% % %         N = 10;
-% % %         neurSelectivity                                      = selectRanks;
-% % %         neurSelectivity(selectRanks >  nanNums)              = NaN;
-% % %         neurSelectivity(goalRanks <= N./2 | threatRanks <= N./2) = 1;
-% % %         neurSelectivity(goalRanks > N./2 & threatRanks > N./2) = NaN;
+% % %                         % 2nd half vs 1st half
+% % %                         neurSelectivity                               = selectRanks;
+% % %                         neurSelectivity(1:floor(end/2),:)             = 0;
+% % % % % %                         neurSelectivity(floor(end/2) + 1 : end,:)           = 1;
+% % %                         neurSelectivity(1 : end,:)           = 1;
+% % %                         neurSelectivity(selectRanks >  nanNums)       = NaN;
 
-        % Store neural selectivity
-        allNS(netLastHalf,1:size(neurSelectivity,2),iM,iRun,:) = neurSelectivity;
+
+% % %                         % 2nd half vs 1st half OF ENTIRE NETWORK (so also
+% % %                         % including early layers -> have to remember to set
+% % %                         % 'netLastHalf' appropriately
+% % %                         neurSelectivity                               = selectRanks;
+% % %                         neurSelectivity(1:floor(end/2),:)             = 0;
+% % %                         neurSelectivity(floor(end/2) + 1 : end,:)     = 1;
+% % %                         neurSelectivity(selectRanks >  nanNums)       = NaN;
+
+                % % %         % $$$ FIGURE OUT how to create a proper divide here
+                % % %         % Most Goal-y and threat-y vs Only Goal-y
+                % % %         N = 10;
+                % % %         neurSelectivity                                      = selectRanks;
+                % % %         neurSelectivity(selectRanks >  nanNums)              = NaN;
+                % % %         neurSelectivity(goalRanks <= N./2 | threatRanks <= N./2) = 1;
+                % % %         neurSelectivity(goalRanks > N./2 & threatRanks > N./2) = NaN;
+
+                % Store neural selectivity
+                allNS(netLastHalf,1:size(neurSelectivity,2),iM,iRun,iTyp,iReg,:) = neurSelectivity;
+            end
+        end
     end
 end
 
@@ -152,6 +167,11 @@ end
 allNS(1:min(netLastHalf)-1,:,:,:,:) = NaN;
 
 %% Do 'alternative task fitting' with a neural network with muliple tasks
+
+clear rho pp rhoAll
+
+% iSelect,iM,iRun,iTyp,iReg
+rho = nan([2 3 17 7 2]);
 
 for iFig = 1:4
 allQtoRecreate  = tasksToRecreate{iFig}.allQtoRecreate;
@@ -167,73 +187,79 @@ allSelect = [0 1]
 % % % iM   = 1;
 % % % iRun = 7;
 
+
+
 tic
 for iM = 1:size(allNetAR,1)
     for iRun = 1:size(allNetAR,2)
-        % Set selectivity: unselective (0) or selective (1)
-        for iSelect = 1:numel(allSelect)
-            cSelect = allSelect(iSelect);
+        for iTyp = 1:size(allNetAR,3)
+            for iReg = 1:size(allNetAR,4)
+                % Set selectivity: unselective (0) or selective (1)
+                for iSelect = 1:numel(allSelect)
+                    cSelect = allSelect(iSelect);
 
-            clear baseQNeurs
+                    clear baseQNeurs
 
-            % Convert to baseQ
-            % Loop through pseudo-policies
-            for iPol    = 1:2
-                if size(allNS,5) == 1
-                    inclNeurs = permute(allNS(:,:,iM,iRun), [3 4 1 2]);
-                    inclNeurs = inclNeurs(:) == cSelect;
+                    % Convert to baseQ
+                    % Loop through pseudo-policies
+                    for iPol    = 1:2
+                        if size(allNS,7) == 1
+                            inclNeurs = permute(allNS(:,:,iM,iRun,iTyp,iReg), [3 4 1 2]);
+                            inclNeurs = inclNeurs(:) == cSelect;
 
-                % This is in case there are non-mutually-exclusive neuron
-                % groupings
-                else 
-                   inclNeurs = permute(allNS(:,:,iM,iRun,iSelect), [3 4 1 2]);
-                   inclNeurs = inclNeurs(:) == 1;
-                end
-                tmpNeurAct = squishAct(:,:,:,:,iPol,iM,iRun);
-                % row col row col act pol task [NOTE: act will just be 1, so the
-                % neurons take the role of tasks in the formal theory]
-                baseQNeurs(:,:,:,:,1,iPol,:) = permute(tmpNeurAct(:,:,inclNeurs),[4 5 1 2 3]);
-            end
+                            % This is in case there are non-mutually-exclusive neuron
+                            % groupings
+                        else
+                            inclNeurs = permute(allNS(:,:,iM,iRun,iTyp,iReg,iSelect), [3 4 1 2]);
+                            inclNeurs = inclNeurs(:) == 1;
+                        end
+                        tmpNeurAct = squishAct(:,:,:,:,iPol,iM,iRun,iTyp,iReg);
+                        % row col row col act pol task [NOTE: act will just be 1, so the
+                        % neurons take the role of tasks in the formal theory]
+                        baseQNeurs(:,:,:,:,1,iPol,:) = permute(tmpNeurAct(:,:,inclNeurs),[4 5 1 2 3]);
+                    end
 
-            % -------------------------------------------------------------------------
-            % Fit the ideal Q-values using neural activities as feature-components
-            % Define function to be optimised
-            FunToOpt = @(p) ErrFun(baseQNeurs, allQtoRecreateForNeurs, p, cAct, sFP);
+                    % -------------------------------------------------------------------------
+                    % Fit the ideal Q-values using neural activities as feature-components
+                    % Define function to be optimised
+                    FunToOpt = @(p) ErrFun(baseQNeurs, allQtoRecreateForNeurs, p, cAct, sFP);
 
-            % Set optimisation options - keep it simple
-            A = []; b = []; Aeq = []; beq = [];
-            w0 = ones([size(baseQNeurs,7), 1]);
-            lb = -[Inf Inf]';
-            ub = [Inf Inf]';
-            % Run optimisation
-            OPTIONS = optimset('TolCon',1e-10);
-            [p,sSqErr,exitflag,output,lambda,grad,hessian] = fmincon(FunToOpt,w0,A,b,Aeq,beq,lb,ub,[],OPTIONS);
+                    % Set optimisation options - keep it simple
+                    A = []; b = []; Aeq = []; beq = [];
+                    w0 = ones([size(baseQNeurs,7), 1]);
+                    lb = -[Inf Inf]';
+                    ub = [Inf Inf]';
+                    % Run optimisation
+                    OPTIONS = optimset('TolCon',1e-10);
+                    [p,sSqErr,exitflag,output,lambda,grad,hessian] = fmincon(FunToOpt,w0,A,b,Aeq,beq,lb,ub,[],OPTIONS);
 
-            % Extract optimised data
-            [sSqErrFinal, bestPsi] = ErrFun(baseQNeurs, allQtoRecreateForNeurs, p, cAct, sFP);
+                    % Extract optimised data
+                    [sSqErrFinal, bestPsi] = ErrFun(baseQNeurs, allQtoRecreateForNeurs, p, cAct, sFP);
 
-            fittedData   = zeros(size(baseQNeurs(:,:,:,:,1)));
-            weightedData = nansum(baseQNeurs(:,:,:,:,cAct,:,:,:) .* permute(p,[2 3 4 5 6 7 1]),7);
-            for r = 1:size(bestPsi,1)
-                for c = 1:size(bestPsi,2)
-                    for rr = 1:size(bestPsi,3)
-                        for cc = 1:size(bestPsi,4)
+                    fittedData   = zeros(size(baseQNeurs(:,:,:,:,1)));
+                    weightedData = nansum(baseQNeurs(:,:,:,:,cAct,:,:,:) .* permute(p,[2 3 4 5 6 7 1]),7);
+                    for r = 1:size(bestPsi,1)
+                        for c = 1:size(bestPsi,2)
+                            for rr = 1:size(bestPsi,3)
+                                for cc = 1:size(bestPsi,4)
 
-                            % Select the correct policy for each condition
-                            fittedData(r,c,rr,cc) = weightedData(r,c,rr,cc,bestPsi(r,c,rr,cc));
+                                    % Select the correct policy for each condition
+                                    fittedData(r,c,rr,cc) = weightedData(r,c,rr,cc,bestPsi(r,c,rr,cc));
 
+                                end
+                            end
                         end
                     end
+
+                    [rho(iSelect,iM,iRun,iTyp,iReg) pp(iSelect,iM,iRun,iTyp,iReg)] = corr(allQtoRecreateForNeurs(:),fittedData(:));
+
                 end
             end
-
-            [rho(iSelect,iM,iRun) pp(iSelect,iM,iRun)] = corr(allQtoRecreateForNeurs(:),fittedData(:));
-
         end
     end
 end
 
-rhoAll(:,:,:,iFig) = rho;
+rhoAll(:,:,:,:,:,iFig) = rho;
 toc
 
 figure,plot(rho(:,:))
@@ -255,6 +281,7 @@ end
 % % % sgtitle(['rho: ' num2str(rho) '. p: ' num2str(pp)])
 
 
+rhoAll = rhoAll(:,:,1:15,:,:,:);
 
 
 figure,plot(rhoAll(:,:))
@@ -275,40 +302,40 @@ rhoAllNewTasks = squeeze(rhoAll(2,:,:));
 
 %% Check predictive ability (i.e. fit quality) against separability
 
-allPerfAll          = repmat(allPerf,[1 1 4]);
-tStatsStructureAll  = repmat(tStatsStructure,[1 1 4]);
-absalldotProdAll    = repmat(absalldotProd,[1 1 4]);          
+allPerfAll          = repmat(allPerf,[1 1 1 1 4]);
+tStatsStructureAll  = repmat(tStatsStructure,[1 1 1 1 4]);
+absalldotProdAll    = repmat(absalldotProd,[1 1 1 1 4]);          
 
-figure,
-subplot(1,4,1)
-plot(allPerf(:)',rhoNewTasks(:)','.')
-lsline
-xlabel('allPerf');
-ylabel('rhoNewTasks');
-title(CorrelationTitle(allPerf(:)',rhoNewTasks(:)'))
-
-
-subplot(1,4,2)
-plot(tStatsStructure(:)',rhoNewTasks(:)','.')
-lsline
-xlabel('tStatsStructure');
-ylabel('rhoNewTasks');
-title(CorrelationTitle(tStatsStructure(:)',rhoNewTasks(:)'))
-
-subplot(1,4,3)
-plot(tStatsStructure(:)',allPerf(:)','.')
-lsline
-xlabel('tStatsStructure');
-ylabel('allPerf');
-title(CorrelationTitle(tStatsStructure(:)',allPerf(:)'))
-
-
-subplot(1,4,4)
-plot(absalldotProd(:)',rhoNewTasks(:)','.')
-lsline
-xlabel('absalldotProd');
-ylabel('rhoNewTasks');
-title(CorrelationTitle(absalldotProd(:)',rhoNewTasks(:)'))
+% % % figure,
+% % % subplot(1,4,1)
+% % % plot(allPerf(:)',rhoNewTasks(:)','.')
+% % % lsline
+% % % xlabel('allPerf');
+% % % ylabel('rhoNewTasks');
+% % % title(CorrelationTitle(allPerf(:)',rhoNewTasks(:)'))
+% % % 
+% % % 
+% % % subplot(1,4,2)
+% % % plot(tStatsStructure(:)',rhoNewTasks(:)','.')
+% % % lsline
+% % % xlabel('tStatsStructure');
+% % % ylabel('rhoNewTasks');
+% % % title(CorrelationTitle(tStatsStructure(:)',rhoNewTasks(:)'))
+% % % 
+% % % subplot(1,4,3)
+% % % plot(tStatsStructure(:)',allPerf(:)','.')
+% % % lsline
+% % % xlabel('tStatsStructure');
+% % % ylabel('allPerf');
+% % % title(CorrelationTitle(tStatsStructure(:)',allPerf(:)'))
+% % % 
+% % % 
+% % % subplot(1,4,4)
+% % % plot(absalldotProd(:)',rhoNewTasks(:)','.')
+% % % lsline
+% % % xlabel('absalldotProd');
+% % % ylabel('rhoNewTasks');
+% % % title(CorrelationTitle(absalldotProd(:)',rhoNewTasks(:)'))
 
 
 % =====================
@@ -342,6 +369,32 @@ lsline
 xlabel('absalldotProd');
 ylabel('rhoNewTasks');
 title(CorrelationTitle(absalldotProdAll(:)',rhoAllNewTasks(:)'))
+
+
+
+
+
+inclD = ~isnan(absalldotProdAll(:)) & ~isnan(allPerfAll(:)) & ~isnan(rhoAllNewTasks(:)) & ~isnan(tStatsStructureAll(:)); 
+
+disp('allPerf and rhoAll')
+[rrrrr ppppp] = partialcorr(allPerfAll(inclD), rhoAllNewTasks(inclD), [tStatsStructureAll(inclD), absalldotProdAll(inclD)])
+
+disp('tstat and rhoAll')
+[rrrrr ppppp] = partialcorr(tStatsStructureAll(inclD), rhoAllNewTasks(inclD), [allPerfAll(inclD) absalldotProdAll(inclD)])
+
+
+disp('allDotProd and rhoAll')
+[rrrrr ppppp] = partialcorr(absalldotProdAll(inclD), rhoAllNewTasks(inclD), [allPerfAll(inclD) tStatsStructureAll(inclD)])
+
+
+
+
+inclD2 = ~isnan(absalldotProd(:)) & ~isnan(allPerf(:)) & ~isnan(tStatsStructure(:)); 
+
+disp('allDotProd and tstat')
+[rrrrr ppppp] = partialcorr(absalldotProd(inclD2), tStatsStructure(inclD2), [allPerf(inclD2)])
+
+
 
 
 

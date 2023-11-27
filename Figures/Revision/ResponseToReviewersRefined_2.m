@@ -1,4 +1,4 @@
-fig%% Effects of policy
+%% Effects of policy
 
 addpath(genpath('Scripts\EgocentricValueMaps'))
 
@@ -565,7 +565,7 @@ end
 
 %% $$$ Plot some kind of order metrics or something --> $$$ !!! POSSIBLY REMOVE
 
-% % % load('Results\ForFigures\NeurTypesAnalysed_V4.mat')
+% % % load('Results\ForFigures\NeurTypesAnalysed_V5.mat')
 
 % binEdges = -4:.5:10;
 binEdges    = -7:.5:7;
@@ -1206,104 +1206,104 @@ end
 
 %% $$$ Create subspace analysis for separate networks
 
-% $$$ Do PCA?
-% Rows of X correspond to observations and columns correspond to variables.
-
-switch s.nta.comparison
-    case 'Valence'
-        s2=DefaultSettings(s);
-        s2.plt.ON = 0;
-        s2.plt.lmbCol=2:s.wrld.size(2)-1;
-        s2.plt.plotThrFl=0;
-        [Q,allNeurAct] = CalcNetOutput(s2,w,net); [rGl pGl covGl] = NetAnalysis(s2,w,allNeurAct); % Goal correlation
-        % stimrow, stimcol, limbrow, limbcol
-        glAct=squeeze(nanmean(allNeurAct(:,:,:,s2.plt.lmbCol,s2.plt.startLayer:s2.plt.stopLayer,:),[3]));
-        s2.plt.plotThrFl=1;
-        [Q,allNeurAct] = CalcNetOutput(s2,w,net); [rThr pThr covThr] = NetAnalysis(s2,w,allNeurAct); % Threat correlation
-        thrAct=squeeze(nanmean(allNeurAct(:,:,:,s2.plt.lmbCol,s2.plt.startLayer:s2.plt.stopLayer,:),[3]));
-
-end
-
-
-for thrR = 1:s.wrld.size(1)
-    for thrC = 1:s.wrld.size(2)
-
-
-        s2=DefaultSettings(s);
-        s2.plt.ON = 0;
-        s2.plt.lmbCol=2:s.wrld.size(2)-1;
-        s2.plt.plotThrFl=0;
-
-        s2.plt.otherStateVars = [thrR thrC];
-
-        [tmpQ,tmpNeurAct] = CalcNetOutput(s2,w,net); 
-        % stimrow, stimcol, limbrow, limbcol
-        glByThrAct(:,:,:,:,:,thrR,thrC) = squeeze(nanmean(tmpNeurAct(:,:,:,s2.plt.lmbCol,s2.plt.startLayer:s2.plt.stopLayer,:),3));
-
-
-    end
-end
+% % % % Rows of X correspond to observations and columns correspond to variables.
+% % % 
+% % % switch s.nta.comparison
+% % %     case 'Valence'
+% % %         s2=DefaultSettings(s);
+% % %         s2.plt.ON = 0;
+% % %         s2.plt.lmbCol=2:s.wrld.size(2)-1;
+% % %         s2.plt.plotThrFl=0;
+% % %         [Q,allNeurAct] = CalcNetOutput(s2,w,net); [rGl pGl covGl] = NetAnalysis(s2,w,allNeurAct); % Goal correlation
+% % %         % stimrow, stimcol, limbrow, limbcol
+% % %         glAct=squeeze(nanmean(allNeurAct(:,:,:,s2.plt.lmbCol,s2.plt.startLayer:s2.plt.stopLayer,:),[3]));
+% % %         s2.plt.plotThrFl=1;
+% % %         [Q,allNeurAct] = CalcNetOutput(s2,w,net); [rThr pThr covThr] = NetAnalysis(s2,w,allNeurAct); % Threat correlation
+% % %         thrAct=squeeze(nanmean(allNeurAct(:,:,:,s2.plt.lmbCol,s2.plt.startLayer:s2.plt.stopLayer,:),[3]));
+% % % 
+% % % end
+% % % 
+% % % 
+% % % for thrR = 1:s.wrld.size(1)
+% % %     for thrC = 1:s.wrld.size(2)
+% % % 
+% % % 
+% % %         s2=DefaultSettings(s);
+% % %         s2.plt.ON = 0;
+% % %         s2.plt.lmbCol=2:s.wrld.size(2)-1;
+% % %         s2.plt.plotThrFl=0;
+% % % 
+% % %         s2.plt.otherStateVars = [thrR thrC];
+% % % 
+% % %         [tmpQ,tmpNeurAct] = CalcNetOutput(s2,w,net); 
+% % %         % stimrow, stimcol, limbrow, limbcol
+% % %         glByThrAct(:,:,:,:,:,thrR,thrC) = squeeze(nanmean(tmpNeurAct(:,:,:,s2.plt.lmbCol,s2.plt.startLayer:s2.plt.stopLayer,:),3));
+% % % 
+% % % 
+% % %     end
+% % % end
 
 
 
 %% $$$ TEMP BREAK --> just on goal activations
 
-% % % glActFlat = permute(glAct,[4 5 1 2 3]);
-% % % glActFlat = glActFlat(:,:,:);
-% % % iN = 1;
-% % % iL = 1;
-% % % pca(squeeze(glActFlat(iN,iL,:)) )
-
-% Flatten neurons and layers
-glActFlat = glAct(:,:,:,:); 
-% Flatten world configurations
-glActFlat = permute(glActFlat,[4 1 2 3]);
-glActFlat = glActFlat(:,:);
-
-% Remove NaNs
-glActFlat = glActFlat(~isnan(glActFlat(:,1)),:);
-
-[coeff,score,~,~,explained] = pca(glActFlat');
-% plot(score(:,1), score(:,2), 'o'); % plotting first two principal components
-
-plot3(score(:,1), score(:,2), score(:,3), 'o'); % plotting first two principal components
-
-plot3(score(:,1), score(:,2), score(:,3), 'o'); % plotting first two principal components
+% % % % % % glActFlat = permute(glAct,[4 5 1 2 3]);
+% % % % % % glActFlat = glActFlat(:,:,:);
+% % % % % % iN = 1;
+% % % % % % iL = 1;
+% % % % % % pca(squeeze(glActFlat(iN,iL,:)) )
+% % % 
+% % % % Flatten neurons and layers
+% % % glActFlat = glAct(:,:,:,:); 
+% % % % Flatten world configurations
+% % % glActFlat = permute(glActFlat,[4 1 2 3]);
+% % % glActFlat = glActFlat(:,:);
+% % % 
+% % % % Remove NaNs
+% % % glActFlat = glActFlat(~isnan(glActFlat(:,1)),:);
+% % % 
+% % % [coeff,score,~,~,explained] = pca(glActFlat');
+% % % % plot(score(:,1), score(:,2), 'o'); % plotting first two principal components
+% % % 
+% % % plot3(score(:,1), score(:,2), score(:,3), 'o'); % plotting first two principal components
+% % % 
+% % % plot3(score(:,1), score(:,2), score(:,3), 'o'); % plotting first two principal components
 
 
 %%
 
-% Create flattened activations for PCA
-glByThrActFlat = permute(glByThrAct,[1 2 3 6 7 4 5]);
-unwrapSize     = size(glByThrActFlat);
-glByThrActFlat = permute(glByThrActFlat(:,:,:,:,:,:),[6 1 2 3 4 5]);
-glByThrActFlat = glByThrActFlat(:,:);
+% % % % Create flattened activations for PCA
+% % % glByThrActFlat = permute(glByThrAct,[1 2 3 6 7 4 5]);
+% % % unwrapSize     = size(glByThrActFlat);
+% % % glByThrActFlat = permute(glByThrActFlat(:,:,:,:,:,:),[6 1 2 3 4 5]);
+% % % glByThrActFlat = glByThrActFlat(:,:);
+% % % 
+% % % 
+% % % % Create 'explanatory variables'
+% % % thrRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[1 2 3 7]) ] );  
+% % % thrRow = permute(thrRow, [2 3 4 1 5]);
+% % % thrCol = repmat( (1:s.wrld.size(2))' , [1, size(glByThrAct,[1 2 3 6]) ] );  
+% % % thrCol = permute(thrCol, [2 3 4 5 1]);
+% % % 
+% % % golRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[2 3 6 7]) ] );  
+% % % golRow = permute(golRow, [1 2 3 4 5]);
+% % % golCol = repmat( (1:s.wrld.size(2))' , [1, size(glByThrAct,[1 3 6 7]) ] );  
+% % % golCol = permute(golCol, [2 1 3 4 5]);
+% % % 
+% % % lmbCol = repmat( (2:s.wrld.size(2)-1)' , [1, size(glByThrAct,[1 2 6 7]) ] );  
+% % % lmbCol = permute(lmbCol, [2 3 1 4 5]);
+% % % 
+% % % [coeff,score,~,~,explained] = pca(glByThrActFlat( ~isnan(glByThrActFlat(:,1)),:)');
+% % % 
+% % % golDist = sqrt((golCol - lmbCol).^2 + (golRow - w.lmb.row).^2);
+% % % thrDist = sqrt((thrCol - lmbCol).^2 + (thrRow - w.lmb.row).^2);
+% % % 
+% % % minStimDist = min(cat(6,golDist,thrDist),[],6);
+% % % maxStimDist = max(cat(6,golDist,thrDist),[],6);
+% % % avStimDist  = mean(cat(6,golDist,thrDist),6);
 
+%% Do tSNE
 
-% Create 'explanatory variables'
-thrRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[1 2 3 7]) ] );  
-thrRow = permute(thrRow, [2 3 4 1 5]);
-thrCol = repmat( (1:s.wrld.size(2))' , [1, size(glByThrAct,[1 2 3 6]) ] );  
-thrCol = permute(thrCol, [2 3 4 5 1]);
-
-golRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[2 3 6 7]) ] );  
-golRow = permute(golRow, [1 2 3 4 5]);
-golCol = repmat( (1:s.wrld.size(2))' , [1, size(glByThrAct,[1 3 6 7]) ] );  
-golCol = permute(golCol, [2 1 3 4 5]);
-
-lmbCol = repmat( (2:s.wrld.size(2)-1)' , [1, size(glByThrAct,[1 2 6 7]) ] );  
-lmbCol = permute(lmbCol, [2 3 1 4 5]);
-
-[coeff,score,~,~,explained] = pca(glByThrActFlat( ~isnan(glByThrActFlat(:,1)),:)');
-
-golDist = sqrt((golCol - lmbCol).^2 + (golRow - w.lmb.row).^2);
-thrDist = sqrt((thrCol - lmbCol).^2 + (thrRow - w.lmb.row).^2);
-
-minStimDist = min(cat(6,golDist,thrDist),[],6);
-maxStimDist = max(cat(6,golDist,thrDist),[],6);
-avStimDist  = mean(cat(6,golDist,thrDist),6);
-
-% % % %% Do tSNE
 % % % % % % figure,
 % % % % % % sneY = tsne(glByThrActFlat( ~isnan(glByThrActFlat(:,1)),:)');
 % % % % % % scatter(Y(:,1), Y(:,2));
@@ -1346,128 +1346,128 @@ avStimDist  = mean(cat(6,golDist,thrDist),6);
 
 %% Plot the pcs
 
-figure, 
-
-% 
-% % % Downsample
-% % tmpScore = reshape(score', [size(score,2) unwrapSize(1:5)] ); % score'
-% % tmpScore = tmpScore(:,2:2:end-1,2:2:end,1:2:end,2:2:end-1,2:2:end);
-% tmpScore = reshape(embedding', [size(embedding,2) unwrapSizeDownSample(1:5)] ); 
-% tmpCl    = thrDist(2:2:end-1,2:2:end,1:2:end,2:2:end-1,2:2:end); 
-% tmpSz    = thrDist(2:2:end-1,2:2:end,1:2:end,2:2:end-1,2:2:end);
-
-% Downsample only a little
-% tmpScore = reshape(sneY3', [size(sneY3,2) unwrapSize(1:5)] ); 
-tmpScore = reshape(score', [size(score,2) unwrapSize(1:5)] ); 
-tmpScore = tmpScore(:,:,2:2:end,1:2:end,:,2:2:end);
-tmpCl    = thrRow(:,2:2:end,1:2:end,:,2:2:end); 
-tmpSz    = golRow(:,2:2:end,1:2:end,:,2:2:end);
-
-
-
-tmpScore = tmpScore(:,:)';
-tmpCl    = tmpCl(:);
-tmpSz    = tmpSz(:);
-
-tmpSz = 10 .* (tmpSz - min(tmpSz)) ./ max(tmpSz) + 1;
-
-value_min = min(tmpCl);
-value_max = max(tmpCl);
-
-% Step 2: Choose a colormap
-colormap_name = 'jet'; % You can use any built-in colormap or create a custom one
-
-% Step 3: Apply the colormap to your data
-nrmCl = (tmpCl - value_min) / (value_max - value_min); % Normalize data to [0, 1]
-% color_map = colormap(whitetocol(100,[0 0 0.7])); % Apply the colormap to the normalized data
-color_map = colormap(redbluecmapRory); % Apply the colormap to the normalized data
-colors = interp1(linspace(0, 1, size(color_map, 1)), color_map, nrmCl); % Interpolate colors
-
-
-
-scatter3(tmpScore(:,1), tmpScore(:,2), tmpScore(:,3), tmpSz , colors , 'filled'); 
-% scatter3(tmpScore(:,4), tmpScore(:,5), tmpScore(:,6), tmpSz , colors , 'filled'); 
+% % % figure, 
+% % % 
+% % % % 
+% % % % % % Downsample
+% % % % % tmpScore = reshape(score', [size(score,2) unwrapSize(1:5)] ); % score'
+% % % % % tmpScore = tmpScore(:,2:2:end-1,2:2:end,1:2:end,2:2:end-1,2:2:end);
+% % % % tmpScore = reshape(embedding', [size(embedding,2) unwrapSizeDownSample(1:5)] ); 
+% % % % tmpCl    = thrDist(2:2:end-1,2:2:end,1:2:end,2:2:end-1,2:2:end); 
+% % % % tmpSz    = thrDist(2:2:end-1,2:2:end,1:2:end,2:2:end-1,2:2:end);
+% % % 
+% % % % Downsample only a little
+% % % % tmpScore = reshape(sneY3', [size(sneY3,2) unwrapSize(1:5)] ); 
+% % % tmpScore = reshape(score', [size(score,2) unwrapSize(1:5)] ); 
+% % % tmpScore = tmpScore(:,:,2:2:end,1:2:end,:,2:2:end);
+% % % tmpCl    = thrRow(:,2:2:end,1:2:end,:,2:2:end); 
+% % % tmpSz    = golRow(:,2:2:end,1:2:end,:,2:2:end);
+% % % 
+% % % 
+% % % 
+% % % tmpScore = tmpScore(:,:)';
+% % % tmpCl    = tmpCl(:);
+% % % tmpSz    = tmpSz(:);
+% % % 
+% % % tmpSz = 10 .* (tmpSz - min(tmpSz)) ./ max(tmpSz) + 1;
+% % % 
+% % % value_min = min(tmpCl);
+% % % value_max = max(tmpCl);
+% % % 
+% % % % Step 2: Choose a colormap
+% % % colormap_name = 'jet'; % You can use any built-in colormap or create a custom one
+% % % 
+% % % % Step 3: Apply the colormap to your data
+% % % nrmCl = (tmpCl - value_min) / (value_max - value_min); % Normalize data to [0, 1]
+% % % % color_map = colormap(whitetocol(100,[0 0 0.7])); % Apply the colormap to the normalized data
+% % % color_map = colormap(redbluecmapRory); % Apply the colormap to the normalized data
+% % % colors = interp1(linspace(0, 1, size(color_map, 1)), color_map, nrmCl); % Interpolate colors
+% % % 
+% % % 
+% % % 
+% % % scatter3(tmpScore(:,1), tmpScore(:,2), tmpScore(:,3), tmpSz , colors , 'filled'); 
+% % % % scatter3(tmpScore(:,4), tmpScore(:,5), tmpScore(:,6), tmpSz , colors , 'filled'); 
 
 
 %% Compute lines of best fit for each variable of interest
-
-dS =  1; % Start dimension 
-dE =  3; % End dimension [max 84]
-
-[b1 b1Int] = regress(tmpCl, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-[b2 b2Int] = regress(tmpSz, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-
-figure,histogram2(tmpCl,(b1(end) + sum(b1(1:end-1).*tmpScore(:,dS:dE)')'),'FaceColor','Flat')
-figure,histogram2(tmpSz,(b2(end) + sum(b2(1:end-1).*tmpScore(:,dS:dE)')'),'FaceColor','Flat')
-
-% figure,plot(tmpCl,(b1(end) + sum(b1(1:end-1).*tmpScore(:,dS:dE)')'),'.')
-% figure,plot(tmpSz,(b2(end) + sum(b2(1:end-1).*tmpScore(:,dS:dE)')'),'.')
-
-
-dotProd     = dot(b1(1:end-1), b2(1:end-1)) ;
-dotProdAbs  = abs(dotProd) ;
-cosTheta    = dotProd ./ (norm(b1(1:end-1)) * norm(b2(1:end-1)));
-cosThetaAbs = abs(cosThetaAbs);
-theta       = acos(cosTheta);
+% % % 
+% % % dS =  1; % Start dimension 
+% % % dE =  3; % End dimension [max 84]
+% % % 
+% % % [b1 b1Int] = regress(tmpCl, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
+% % % [b2 b2Int] = regress(tmpSz, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
+% % % 
+% % % figure,histogram2(tmpCl,(b1(end) + sum(b1(1:end-1).*tmpScore(:,dS:dE)')'),'FaceColor','Flat')
+% % % figure,histogram2(tmpSz,(b2(end) + sum(b2(1:end-1).*tmpScore(:,dS:dE)')'),'FaceColor','Flat')
+% % % 
+% % % % figure,plot(tmpCl,(b1(end) + sum(b1(1:end-1).*tmpScore(:,dS:dE)')'),'.')
+% % % % figure,plot(tmpSz,(b2(end) + sum(b2(1:end-1).*tmpScore(:,dS:dE)')'),'.')
+% % % 
+% % % 
+% % % dotProd     = dot(b1(1:end-1), b2(1:end-1)) ;
+% % % dotProdAbs  = abs(dotProd) ;
+% % % cosTheta    = dotProd ./ (norm(b1(1:end-1)) * norm(b2(1:end-1)));
+% % % cosThetaAbs = abs(cosThetaAbs);
+% % % theta       = acos(cosTheta);
 
 
 %% Compute similarity of encoding direction as a function of dimension depth
-
-nPCs = 3;
-
-assessDims = 1:size(tmpScore,2) - (nPCs-1);
-
-for iD = assessDims
-
-    dS =  iD; % Start dimension
-    dE =  iD + nPCs -1; % End dimension [max 84]
-
-    [b1 b1Int] = regress(tmpCl, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-    [b2 b2Int] = regress(tmpSz, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
-
-    dotProd(iD)     = dot(b1(1:end-1), b2(1:end-1));
-    dotProdAbs(iD)  = abs(dotProd(iD));
-    cosTheta(iD)    = dotProd(iD) ./ (norm(b1(1:end-1)) * norm(b2(1:end-1)));
-    cosThetaAbs(iD) = abs(cosTheta(iD));
-    theta(iD)       = acos(cosTheta(iD));
-    thetaAbs(iD)    = abs(theta(iD) - pi./2);
-
-end
-
-% figure,
-% plot(assessDims , similarityMetric,'x','LineWidth',2); hold on
-% plot(assessDims , dotProdAbs,'-o','LineWidth',2);
-% plot(assessDims , cosTheta,'x','LineWidth',2);
-% plot(assessDims , cosThetaAbs,'-x','LineWidth',2);
-% plot(assessDims , theta,'-x','LineWidth',2);
-% plot(assessDims , thetaAbs,'-o','LineWidth',2);
-% legend('DotProd', 'DotProdAbs', 'CosTheta', 'CosThetaAbs','Theta','ThetaAbs')
-% xlabel('dimension of PCA')
-% ylabel('similarity')
-
-
-figure('Position',[50 50 600 900]),
-subplot(3,1,1)
-plot(assessDims , theta,'-x','LineWidth',2); hold on
-plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
-title('theta')
-xlabel('dimension of PCA')
-ylabel('angle between vectors (pi/2 is orthogonal)')
-
-
-subplot(3,1,2)
-plot(assessDims , cosThetaAbs,'-x','LineWidth',2); hold on
-plot(assessDims , zeros(size(assessDims)) ,'-.k');
-title('costhetaAbs')
-xlabel('dimension of PCA')
-ylabel('overlap of vectors (0 is orthogonal)')
-
-subplot(3,1,3)
-plot(assessDims , thetaAbs,'-x','LineWidth',2); hold on
-plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
-title('theta abs diff from pi/2')
-xlabel('dimension of PCA')
-ylabel('abs angle diff between vectors (0 is orthogonal)')
+% % % 
+% % % nPCs = 3;
+% % % 
+% % % assessDims = 1:size(tmpScore,2) - (nPCs-1);
+% % % 
+% % % for iD = assessDims
+% % % 
+% % %     dS =  iD; % Start dimension
+% % %     dE =  iD + nPCs -1; % End dimension [max 84]
+% % % 
+% % %     [b1 b1Int] = regress(tmpCl, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
+% % %     [b2 b2Int] = regress(tmpSz, [tmpScore(:,dS:dE), ones(size(tmpScore, 1), 1)]);
+% % % 
+% % %     dotProd(iD)     = dot(b1(1:end-1), b2(1:end-1));
+% % %     dotProdAbs(iD)  = abs(dotProd(iD));
+% % %     cosTheta(iD)    = dotProd(iD) ./ (norm(b1(1:end-1)) * norm(b2(1:end-1)));
+% % %     cosThetaAbs(iD) = abs(cosTheta(iD));
+% % %     theta(iD)       = acos(cosTheta(iD));
+% % %     thetaAbs(iD)    = abs(theta(iD) - pi./2);
+% % % 
+% % % end
+% % % 
+% % % % figure,
+% % % % plot(assessDims , similarityMetric,'x','LineWidth',2); hold on
+% % % % plot(assessDims , dotProdAbs,'-o','LineWidth',2);
+% % % % plot(assessDims , cosTheta,'x','LineWidth',2);
+% % % % plot(assessDims , cosThetaAbs,'-x','LineWidth',2);
+% % % % plot(assessDims , theta,'-x','LineWidth',2);
+% % % % plot(assessDims , thetaAbs,'-o','LineWidth',2);
+% % % % legend('DotProd', 'DotProdAbs', 'CosTheta', 'CosThetaAbs','Theta','ThetaAbs')
+% % % % xlabel('dimension of PCA')
+% % % % ylabel('similarity')
+% % % 
+% % % 
+% % % figure('Position',[50 50 600 900]),
+% % % subplot(3,1,1)
+% % % plot(assessDims , theta,'-x','LineWidth',2); hold on
+% % % plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
+% % % title('theta')
+% % % xlabel('dimension of PCA')
+% % % ylabel('angle between vectors (pi/2 is orthogonal)')
+% % % 
+% % % 
+% % % subplot(3,1,2)
+% % % plot(assessDims , cosThetaAbs,'-x','LineWidth',2); hold on
+% % % plot(assessDims , zeros(size(assessDims)) ,'-.k');
+% % % title('costhetaAbs')
+% % % xlabel('dimension of PCA')
+% % % ylabel('overlap of vectors (0 is orthogonal)')
+% % % 
+% % % subplot(3,1,3)
+% % % plot(assessDims , thetaAbs,'-x','LineWidth',2); hold on
+% % % plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
+% % % title('theta abs diff from pi/2')
+% % % xlabel('dimension of PCA')
+% % % ylabel('abs angle diff between vectors (0 is orthogonal)')
 
 
 %% $$$ NEXT change this to loop over all models, and extract similar lines 
@@ -1731,8 +1731,8 @@ end
 %% Convert to useable quantities
 
 
-% load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_V2.mat');
-load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_BigNetworks.mat');
+load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_V2.mat');
+% load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_BigNetworks.mat');
 
 TmpNrm  = @(x) squeeze(sqrt(sum(x.^2,1)));
 
@@ -1760,164 +1760,164 @@ crossProdRelMax = crossProdSize ./ ...
 
 %% $$$ Create permuted b2 --> permute ACROSS RUNS
 
-% (vect coords,iDim,iVar,iTyp,iReg,iRun,iM)
-
-tic
-
-nPrm = 1000;
-
-b2TmpPrm = repmat(b2Tmp,[1,1,1,1,1,1,1, nPrm]);
-
-
-% Define the target array size without the last dimension
-aS = size(b2TmpPrm);
-aS = aS(1:end-1);
-
-% Use a nested loop to fill in the last dimension
-for iP = 1:nPrm
-for i = 1:aS(1), for j = 1:aS(2), for k = 1:aS(3), for l = 1:aS(4), for m = 1:aS(5), for n = 1:aS(7), 
-    b2TmpPrm(i, j, k, l, m, :, n, iP) = b2Tmp(i, j, k, l, m, randperm(aS(6)), n);
-end, end, end, end, end, end
-end
-
-toc
-
-tic
-for iP = 1:nPrm
-    crossProdSizePerm(:,:,:,:,:,:,iP) = TmpNrm(cross(b1Tmp(1:end-1,:,:,:,:,:,:), b2TmpPrm(1:end-1,:,:,:,:,:,:,iP)));
-    dotProdAbsPerm(:,:,:,:,:,:,iP)    = abs(squeeze(dot(b1Tmp(1:end-1,:,:,:,:,:,:), b2TmpPrm(1:end-1,:,:,:,:,:,:,iP)))  );
-    thetaPerm(:,:,:,:,:,:,iP)         = acos(  squeeze(dot(b1Tmp(1:end-1,:,:,:,:,:,:), b2TmpPrm(1:end-1,:,:,:,:,:,:,iP))) ./ ...
-        (TmpNrm(b1Tmp(1:end-1,:,:,:,:,:,:)) .* TmpNrm(b2TmpPrm(1:end-1,:,:,:,:,:,:,iP)))  );
-end
-toc
+% % % % (vect coords,iDim,iVar,iTyp,iReg,iRun,iM)
+% % % 
+% % % tic
+% % % 
+% % % nPrm = 1000;
+% % % 
+% % % b2TmpPrm = repmat(b2Tmp,[1,1,1,1,1,1,1, nPrm]);
+% % % 
+% % % 
+% % % % Define the target array size without the last dimension
+% % % aS = size(b2TmpPrm);
+% % % aS = aS(1:end-1);
+% % % 
+% % % % Use a nested loop to fill in the last dimension
+% % % for iP = 1:nPrm
+% % % for i = 1:aS(1), for j = 1:aS(2), for k = 1:aS(3), for l = 1:aS(4), for m = 1:aS(5), for n = 1:aS(7), 
+% % %     b2TmpPrm(i, j, k, l, m, :, n, iP) = b2Tmp(i, j, k, l, m, randperm(aS(6)), n);
+% % % end, end, end, end, end, end
+% % % end
+% % % 
+% % % toc
+% % % 
+% % % tic
+% % % for iP = 1:nPrm
+% % %     crossProdSizePerm(:,:,:,:,:,:,iP) = TmpNrm(cross(b1Tmp(1:end-1,:,:,:,:,:,:), b2TmpPrm(1:end-1,:,:,:,:,:,:,iP)));
+% % %     dotProdAbsPerm(:,:,:,:,:,:,iP)    = abs(squeeze(dot(b1Tmp(1:end-1,:,:,:,:,:,:), b2TmpPrm(1:end-1,:,:,:,:,:,:,iP)))  );
+% % %     thetaPerm(:,:,:,:,:,:,iP)         = acos(  squeeze(dot(b1Tmp(1:end-1,:,:,:,:,:,:), b2TmpPrm(1:end-1,:,:,:,:,:,:,iP))) ./ ...
+% % %         (TmpNrm(b1Tmp(1:end-1,:,:,:,:,:,:)) .* TmpNrm(b2TmpPrm(1:end-1,:,:,:,:,:,:,iP)))  );
+% % % end
+% % % toc
 
 %% Scatter plots 
 % % % load('C:\Users\Rory Bufacchi\OneDrive\Projects\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\FullWorkSpace_BigNets.mat')
 
-iMM = 1;
-for iRun = 1:size(rSall,2)
-    for iM = 1:size(rSall,1)
-        tmpPerf(iMM) = sum(rSall(iM,iRun).perf.rewPerAct(end,:));
-        iMM = iMM + 1;
-    end
-end
+% % % iMM = 1;
+% % % for iRun = 1:size(rSall,2)
+% % %     for iM = 1:size(rSall,1)
+% % %         tmpPerf(iMM) = sum(rSall(iM,iRun).perf.rewPerAct(end,:));
+% % %         iMM = iMM + 1;
+% % %     end
+% % % end
 
 
     %% Line plots 
 
-    % Reshape in case only 1 regularization and type is present (i.e. if
-    % only looking at the big networks)
-    if size(crossProdSize,5) <= 1
-        crossProdSize       = permute(crossProdSize,[1 2 5 6 3 4 7]);
-        dotProdAbs          = permute(dotProdAbs,[1 2 5 6 3 4 7]);
-        crossProdSizePerm   = permute(crossProdSizePerm,[1 2 5 6 3 4 7 8]);
-        dotProdAbsPerm      = permute(dotProdAbsPerm,[1 2 5 6 3 4 7 8]);
-    end
-
-% % %     % For small networks
-% % %     iV   = 5; %1; % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
+% % %     % Reshape in case only 1 regularization and type is present (i.e. if
+% % %     % only looking at the big networks)
+% % %     if size(crossProdSize,5) <= 1
+% % %         crossProdSize       = permute(crossProdSize,[1 2 5 6 3 4 7]);
+% % %         dotProdAbs          = permute(dotProdAbs,[1 2 5 6 3 4 7]);
+% % %         crossProdSizePerm   = permute(crossProdSizePerm,[1 2 5 6 3 4 7 8]);
+% % %         dotProdAbsPerm      = permute(dotProdAbsPerm,[1 2 5 6 3 4 7 8]);
+% % %     end
+% % % 
+% % % % % %     % For small networks
+% % % % % %     iV   = 5; %1; % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
+% % % % % %     iTyp = 1; % Neuron type
+% % % % % %     iReg = 2; % Regularisation type
+% % % 
+% % %     % For big networks
+% % %     iV   = 1; %1; % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
 % % %     iTyp = 1; % Neuron type
-% % %     iReg = 2; % Regularisation type
-
-    % For big networks
-    iV   = 1; %1; % comparison Variables % $$$ COMAPRISON 6, MIN VS MAX STIMDIST is actually CRAZY ALIGNED for early PCs (also 7, min vs avstimdist)
-    iTyp = 1; % Neuron type
-    iReg = 1; % Regularisation type
-
-
-
-    % Compute similarity of encoding direction as a function of dimenstion depth
-    allVars     = {'thrRow','thrCol','lmbCol','lmbCol','golDist',...
-               'minStimDist','minStimDist'};
-    allVarsComp = {'golRow','golCol','thrCol','golCol','thrDist',...
-               'maxStimDist','avStimDist'};
-
-
-allVars{iV}
-allVarsComp{iV}
-neurTypes{iTyp}
-
-    assessDims = 1:size(b1,2);
-
-
-
-% figure('Position',[2000 50 600 900]),
-figure('Position',[50 50 600 900]),
-
-% -------------
-subplot(4,1,1)
-plot(assessDims , squeeze(theta(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(nanmean(theta(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
-plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
-title('theta')
-xlabel('dimension of PCA')
-ylabel('angle between vectors (pi/2 is orthogonal)')
-
-% -------------
-subplot(4,1,2)
-plot(assessDims , squeeze(cosThetaAbs(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(nanmean(cosThetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
-plot(assessDims , zeros(size(assessDims)) ,'-.k');
-title('costhetaAbs')
-xlabel('dimension of PCA')
-ylabel('overlap of vectors (0 is orthogonal)')
-
-% -------------
-subplot(4,1,3)
-plot(assessDims , squeeze(thetaAbs(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(nanmean(thetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
-plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
-title('theta abs diff from pi/2')
-xlabel('dimension of PCA')
-ylabel('abs angle diff between vectors (0 is orthogonal)')
-
-% -------------
-subplot(4,1,4)
-plot(assessDims , squeeze(dotProdAbs(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(nanmean(dotProdAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
-plot(assessDims , zeros(size(assessDims)) ,'-.k');
-
-tmpD = nanmean(dotProdAbsPerm(:,iV,iTyp,iReg,:,:,:,:),7); % $$$
-plot(assessDims , squeeze(nanmedian(tmpD(:,1,1,1,:),5)  ) ,'-b','LineWidth',3); hold on
-
-title('dot product abs')
-xlabel('dimension of PCA')
-ylabel('dot product between vectors (0 is orthogonal)')
-ylim([-1 1])
-
-
-figure('Position',[800 50 600 900]),
-% -------------
-subplot(4,1,1)
-plot(assessDims , squeeze(crossProdRelMax(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(nanmean(crossProdRelMax(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
-plot(assessDims , ones(size(assessDims)) .* 1,'-.k');
-title('xprod relative to maximum')
-xlabel('dimension of PCA')
-ylabel('xProd')
-
-% -------------
-subplot(4,1,2)
-plot(assessDims , squeeze(crossProdSize(:,iV,iTyp,iReg,:))); hold on
-plot(assessDims , squeeze(nanmedian(crossProdSize(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
-plot(assessDims , ones(size(assessDims)) .* 0 ,'-.k');
-
-tmpD = nanmean(crossProdSizePerm(:,iV,iTyp,iReg,:,:,:,:),7); % $$$
-plot(assessDims , squeeze(nanmedian(tmpD(:,1,1,1,:),5)  ) ,'-b','LineWidth',3); hold on
-
-title('xprod size')
-xlabel('dimension of PCA')
-ylabel('xProd')
-
-% -------------
-subplot(4,1,3)
-tmpD = abs(squeeze(crossProdSize(:,iV,iTyp,iReg,:))) ./ (  abs(squeeze(crossProdSize(:,iV,iTyp,iReg,:)))  +  abs(squeeze(dotProd(:,iV,iTyp,iReg,:)))  );
-plot(assessDims ,tmpD); hold on
-plot(assessDims , nanmean(tmpD,2) ,'-k','LineWidth',2); 
-plot(assessDims , ones(size(assessDims)) .* 0 ,'-.k');
-title('abs(xprod) vs abs(xprod) + abs(dotprod)')
-xlabel('dimension of PCA')
-ylabel('xProd')
+% % %     iReg = 1; % Regularisation type
+% % % 
+% % % 
+% % % 
+% % %     % Compute similarity of encoding direction as a function of dimenstion depth
+% % %     allVars     = {'thrRow','thrCol','lmbCol','lmbCol','golDist',...
+% % %                'minStimDist','minStimDist'};
+% % %     allVarsComp = {'golRow','golCol','thrCol','golCol','thrDist',...
+% % %                'maxStimDist','avStimDist'};
+% % % 
+% % % 
+% % % allVars{iV}
+% % % allVarsComp{iV}
+% % % neurTypes{iTyp}
+% % % 
+% % %     assessDims = 1:size(b1,2);
+% % % 
+% % % 
+% % % 
+% % % % figure('Position',[2000 50 600 900]),
+% % % figure('Position',[50 50 600 900]),
+% % % 
+% % % % -------------
+% % % subplot(4,1,1)
+% % % plot(assessDims , squeeze(theta(:,iV,iTyp,iReg,:))); hold on
+% % % plot(assessDims , squeeze(nanmean(theta(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
+% % % plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
+% % % title('theta')
+% % % xlabel('dimension of PCA')
+% % % ylabel('angle between vectors (pi/2 is orthogonal)')
+% % % 
+% % % % -------------
+% % % subplot(4,1,2)
+% % % plot(assessDims , squeeze(cosThetaAbs(:,iV,iTyp,iReg,:))); hold on
+% % % plot(assessDims , squeeze(nanmean(cosThetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
+% % % plot(assessDims , zeros(size(assessDims)) ,'-.k');
+% % % title('costhetaAbs')
+% % % xlabel('dimension of PCA')
+% % % ylabel('overlap of vectors (0 is orthogonal)')
+% % % 
+% % % % -------------
+% % % subplot(4,1,3)
+% % % plot(assessDims , squeeze(thetaAbs(:,iV,iTyp,iReg,:))); hold on
+% % % plot(assessDims , squeeze(nanmean(thetaAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
+% % % plot(assessDims , ones(size(assessDims)) .* pi./2,'-.k');
+% % % title('theta abs diff from pi/2')
+% % % xlabel('dimension of PCA')
+% % % ylabel('abs angle diff between vectors (0 is orthogonal)')
+% % % 
+% % % % -------------
+% % % subplot(4,1,4)
+% % % plot(assessDims , squeeze(dotProdAbs(:,iV,iTyp,iReg,:))); hold on
+% % % plot(assessDims , squeeze(nanmean(dotProdAbs(:,iV,iTyp,iReg,:),5)),'-xk','LineWidth',2); 
+% % % plot(assessDims , zeros(size(assessDims)) ,'-.k');
+% % % 
+% % % tmpD = nanmean(dotProdAbsPerm(:,iV,iTyp,iReg,:,:,:,:),7); % $$$
+% % % plot(assessDims , squeeze(nanmedian(tmpD(:,1,1,1,:),5)  ) ,'-b','LineWidth',3); hold on
+% % % 
+% % % title('dot product abs')
+% % % xlabel('dimension of PCA')
+% % % ylabel('dot product between vectors (0 is orthogonal)')
+% % % ylim([-1 1])
+% % % 
+% % % 
+% % % figure('Position',[800 50 600 900]),
+% % % % -------------
+% % % subplot(4,1,1)
+% % % plot(assessDims , squeeze(crossProdRelMax(:,iV,iTyp,iReg,:))); hold on
+% % % plot(assessDims , squeeze(nanmean(crossProdRelMax(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
+% % % plot(assessDims , ones(size(assessDims)) .* 1,'-.k');
+% % % title('xprod relative to maximum')
+% % % xlabel('dimension of PCA')
+% % % ylabel('xProd')
+% % % 
+% % % % -------------
+% % % subplot(4,1,2)
+% % % plot(assessDims , squeeze(crossProdSize(:,iV,iTyp,iReg,:))); hold on
+% % % plot(assessDims , squeeze(nanmedian(crossProdSize(:,iV,iTyp,iReg,:),5)) ,'-k','LineWidth',2); 
+% % % plot(assessDims , ones(size(assessDims)) .* 0 ,'-.k');
+% % % 
+% % % tmpD = nanmean(crossProdSizePerm(:,iV,iTyp,iReg,:,:,:,:),7); % $$$
+% % % plot(assessDims , squeeze(nanmedian(tmpD(:,1,1,1,:),5)  ) ,'-b','LineWidth',3); hold on
+% % % 
+% % % title('xprod size')
+% % % xlabel('dimension of PCA')
+% % % ylabel('xProd')
+% % % 
+% % % % -------------
+% % % subplot(4,1,3)
+% % % tmpD = abs(squeeze(crossProdSize(:,iV,iTyp,iReg,:))) ./ (  abs(squeeze(crossProdSize(:,iV,iTyp,iReg,:)))  +  abs(squeeze(dotProd(:,iV,iTyp,iReg,:)))  );
+% % % plot(assessDims ,tmpD); hold on
+% % % plot(assessDims , nanmean(tmpD,2) ,'-k','LineWidth',2); 
+% % % plot(assessDims , ones(size(assessDims)) .* 0 ,'-.k');
+% % % title('abs(xprod) vs abs(xprod) + abs(dotprod)')
+% % % xlabel('dimension of PCA')
+% % % ylabel('xProd')
 
 
 
@@ -2187,19 +2187,19 @@ end
 
 %% Collect data for performance vs PCA orthogonality
 
-% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat')
+% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V5.mat')
 % % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_BIGNETS_temp.mat')
 
-% % % % FOR SMALL NETWORKS
-% % % neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
-% % % regTypes    = {'Valence_51','L1'};
-% % % regNames    = {'No','L1'};
+% FOR SMALL NETWORKS
+neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
+regTypes    = {'Valence_51','L1'};
+regNames    = {'No','L1'};
 
-
-% FOR BIG NETWORKS
-neurTypes   = {'SuperCompRelearn'};
-regTypes    = {'Valence_51'};
-regNames    = {'No'};
+% % % 
+% % % % FOR BIG NETWORKS
+% % % neurTypes   = {'SuperCompRelearn'};
+% % % regTypes    = {'Valence_51'};
+% % % regNames    = {'No'};
 
 tic
 for iTyp = 1:length(neurTypes) % Neuron type
@@ -2227,17 +2227,17 @@ toc
 tic
 iM = 1;
 
-% % FOR SMALL NETWORKS
-% neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
-% % % % neurTypes   = {'softmax','logsig','tribas','radbas','poslin','purelin','tansig'};
-% regTypes    = {'Valence_51','L1'};
-% regNames    = {'No','L1'};
+% FOR SMALL NETWORKS
+neurTypes   = {'tansig','logsig','softmax','poslin','purelin','tribas','radbas'};
+% % % neurTypes   = {'softmax','logsig','tribas','radbas','poslin','purelin','tansig'};
+regTypes    = {'Valence_51','L1'};
+regNames    = {'No','L1'};
 
-
-% FOR BIG NETWORKS
-neurTypes   = {'SuperCompRelearn'};
-regTypes    = {'Valence_51'};
-regNames    = {'No'};
+% 
+% % FOR BIG NETWORKS
+% neurTypes   = {'SuperCompRelearn'};
+% regTypes    = {'Valence_51'};
+% regNames    = {'No'};
 
 
 for iTyp = 1:length(neurTypes);
@@ -2289,7 +2289,7 @@ end
 end
 
 % % % % Save analysed neuron types
-% % % save('Results\ForFigures\NeurTypesAnalysed_V4.mat','-v7.3')
+% % % save('Results\ForFigures\NeurTypesAnalysed_V5.mat','-v7.3')
 % % % save('Results\ForFigures\NeurTypesAnalysed_BIGNETS_temp.mat','-v7.3')
 toc
 
@@ -2362,7 +2362,7 @@ nanstd(rho(:))
 
 %% Perform LME for all models independently, accounting for layer differences
 
-% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V4.mat')
+% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V5.mat')
 % % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_BIGNETS_temp.mat')
 
 
@@ -2494,166 +2494,168 @@ meanEffs = mean(tStatTmp(:))
 disp('standard deviation of tstat of node distance')
 sdEffs   = std(tStatTmp(:))
 
+% % % save('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V5.mat','-v7.3')
+
 %% $$$ Use the projection method to perform parametric stats for the PCA?
 
-% First project onto the goal and threat axes
-
-% Select the particalar comparisons and PCA dimensions of interest
-iV = 1;
-iD = 1;
-
-for iTyp = 1:length(neurTypes)
-
-
-for iReg = 1:length(regTypes)
-
-
-bFold = 'Results\ForFigures\Valence\';
-cFiles = dir([bFold '*' regTypes{iReg} '*_' neurTypes{iTyp} '_B_V*.mat']);
-
-
-for iRun = 1:length(cFiles)
-
-for iM = 1:size(rSall,1)
-
-load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
-          'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
-
-% % % load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+% % % % First project onto the goal and threat axes
+% % % 
+% % % % Select the particalar comparisons and PCA dimensions of interest
+% % % iV = 1;
+% % % iD = 1;
+% % % 
+% % % for iTyp = 1:length(neurTypes)
+% % % 
+% % % 
+% % % for iReg = 1:length(regTypes)
+% % % 
+% % % 
+% % % bFold = 'Results\ForFigures\Valence\';
+% % % cFiles = dir([bFold '*' regTypes{iReg} '*_' neurTypes{iTyp} '_B_V*.mat']);
+% % % 
+% % % 
+% % % for iRun = 1:length(cFiles)
+% % % 
+% % % for iM = 1:size(rSall,1)
+% % % 
+% % % load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
 % % %           'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
-
-% $$$ HERE figure out how to deal with the bloody model architectures --> I
-% think just store them separately?
-
-  % Create flattened activations for PCA
-    glByThrActFlat = permute(glByThrAct,[1 2 3 6 7 4 5]);
-    unwrapSize     = size(glByThrActFlat);
-    glByThrActFlat = permute(glByThrActFlat(:,:,:,:,:,:),[6 1 2 3 4 5]);
-    glByThrActFlat = glByThrActFlat(:,:);
-
-    
-% % %     % ============================I THINK THIS CAN GO =====================
-% % %     % Create 'explanatory variables'
-% % %     thrRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[1 2 3 7]) ] );  
-% % %     thrRow = permute(thrRow, [2 3 4 1 5]);
+% % % 
+% % % % % % load(['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+% % % % % %           'FullNetActivity_NeurType_' neurTypes{iTyp} '_RegType_' regTypes{iReg} '_Run_' num2str(iRun) '_NetArch_' num2str(iM) '.mat']);
+% % % 
+% % % % $$$ HERE figure out how to deal with the bloody model architectures --> I
+% % % % think just store them separately?
+% % % 
+% % %   % Create flattened activations for PCA
+% % %     glByThrActFlat = permute(glByThrAct,[1 2 3 6 7 4 5]);
+% % %     unwrapSize     = size(glByThrActFlat);
+% % %     glByThrActFlat = permute(glByThrActFlat(:,:,:,:,:,:),[6 1 2 3 4 5]);
+% % %     glByThrActFlat = glByThrActFlat(:,:);
+% % % 
 % % %     
-% % %     golRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[2 3 6 7]) ] );  
-% % %     golRow = permute(golRow, [1 2 3 4 5]);   
-% % %     % ============================I THINK THIS CAN GO =====================
-
-
-    % Perform PCA
-    [coeff,score,~,~,explained] = pca(glByThrActFlat( ~isnan(glByThrActFlat(:,1)),:)');
-    % Replace with zero if the PCA doesn't work
-    if size(score,2) == 0
-        score = zeros([size(glByThrActFlat,2) 3]);
-    end
-
-
-
-    
-    % Downsample more here than when creating the basis vectors, because
-    % otherwise we end up with a stupidly large array of vectors between
-    % states
-    tmpScore = reshape(score', [size(score,2) unwrapSize(1:5)] );
-    tmpScore = tmpScore(:,2:3:end,2:3:end,1:3:end,2:3:end,2:3:end);
-    tmpScore = tmpScore(:,:)';
-
-
-
-    % Extract attributes of interest for given state
-    allVars     = {'thrRow','thrCol','lmbCol','lmbCol','golDist',...
-               'minStimDist','minStimDist'};
-    allVarsComp = {'golRow','golCol','thrCol','golCol','thrDist',...
-               'maxStimDist','avStimDist'};
-    eval(['tmpCl    = ' allVars{iV} '(2:3:end,2:3:end,1:3:end,2:3:end,2:3:end);']);
-    eval(['tmpSz    = ' allVarsComp{iV} '(2:3:end,2:3:end,1:3:end,2:3:end,2:3:end);']);
-    tmpCl    = tmpCl(:);
-    tmpSz    = tmpSz(:);
-
-
-    % Create a vector between each pair of points in the 1st 3 dimensions
-    % of the score
-    dS = 1;
-    dE = 3;
-    pointToPointVecs = tmpScore(:,dS:dE)' - permute(tmpScore(:,dS:dE)',[1 3 2]);
-    % Create a vector between each pair of points in goal-threat (fully
-    % orthogonal) space
-    goalThreatSpace         = [tmpCl, tmpSz];
-    pointToPointVecsGolThr  = goalThreatSpace' - permute(goalThreatSpace',[1 3 2]);
-
-    tic
-    % Remove diagonal (because distance is 0), and diagonally symmetric elements
-    for iR = 1:size(pointToPointVecsGolThr,2)
-        pointToPointVecs(:,iR:end,iR) = NaN;
-        pointToPointVecsGolThr(:,iR:end,iR) = NaN;
-    end
-    pointToPointVecs        = pointToPointVecs(:,:);
-    pointToPointVecsGolThr  = pointToPointVecsGolThr(:,:);
-    pointToPointVecs(:,isnan(pointToPointVecs(1,:))) = [];
-    pointToPointVecsGolThr(:,isnan(pointToPointVecsGolThr(1,:))) = [];
-    toc
-
-    % $$$ Calculate dot product between each pair of vectors? Will that
-    % make it huge? I think that will make it too huge...
-
-
-%     figure, histogram2(sqrt(sum(pointToPointVecsGolThr.^2)),sqrt(sum(pointToPointVecs.^2)),'Facecolor','flat')
-
-    figure, histogram2(pointToPointVecsGolThr(1,:),projOntoGoal,'Facecolor','flat')
-
-    figure, histogram2(pointToPointVecsGolThr(2,:),projOntoThreat,'Facecolor','flat')
-
-
-
-
-    % Remove zero distance
-    pointToPointVecsGolThr(:,sum(pointToPointVecs,1) == 0) = [];
-    pointToPointVecs(:,sum(pointToPointVecs,1) == 0) = [];
-
-
-
-
-    % Normalise
-    pointToPointVecs = pointToPointVecs ./ sqrt(sum(pointToPointVecs.^2 ,1));
-    
-
-    % Project that vector onto the goal and threat-preferring axes
-    % i.e. dot product
-    tmpGlVec        = b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) ./ sqrt(sum(b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM).^2,1));
-    tmpThrVec       = b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) ./ sqrt(sum(b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM).^2,1));
-    projOntoGoal    = sum(tmpGlVec .* pointToPointVecs , 1);
-%     projOntoGoal    = unique(abs(projOntoGoal),'stable');
-    projOntoThreat  = sum(tmpThrVec .* pointToPointVecs , 1);
-%     projOntoThreat  = unique(abs(projOntoThreat),'stable');
-
-    [rrr(iM,iRun,iTyp,iReg) ppp(iM,iRun,iTyp,iReg)] = corr(projOntoGoal',projOntoThreat');
-
-end
-end
-end
-end
-
-% $$$ Tomorrow, double check that the dot product isn't biased to being
-% smaller than 0.5 --> it is. 
-
-% $$$ WAIT A MINUTE, did I just create a random cloud of points and then use that to show that two vectors are more or less orthogonal?...
-
-% $$$ What do I do about it?
-
-% $$$ --> let's see what the shitty iTyps show. Cause there shouldn't be
-% much structure there
+% % % % % %     % ============================I THINK THIS CAN GO =====================
+% % % % % %     % Create 'explanatory variables'
+% % % % % %     thrRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[1 2 3 7]) ] );  
+% % % % % %     thrRow = permute(thrRow, [2 3 4 1 5]);
+% % % % % %     
+% % % % % %     golRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[2 3 6 7]) ] );  
+% % % % % %     golRow = permute(golRow, [1 2 3 4 5]);   
+% % % % % %     % ============================I THINK THIS CAN GO =====================
+% % % 
+% % % 
+% % %     % Perform PCA
+% % %     [coeff,score,~,~,explained] = pca(glByThrActFlat( ~isnan(glByThrActFlat(:,1)),:)');
+% % %     % Replace with zero if the PCA doesn't work
+% % %     if size(score,2) == 0
+% % %         score = zeros([size(glByThrActFlat,2) 3]);
+% % %     end
+% % % 
+% % % 
+% % % 
+% % %     
+% % %     % Downsample more here than when creating the basis vectors, because
+% % %     % otherwise we end up with a stupidly large array of vectors between
+% % %     % states
+% % %     tmpScore = reshape(score', [size(score,2) unwrapSize(1:5)] );
+% % %     tmpScore = tmpScore(:,2:3:end,2:3:end,1:3:end,2:3:end,2:3:end);
+% % %     tmpScore = tmpScore(:,:)';
+% % % 
+% % % 
+% % % 
+% % %     % Extract attributes of interest for given state
+% % %     allVars     = {'thrRow','thrCol','lmbCol','lmbCol','golDist',...
+% % %                'minStimDist','minStimDist'};
+% % %     allVarsComp = {'golRow','golCol','thrCol','golCol','thrDist',...
+% % %                'maxStimDist','avStimDist'};
+% % %     eval(['tmpCl    = ' allVars{iV} '(2:3:end,2:3:end,1:3:end,2:3:end,2:3:end);']);
+% % %     eval(['tmpSz    = ' allVarsComp{iV} '(2:3:end,2:3:end,1:3:end,2:3:end,2:3:end);']);
+% % %     tmpCl    = tmpCl(:);
+% % %     tmpSz    = tmpSz(:);
+% % % 
+% % % 
+% % %     % Create a vector between each pair of points in the 1st 3 dimensions
+% % %     % of the score
+% % %     dS = 1;
+% % %     dE = 3;
+% % %     pointToPointVecs = tmpScore(:,dS:dE)' - permute(tmpScore(:,dS:dE)',[1 3 2]);
+% % %     % Create a vector between each pair of points in goal-threat (fully
+% % %     % orthogonal) space
+% % %     goalThreatSpace         = [tmpCl, tmpSz];
+% % %     pointToPointVecsGolThr  = goalThreatSpace' - permute(goalThreatSpace',[1 3 2]);
+% % % 
+% % %     tic
+% % %     % Remove diagonal (because distance is 0), and diagonally symmetric elements
+% % %     for iR = 1:size(pointToPointVecsGolThr,2)
+% % %         pointToPointVecs(:,iR:end,iR) = NaN;
+% % %         pointToPointVecsGolThr(:,iR:end,iR) = NaN;
+% % %     end
+% % %     pointToPointVecs        = pointToPointVecs(:,:);
+% % %     pointToPointVecsGolThr  = pointToPointVecsGolThr(:,:);
+% % %     pointToPointVecs(:,isnan(pointToPointVecs(1,:))) = [];
+% % %     pointToPointVecsGolThr(:,isnan(pointToPointVecsGolThr(1,:))) = [];
+% % %     toc
+% % % 
+% % %     % $$$ Calculate dot product between each pair of vectors? Will that
+% % %     % make it huge? I think that will make it too huge...
+% % % 
+% % % 
+% % % %     figure, histogram2(sqrt(sum(pointToPointVecsGolThr.^2)),sqrt(sum(pointToPointVecs.^2)),'Facecolor','flat')
+% % % 
+% % %     figure, histogram2(pointToPointVecsGolThr(1,:),projOntoGoal,'Facecolor','flat')
+% % % 
+% % %     figure, histogram2(pointToPointVecsGolThr(2,:),projOntoThreat,'Facecolor','flat')
+% % % 
+% % % 
+% % % 
+% % % 
+% % %     % Remove zero distance
+% % %     pointToPointVecsGolThr(:,sum(pointToPointVecs,1) == 0) = [];
+% % %     pointToPointVecs(:,sum(pointToPointVecs,1) == 0) = [];
+% % % 
+% % % 
+% % % 
+% % % 
+% % %     % Normalise
+% % %     pointToPointVecs = pointToPointVecs ./ sqrt(sum(pointToPointVecs.^2 ,1));
+% % %     
+% % % 
+% % %     % Project that vector onto the goal and threat-preferring axes
+% % %     % i.e. dot product
+% % %     tmpGlVec        = b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) ./ sqrt(sum(b1ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM).^2,1));
+% % %     tmpThrVec       = b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM) ./ sqrt(sum(b2ScaleDimSd(1:3,iD,iV,iTyp,iReg,iRun,iM).^2,1));
+% % %     projOntoGoal    = sum(tmpGlVec .* pointToPointVecs , 1);
+% % % %     projOntoGoal    = unique(abs(projOntoGoal),'stable');
+% % %     projOntoThreat  = sum(tmpThrVec .* pointToPointVecs , 1);
+% % % %     projOntoThreat  = unique(abs(projOntoThreat),'stable');
+% % % 
+% % %     [rrr(iM,iRun,iTyp,iReg) ppp(iM,iRun,iTyp,iReg)] = corr(projOntoGoal',projOntoThreat');
+% % % 
+% % % end
+% % % end
+% % % end
+% % % end
+% % % 
+% % % % $$$ Tomorrow, double check that the dot product isn't biased to being
+% % % % smaller than 0.5 --> it is. 
+% % % 
+% % % % $$$ WAIT A MINUTE, did I just create a random cloud of points and then use that to show that two vectors are more or less orthogonal?...
+% % % 
+% % % % $$$ What do I do about it?
+% % % 
+% % % % $$$ --> let's see what the shitty iTyps show. Cause there shouldn't be
+% % % % much structure there
 
 
 
 %% $$$ Use PROPER permutation method And/or bootstrapping to perform stats for the PCA?
 
-% First project onto the goal and threat axes
+load(['Results\ForFigures\DimensionReduction\NetworkActivations\' ...
+          'FullNetActivity_NeurType_' neurTypes{1} '_RegType_' regTypes{iReg} '_Run_' num2str(1) '_NetArch_' num2str(1) '.mat']);
 
 % Select the particalar comparisons and PCA dimensions of interest
 iV = 1;
 iD = 1;
-
 
 % Create 'explanatory variables'
 thrRow = repmat( (1:s.wrld.size(1))' , [1, size(glByThrAct,[1 2 3 7]) ] );
@@ -2784,6 +2786,7 @@ end
 end
 toc
 
+% save('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V5.mat','-v7.3')
 
 
 %% Finalise pca stats and plot scatter plus histograms
@@ -2987,9 +2990,11 @@ yDefs   = {'allPerf'        };
 % $$$ FOr structure, check out line 128
 
 % figure('Position',[50,500,1800,400])
-f.PCAvsRew.f        = figure('Position',[50,200,600,600]);
-f.StructvsRew.f     = figure('Position',[50,200,600,600]);
-f.PCAvsStructvsRew.f = figure('Position',[50,200,600,600]);
+f.PCAvsRew.f            = figure('Position',[50,200,600,600]);
+f.StructvsRew.f         = figure('Position',[50,200,600,600]);
+f.PCAvsStructvsRew.f    = figure('Position',[50,200,600,600]);
+f.StructvsReconsstruct.f= figure('Position',[50,200,600,600]);
+f.PCAvsReconsstruct.f   = figure('Position',[50,200,600,600]);
 
 cM = 1:3;
 cReg = 1:2;
@@ -3033,6 +3038,68 @@ plot(xQuery,yAvg,'k','LineWidth',2); hold on
 ShadedPlot(xQuery,yAvg, yAvg - yStd, yAvg + yStd, shOpts)
 xlabel('Network structure (t-stat)')
 ylabel('Performance(reward/timestep)')
+
+
+
+figure(f.StructvsReconsstruct.f)
+% PCA VS RECONSIRUCTION ---------------------------------------------
+tmpX = tStatsStructureAll (cM,:,:,cReg,:);
+tmpY = squeeze(rhoAll(2,cM,:,:,cReg,:));
+% % % h = histogram2(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'FaceColor','Flat');
+% % % densCol = h.Values ./ sum(h.Values,2);
+% % % [XX YY] = meshgrid(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)), h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)) )
+% % % imagesc(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)) ./ 2, ...
+% % %         h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)) ./ 2,densCol'); axis xy
+% % % colormap(whitetocol(256,[0 0 0]));
+% % % hold on
+scatter(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'.'); hold on
+lsline
+
+tmpX = permute(tStatsStructureAll(cM,:,:,cReg,:),[3 1 2 4 5]); tmpX = tmpX(:,:);
+tmpY = permute(squeeze(rhoAll(2,cM,:,:,cReg,:)),[3 1 2 4 5]); tmpY = tmpY(:,:);
+% % % scatter(tmpX',tmpY','.'); hold on
+scatter(tmpX',tmpY',10,'Filled'); hold on
+xlabel('Network structure (t-stat)')
+ylabel('Reconstruction quality (rho)')
+% [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:), linspace(min(tmpX(:)),max(tmpX(:)),100), min(tmpX(:)-))
+[xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:));
+[xQuery, yStd] = SlidingWindowFunction(tmpX(:), tmpY(:),@(x)std(x)./sqrt(numel(x)) );
+shOpts.PlotMean = 0; shOpts.c = [0.7 0.7 0.7];
+plot(xQuery,yAvg,'k','LineWidth',2); hold on
+ShadedPlot(xQuery,yAvg, yAvg - yStd, yAvg + yStd, shOpts)
+ylim([0 1]);
+xlim([-30 10]);
+
+
+
+
+figure(f.PCAvsReconsstruct.f)
+% PCA VS RECONSIRUCTION ---------------------------------------------
+tmpX = absalldotProdAll(cM,:,:,cReg,:);
+tmpY = squeeze(rhoAll(2,cM,:,:,cReg,:));
+% % % h = histogram2(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'FaceColor','Flat');
+% % % densCol = h.Values ; %./ sum(h.Values,2);
+% % % [XX YY] = meshgrid(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)), h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)) )
+% % % imagesc(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)) ./ 2, ...
+% % %         h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)) ./ 2,densCol'); axis xy
+% % % colormap(whitetocol(256,[0 0 0]));
+% % % hold on
+scatter(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'.'); hold on
+lsline
+
+tmpX = permute(absalldotProdAll(cM,:,:,cReg,:),[3 1 2 4 5]); tmpX = tmpX(:,:);
+tmpY = permute(squeeze(rhoAll(2,cM,:,:,cReg,:)),[3 1 2 4 5]); tmpY = tmpY(:,:);
+% % % scatter(tmpX',tmpY','.'); hold on
+scatter(tmpX',tmpY',10,'Filled'); hold on
+xlabel('AbsdDot product (paralellity)')
+ylabel('Reconstruction quality (rho)')
+% [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:), linspace(min(tmpX(:)),max(tmpX(:)),100), min(tmpX(:)-))
+[xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:));
+[xQuery, yStd] = SlidingWindowFunction(tmpX(:), tmpY(:),@(x)std(x)./sqrt(numel(x)) );
+shOpts.PlotMean = 0; shOpts.c = [0.7 0.7 0.7];
+plot(xQuery,yAvg,'k','LineWidth',2); hold on
+ShadedPlot(xQuery,yAvg, yAvg - yStd, yAvg + yStd, shOpts)
+
 
 
 
