@@ -1025,6 +1025,27 @@ xlabel('Batch number')
 
 legend('Widening','Constant','Narrowing')
 
+%% Do tool stats
+
+batchNum = repmat((1:size(toolPerfs,1))',[1 size(toolPerfs,2)]);
+[rhorho pp] = corr(batchNum,toolPerfs);
+
+pp = pp(1,:);
+rhorho = rhorho(1,:);
+
+[dmy1 dmy2 pp] = fdr(pp);
+
+disp('Minimum correlation, p:')
+[maxP maxInd] = max(pp(:))
+disp('Minimum correlation, rho:')
+rhorho(maxInd)
+
+
+di
+nanmean(rhorho)
+
+
+
 %% Plot tool results
 
 
@@ -2993,6 +3014,7 @@ yDefs   = {'allPerf'        };
 f.PCAvsRew.f            = figure('Position',[50,200,600,600]);
 f.StructvsRew.f         = figure('Position',[50,200,600,600]);
 f.PCAvsStructvsRew.f    = figure('Position',[50,200,600,600]);
+f.StructvsReconsstruct.f= figure('Position',[50,200,600,600]);
 f.PCAvsReconsstruct.f   = figure('Position',[50,200,600,600]);
 
 cM = 1:3;
@@ -3040,28 +3062,56 @@ ylabel('Performance(reward/timestep)')
 
 
 
+figure(f.StructvsReconsstruct.f)
+% PCA VS RECONSIRUCTION ---------------------------------------------
+tmpX = tStatsStructureAll (cM,:,:,cReg,:);
+tmpY = squeeze(rhoAll(2,cM,:,:,cReg,:));
+% % % h = histogram2(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'FaceColor','Flat');
+% % % densCol = h.Values ./ sum(h.Values,2);
+% % % [XX YY] = meshgrid(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)), h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)) )
+% % % imagesc(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)) ./ 2, ...
+% % %         h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)) ./ 2,densCol'); axis xy
+% % % colormap(whitetocol(256,[0 0 0]));
+% % % hold on
+scatter(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'.'); hold on
+lsline
+
+tmpX = permute(tStatsStructureAll(cM,:,:,cReg,:),[3 1 2 4 5]); tmpX = tmpX(:,:);
+tmpY = permute(squeeze(rhoAll(2,cM,:,:,cReg,:)),[3 1 2 4 5]); tmpY = tmpY(:,:);
+% % % scatter(tmpX',tmpY','.'); hold on
+scatter(tmpX',tmpY',10,'Filled'); hold on
+xlabel('Network structure (t-stat)')
+ylabel('Reconstruction quality (rho)')
+% [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:), linspace(min(tmpX(:)),max(tmpX(:)),100), min(tmpX(:)-))
+[xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:));
+[xQuery, yStd] = SlidingWindowFunction(tmpX(:), tmpY(:),@(x)std(x)./sqrt(numel(x)) );
+shOpts.PlotMean = 0; shOpts.c = [0.7 0.7 0.7];
+plot(xQuery,yAvg,'k','LineWidth',2); hold on
+ShadedPlot(xQuery,yAvg, yAvg - yStd, yAvg + yStd, shOpts)
+ylim([0 1]);
+xlim([-30 10]);
+
+
+
 
 figure(f.PCAvsReconsstruct.f)
 % PCA VS RECONSIRUCTION ---------------------------------------------
 tmpX = absalldotProdAll(cM,:,:,cReg,:);
 tmpY = squeeze(rhoAll(2,cM,:,:,cReg,:));
-
-h = histogram2(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'FaceColor','Flat');
-densCol = h.Values ./ sum(h.Values,2);
-[XX YY] = meshgrid(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)), h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)) )
-% % % figure,imagesc(XX,YY,densCol); axis xy
-figure,imagesc(h.YBinEdges(1:end-1) + diff(h.XBinEdges(1:2)), ...
-               h.XBinEdges(1:end-1) + diff(h.YBinEdges(1:2)),densCol'); axis xy
-% % % figure,imagesc(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)), ...
-% % %                h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)),densCol); axis xy
-
-
-
+% % % h = histogram2(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'FaceColor','Flat');
+% % % densCol = h.Values ; %./ sum(h.Values,2);
+% % % [XX YY] = meshgrid(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)), h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)) )
+% % % imagesc(h.XBinEdges(1:end-1) + diff(h.XBinEdges(1:2)) ./ 2, ...
+% % %         h.YBinEdges(1:end-1) + diff(h.YBinEdges(1:2)) ./ 2,densCol'); axis xy
+% % % colormap(whitetocol(256,[0 0 0]));
+% % % hold on
 scatter(tmpX(~isinf(tmpX(:)) & ~isnan(tmpX(:))), tmpY(~isinf(tmpX(:)) & ~isnan(tmpX(:))),'.'); hold on
 lsline
+
 tmpX = permute(absalldotProdAll(cM,:,:,cReg,:),[3 1 2 4 5]); tmpX = tmpX(:,:);
 tmpY = permute(squeeze(rhoAll(2,cM,:,:,cReg,:)),[3 1 2 4 5]); tmpY = tmpY(:,:);
-scatter(tmpX',tmpY','.'); hold on
+% % % scatter(tmpX',tmpY','.'); hold on
+scatter(tmpX',tmpY',10,'Filled'); hold on
 xlabel('AbsdDot product (paralellity)')
 ylabel('Reconstruction quality (rho)')
 % [xQuery, yAvg] = SlidingWindowAverage(tmpX(:), tmpY(:), linspace(min(tmpX(:)),max(tmpX(:)),100), min(tmpX(:)-))

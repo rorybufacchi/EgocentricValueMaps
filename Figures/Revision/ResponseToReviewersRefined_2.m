@@ -1025,6 +1025,8 @@ xlabel('Batch number')
 
 legend('Widening','Constant','Narrowing')
 
+
+
 %% Plot tool results
 
 
@@ -1202,6 +1204,48 @@ for iF = 1:length(allFields)
 
 end
 
+
+
+%% Do tool stats
+
+
+% Effect of training ------------------------------------------------------
+batchNum = repmat((1:size(toolPerfs,1))',[1 size(toolPerfs,2)]);
+[rhorho pp] = corr(batchNum,toolPerfs);
+
+pp = pp(1,:);
+rhorho = rhorho(1,:);
+
+[dmy1 dmy2 pp] = fdr(pp);
+
+disp('Minimum correlation, p:')
+[maxP maxInd] = max(pp(:))
+disp('Minimum correlation, rho:')
+rhorho(maxInd)
+
+
+disp('mean rho')
+nanmean(rhorho)
+disp('std rho')
+nanstd(rhorho)
+
+
+% Number of tool fields ---------------------------------------------------
+% $$$ USE THESE BITS TO MAKE IT WORK
+
+npksNnoTool
+
+QallNoTool
+
+
+[incrToolRS(iM,iD).npks,   incrToolRS(iM,iD).pks,    incrToolRS(iM,iD).pkLocs]  = ...
+    RowPeakFind(sFP,Q);
+
+
+disp('No tool pre vs post training')
+[pTl hTl stats] = signrank(npksVec(:,1),npksVec(:,3),'method','approximate')
+disp('Yes tool pre vs post training')
+[pTl hTl stats] = signrank(npksVec(:,2),npksVec(:,4),'method','approximate')
 
 
 %% $$$ Create subspace analysis for separate networks
