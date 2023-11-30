@@ -565,7 +565,7 @@ end
 
 %% $$$ Plot some kind of order metrics or something --> $$$ !!! POSSIBLY REMOVE
 
-% % % load('Results\ForFigures\NeurTypesAnalysed_V5.mat')
+% % % load('Results\ForFigures\NeurTypesAnalysed_V5c.mat')
 
 % binEdges = -4:.5:10;
 binEdges    = -7:.5:7;
@@ -2231,7 +2231,7 @@ end
 
 %% Collect data for performance vs PCA orthogonality
 
-% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V5.mat')
+% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V5c.mat')
 % % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_BIGNETS_temp.mat')
 
 % FOR SMALL NETWORKS
@@ -2406,7 +2406,7 @@ nanstd(rho(:))
 
 %% Perform LME for all models independently, accounting for layer differences
 
-% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V5.mat')
+% % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_V5c.mat')
 % % % load('C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\NeurTypesAnalysed_BIGNETS_temp.mat')
 
 
@@ -2894,8 +2894,10 @@ disp('std rho')
 rad2deg(atan2(std(tmpSin(:)) , std(tmpCos(:))))
 
 
+tStatsStructureTmp = tStatsStructure(:,1:15,:,:,:);
+allPerfTmp         = allPerf(:,1:15,:,:,:);
 disp('correlation between structure t-stat and network performance')
-[rhorho pvalpval] = corr(tStatsStructure(:),allPerf(:))
+[rhorho pvalpval] = corr(tStatsStructureTmp(:),allPerfTmp(:))
 
 
 
@@ -2931,6 +2933,7 @@ for iMet = 1:length(metDefs)
     eval([' tmpY = ' yDefs{iMet}   '(:,1:15,' num2str(iRow) ',' num2str(iReg) ');']);
     tmpX = tmpX(:);
     tmpY = tmpY(:);
+
 
     axS.xOffset = 0.05;
     axS.yOffset = 0.05;

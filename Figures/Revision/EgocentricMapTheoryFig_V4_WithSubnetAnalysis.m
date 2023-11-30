@@ -396,6 +396,16 @@ disp('allDotProd and tstat')
 
 
 
+disp('allStruct tstat and perf')
+[rrrrr ppppp] = corr(tStatsStructure(inclD2), allPerf(inclD2))
+
+
+
+disp('allDotProd and perf')
+[rrrrr ppppp] = corr(absalldotProd(inclD2), allPerf(inclD2))
+
+
+
 
 
 %%
