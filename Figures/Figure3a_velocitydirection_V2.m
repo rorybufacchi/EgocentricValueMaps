@@ -96,8 +96,13 @@ for iPl = 1:nPlts
         plot([iiPl iiPl]', 12 - [nanmean(tmpD(iiPl,:),2) - nanstd(tmpD(iiPl,:),[],2)./2  ...
             nanmean(tmpD(iiPl,:),2) + nanstd(tmpD(iiPl,:),[],2)./2  ]',...
             'k','LineWidth',2);
+
+% % %         plot(iiPl .* ones([size(tmpD,2) 1]) + rand([size(tmpD,2) 1]).*0.4, 12 - tmpD(iiPl,:),'.');
+
         end
-        ylim([0 5])
+        boxplot(12-tmpD');
+        plotRowAveragesWithSpread(12 - tmpD);
+        ylim([0 8])
         axb.XAxis.Visible = 'off';
         axb.Box = 'off';
         title('Field Size')
@@ -390,8 +395,8 @@ for iF = 1:length(allFields)
     cF = allFields{iF};
        
     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\VelocityDirection\BitsAndPieces\FromMatlab\' cF '_V2.eps'] , 'epsc')
-    saveas(f.(cF).f,['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\VelocityDirection\BitsAndPieces\FromMatlab\' cF '_V2.pdf'] , 'pdf')
+    saveas(f.(cF).f,['Results\ForFigures\VelocityDirection\BitsAndPieces\FromMatlab\' cF '_V3.eps'] , 'epsc')
+    saveas(f.(cF).f,['Results\ForFigures\VelocityDirection\BitsAndPieces\FromMatlab\' cF '_V3.pdf'] , 'pdf')
 end
 
 % % % 

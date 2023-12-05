@@ -3327,7 +3327,7 @@ dDi.psiSplit{32} = { {'bodyPart',{'RotatedHeadDist'}},                          
 
 
 %% #################################################################
-% Create 'successor representations'
+% Create 'egocentric maps'
 for iD = 1:size(d,1) 
     [dQ.psi{iD},  dQ.psiLines{iD},  dQ.psiLineDescr{iD}]  = MakePsi(allQ, dQ(iD,:));
     [dHP.psi{iD}, dHP.psiLines{iD}, dHP.psiLineDescr{iD}] = MakePsi(allQ, dHP(iD,:));
