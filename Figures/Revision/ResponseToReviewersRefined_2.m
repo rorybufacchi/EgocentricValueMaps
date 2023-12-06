@@ -318,10 +318,10 @@ cAx = [-6 -1];
 
 f.TwoDimPlot.f        = figure('Position',[20 20 1200 1200]);
 
-for iHP = 2 %1:nHandPos
+for iHP = 1:nHandPos
 
     cHP = allHP(iHP);
-    for iDynam = 1 %1:nDynam
+    for iDynam = 1:nDynam
 
         iPl = iPl + 1
 
