@@ -318,10 +318,10 @@ cAx = [-6 -1];
 
 f.TwoDimPlot.f        = figure('Position',[20 20 1200 1200]);
 
-for iHP = 2 %1:nHandPos
+for iHP = 1:nHandPos
 
     cHP = allHP(iHP);
-    for iDynam = 1 %1:nDynam
+    for iDynam = 1:nDynam
 
         iPl = iPl + 1
 
@@ -952,7 +952,7 @@ for iM = 1:size(incrToolRS,1)
 
         for iN = 1:size(allNeurAct,6)
             for iL = 1:size(allNeurAct,5)
-                npksN(:,iL,iN,iM,iD) = RowPeakFind(sFP, permute(allNeurAct,[3 4 1 2 5 6]));
+                npksN(:,iL,iN,iM,iD) = RowPeakFind(sFP, permute(allNeurAct(:,:,:,:,iL,iN),[3 4 1 2 5 6]));
             end
         end
 
@@ -963,7 +963,7 @@ for iM = 1:size(incrToolRS,1)
 
         for iN = 1:size(allNeurAct,6)
             for iL = 1:size(allNeurAct,5)
-                npksNnoTool(:,iL,iN,iM,iD) = RowPeakFind(sFP, permute(allNeurAct,[3 4 1 2 5 6]));
+                npksNnoTool(:,iL,iN,iM,iD) = RowPeakFind(sFP, permute(allNeurAct(:,:,:,:,iL,iN),[3 4 1 2 5 6]));
             end
         end
         
@@ -993,7 +993,7 @@ toc
 % % % 
 % % % toc
 
-save('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Tool_ReviewerResponse_Pre_post_51_51Batch_ToolPos5_moreRandSpr_NoHist_PEAKSANALYSED.mat','-v7.3')
+save('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Tool_ReviewerResponse_Pre_post_51_51Batch_ToolPos5_moreRandSpr_NoHist_PEAKSANALYSED_V2.mat','-v7.3')
 
 
 %% Calculate Incremental tool improvements
@@ -1209,9 +1209,31 @@ end
 %% Do tool stats
 
 
+
+% Calculate number of peaks without a tool --------------------------------
+tic
+clear toolPks noToolPks
+for iM = 1:size(incrToolRS,1)
+    for iD = 1:size(incrToolRS,2)
+        toolPks(iD,iM,:)     = incrToolRS(iM,iD).npks;
+        sFP.plt.ToolPresent = 0;
+        [noToolPks(iD,iM,:), dmy1, dmy2]  = ...
+            RowPeakFind(sFP,QallNoTool(:,:,:,:,:,iM,iD,1));
+    end
+end
+toc
+
+% Display stats for number of tool fields 
+disp('After training, tool vs no tool')
+[pTl hTl stats] = signrank(toolPks(end,:),noToolPks(end,:),'method','approximate')
+effSizR1 = stats.zval ./ sqrt(numel(toolPks(end,:).*2))
+
+
 % Effect of training ------------------------------------------------------
-batchNum = repmat((1:size(toolPerfs,1))',[1 size(toolPerfs,2)]);
-[rhorho pp] = corr(batchNum,toolPerfs);
+batchNum = repmat((1:size(toolPks,1))',[1 size(toolPks,2) size(toolPks,3)]);
+tmpX = permute(batchNum,[2 1 3]); tmpX = tmpX(:,:);
+tmpY = permute(toolPks,[2 1 3]);  tmpY = tmpY(:,:);
+[rhorho pp] = corr(tmpX',tmpY');
 
 pp = pp(1,:);
 rhorho = rhorho(1,:);
@@ -1223,31 +1245,59 @@ disp('Minimum correlation, p:')
 disp('Minimum correlation, rho:')
 rhorho(maxInd)
 
-
 disp('mean rho')
 nanmean(rhorho)
 disp('std rho')
 nanstd(rhorho)
 
+disp('mean peaks with tool:')
+mean(toolPks(end,:))
+disp('mean sd with tool:')
+std(toolPks(end,:))
 
-% Number of tool fields ---------------------------------------------------
-% $$$ USE THESE BITS TO MAKE IT WORK
+disp('mean peaks without tool:')
+mean(noToolPks(end,:))
+disp('mean sd without tool:')
+std(noToolPks(end,:))
+
+
+%% Convert to format that can be used by old neuron analysis
+
+
+olRS = incrToolRS(:,1);
+ytRS = incrToolRS(:,end);
+
+[rMatOL] = DisplayProxStats(olRS);
+[rMatYT] = DisplayProxStats(ytRS);
+
+nPksNLikeOld = cat(5,npksNnoTool(:,:,:,:,1),npksN(:,:,:,:,1),npksNnoTool(:,:,:,:,end),npksN(:,:,:,:,end));
+
+rMatOL.npksN      = nPksNLikeOld;
+rMatYT.npksN      = nPksNLikeOld; 
+
+
+rMat.nPeaksPerNeur = squeeze(nanmean(nPksNLikeOld(:,:,:,:,:),[1]));
+rMat.peaksPerLay   = squeeze(nanmean(nPksNLikeOld(:,:,:,:,:),[1 2]));
+
+
+
+
+%%
+
+% $$$ USE THESE BITS TO MAKE IT WORK#
+
+% $$$ TO DO THIS, I need to shape the new data back into the old format
+% --> It's incrToolRS that I need to change into olRS or whatever it was
+
+
+
+
+
+
 
 npksNnoTool
 
 QallNoTool
-
-
-[incrToolRS(iM,iD).npks,   incrToolRS(iM,iD).pks,    incrToolRS(iM,iD).pkLocs]  = ...
-    RowPeakFind(sFP,Q);
-
-
-disp('No tool pre vs post training')
-[pTl hTl stats] = signrank(npksVec(:,1),npksVec(:,3),'method','approximate')
-disp('Yes tool pre vs post training')
-[pTl hTl stats] = signrank(npksVec(:,2),npksVec(:,4),'method','approximate')
-
-
 %% $$$ Create subspace analysis for separate networks
 
 % % % % Rows of X correspond to observations and columns correspond to variables.

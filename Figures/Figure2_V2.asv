@@ -2,10 +2,10 @@
 % load('D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\WorkSpaceForProxPos.mat')
 % load('D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\WorkSpaceForProxPos_3.mat')
 
-addpath('D:\Old_D\DPPS\DefenseAgent\Scripts\rlsimplepps')
-addpath('D:\Old_D\DPPS\DefenseAgent\Scripts')
-addpath('D:\Old_D\Programs\Matlab\Utilities\')
-addpath('D:\Old_D\Programs\Matlab\Utilities\plotting\colormaps\')
+% % % addpath('D:\Old_D\DPPS\DefenseAgent\Scripts\rlsimplepps')
+% % % addpath('D:\Old_D\DPPS\DefenseAgent\Scripts')
+% % % addpath('D:\Old_D\Programs\Matlab\Utilities\')
+% % % addpath('D:\Old_D\Programs\Matlab\Utilities\plotting\colormaps\')
 
 
 % % % %% Old HBR data
@@ -177,7 +177,7 @@ for iM = 1:length(rS)
     Q(:,:,:,:,iM) = nanmean(Q,5);
 end
 
-s.plt.intrpFact=1;%.2; % NEXT PUT GRID OVER IMAGE
+s.plt.intrpFact=1;%.2; 
 s.plt.OneActFl=1;
 s.plt.plAct = 2;
 s.plt.meanLimbCols = 1;
@@ -755,10 +755,14 @@ end
 bpAvOverCols(:,:,1) = [];
 
 
+tmpD    = squeeze(bpAvOverCols(:,2,:) - bpAvOverCols(:,1,:)   );
 tmpM    = squeeze(nanmean( bpAvOverCols(:,2,:) - bpAvOverCols(:,1,:)   ));
 tmpSD	= squeeze(nanstd( bpAvOverCols(:,2,:) - bpAvOverCols(:,1,:)  ))  ./sqrt(size(bpAvOverCols,1));
 f.RT.ModelBars = bar(tmpM','FaceColor','flat'); box off
 f.RT.ModelBars.CData(2,:) = [1 0 0];
+hold on
+boxplot(tmpD)
+plotRowAveragesWithSpread_alt(tmpD');
 hold on
 
 for iM = 1:2
@@ -767,7 +771,7 @@ for iM = 1:2
     end
 end
 xlim([.5 2.5])
-ylim([-.15 .5])
+ylim([-.2 1])
 
 ylabel('Far - Near Reaction Time difference (a.u.)')
 
@@ -776,7 +780,7 @@ f.RT.ax{2}.XTickLabel = {'Baseline', sprintf('simulated \\newline TMS')}
 
 % -------------------------------------------------------------------------
 f.RT.ax{3} = axes('Position',[.1 .65 .3 .3]);
-tmpFig = imread('D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\BitsAndPieces\TMS_v2.jpg');
+tmpFig = imread('Results\ForFigures\ProximityPosition\BitsAndPieces\TMS_v2.jpg');
 alphaChan = ~all(tmpFig > 250, 3);
 image(tmpFig,'AlphaData',alphaChan); axis off
 title('TMS abolishes spatial RT effect')
@@ -784,7 +788,7 @@ title('TMS abolishes spatial RT effect')
 % -------------------------------------------------------------------------
 % f.RT.ax{4} = axes('Position',[.55 .65 .3 .3]);
 f.RT.ax{4} = axes('Position',[.55 .725 .3 .225]);
-tmpFig = imread('D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\BitsAndPieces\TMS_NeurNet_NoStimulator.jpg');
+tmpFig = imread('Results\ForFigures\ProximityPosition\BitsAndPieces\TMS_NeurNet_NoStimulator.jpg');
 alphaChan = ~all(tmpFig > 250, 3);
 image(tmpFig,'AlphaData',alphaChan); axis off
 title('simulated TMS abolishes spatial RT effect')
@@ -792,10 +796,10 @@ title('simulated TMS abolishes spatial RT effect')
 tmpD = squeeze(bpAvOverCols(:,2,:) - bpAvOverCols(:,1,:) );
 
 
-[pRT hRT statsRT] = signrank(tmpD(:,1),'method','approximate')
+[pRT hRT statsRT] = signrank(tmpD(:,1),zeros(size(tmpD(:,1))),'method','approximate')
 effSizeNoLesion = statsRT.zval ./ sqrt(numel(tmpD(:,1)))
 
-[pRT hRT statsRT] = signrank(tmpD(:,2),'method','approximate')
+[pRT hRT statsRT] = signrank(tmpD(:,2),zeros(size(tmpD(:,1))),'method','approximate')
 effSizeLesion = statsRT.zval ./ sqrt(numel(tmpD(:,2)))
 
 [pRTcomp hRTcomp statsRTcomp] = ranksum(tmpD(:,1),tmpD(:,2),'method','approximate')
@@ -947,8 +951,8 @@ for iF = 1:length(allFields)
 %     cFig = figure(f.(cF).f)
 %     print(cFig,['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\BitsAndPieces\FromMatlab\' cF ,'-dpfd'])
     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\BitsAndPieces\FromMatlab\' cF '_NoGrid.eps'] , 'epsc')
-    saveas(f.(cF).f,['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\BitsAndPieces\FromMatlab\' cF '_NoGrid.pdf'] , 'pdf')
+    saveas(f.(cF).f,['Results\ForFigures\ProximityPosition\BitsAndPieces\FromMatlab\' cF '_V2.eps'] , 'epsc')
+    saveas(f.(cF).f,['Results\ForFigures\ProximityPosition\BitsAndPieces\FromMatlab\' cF '_V2.pdf'] , 'pdf')
 %     saveas(f.(cF).f,['D:\Old_D\DPPS\DefenseAgent\Results\ForFigures\ProximityPosition\BitsAndPieces\FromMatlab\' cF '.svg'] , 'svg')
 end
 
