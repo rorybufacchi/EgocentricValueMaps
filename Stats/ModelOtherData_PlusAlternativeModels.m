@@ -611,7 +611,7 @@ allQ.centerpos{23}   = sTrack.clc.nearPos; % x y z position of this plot in the 
 
 
 %% #################################################################
-% Make extra q with reward -2 for the more threatening situation for body as well
+% Make extra q with reward -1.25 for the more threatening situation for body as well
 allQ(24,:) = allQ(2,:);
 allQ.qVals{24} = 1.25 .* allQ.qVals{2};
 allQ.rew(24)   = 1.25 .* allQ.rew(24);
@@ -3111,7 +3111,7 @@ dQ.psiSplit{13} = { {'bodyPart',{'Head','Trunk'}},               {'dir',{1}}  , 
 dQ.psiSplit{14} = { {'bodyPart',{'Head','Trunk'}},               {'dir',{1}}  , {'rew',{1,-1}}};
 dQ.psiSplit{15} = { {'bodyPart',{'Head','Trunk'}},               {'dir',{1}}  , {'rew',{1,-1}}};
 dQ.psiSplit{16} = { {'bodyPart',{'Head'}},                       {'dir',{1}}  , {'rew',{1,-1}}}; 
-dQ.psiSplit{17} = { {'bodyPart',{'HandByChest'}} ,               {'dir',{1}}  , {'rew',{1,-1}}};
+dQ.psiSplit{17} = { {'bodyPart',{'Trunk','HandByChest'}} ,               {'dir',{1}}  , {'rew',{1,-1}}};
 dQ.psiSplit{18} = { {'bodyPart',{'Trunk','HandByChestPlusTool'}},{'dir',{1}}  , {'rew',{1,-1}}}; 
 dQ.psiSplit{19} = { {'bodyPart',{'Trunk','HandByChestTrack'}} ,  {'dir',{1}}  , {'rew',{1,-1}}}; 
 dQ.psiSplit{20} = { {'bodyPart',{'Trunk','HandByChestTrack'}} ,  {'dir',{1}}  , {'rew',{1,-1}}}; 
@@ -3156,7 +3156,7 @@ dUn.psiSplit{13} = { {'bodyPart',{'HeadUnc','TrunkUnc'}},                   {'di
 dUn.psiSplit{14} = { {'bodyPart',{'HeadUnc','TrunkUnc'}},                   {'dir',{1}}  , {'rew',{1,-1}}};
 dUn.psiSplit{15} = { {'bodyPart',{'HeadUnc','TrunkUnc'}},                   {'dir',{1}}  , {'rew',{1,-1}}};
 dUn.psiSplit{16} = { {'bodyPart',{'HeadUnc'}},                              {'dir',{1}}  , {'rew',{1,-1}}}; 
-dUn.psiSplit{17} = { {'bodyPart',{'HandByChestUnc'}} ,                      {'dir',{1}}  , {'rew',{1,-1}}};
+dUn.psiSplit{17} = { {'bodyPart',{'TrunkUnc','HandByChestUnc'}} ,                      {'dir',{1}}  , {'rew',{1,-1}}};
 dUn.psiSplit{18} = { {'bodyPart',{'TrunkUnc','HandByChestPlusToolUnc'}},    {'dir',{1}}  , {'rew',{1,-1}}}; 
 dUn.psiSplit{19} = { {'bodyPart',{'TrunkUnc','HandByChestTrack'}} ,      {'dir',{1}}  , {'rew',{1,-1}}}; 
 dUn.psiSplit{20} = { {'bodyPart',{'TrunkUnc','HandByChestTrack'}} ,      {'dir',{1}}  , {'rew',{1,-1}}}; 
@@ -3194,7 +3194,7 @@ dSr.psiSplit{13} = { {'bodyPart',{'HeadSARSA','TrunkSARSA'}},                   
 dSr.psiSplit{14} = { {'bodyPart',{'HeadSARSA','TrunkSARSA'}},                   {'dir',{1}}  , {'rew',{1,-1}}};
 dSr.psiSplit{15} = { {'bodyPart',{'HeadSARSA','TrunkSARSA'}},                   {'dir',{1}}  , {'rew',{1,-1}}};
 dSr.psiSplit{16} = { {'bodyPart',{'HeadSARSA'}},                              {'dir',{1}}  , {'rew',{1,-1}}}; 
-dSr.psiSplit{17} = { {'bodyPart',{'HandByChestSARSA'}} ,                      {'dir',{1}}  , {'rew',{1,-1}}};
+dSr.psiSplit{17} = { {'bodyPart',{'TrunkSARSA','HandByChestSARSA'}} ,                      {'dir',{1}}  , {'rew',{1,-1}}};
 dSr.psiSplit{18} = { {'bodyPart',{'TrunkSARSA','HandByChestPlusToolSARSA'}},    {'dir',{1}}  , {'rew',{1,-1}}}; 
 dSr.psiSplit{19} = { {'bodyPart',{'TrunkSARSA','HandByChestTrack'}} ,      {'dir',{1}}  , {'rew',{1,-1}}}; 
 dSr.psiSplit{20} = { {'bodyPart',{'TrunkSARSA','HandByChestTrack'}} ,      {'dir',{1}}  , {'rew',{1,-1}}}; 
@@ -3234,7 +3234,7 @@ dHP.psiSplit{13} = { {'bodyPart',{'HeadHP','TrunkHP'}},                   {'dir'
 dHP.psiSplit{14} = { {'bodyPart',{'HeadHP','TrunkHP'}},                   {'dir',{1}}  , {'rew',{1}}};
 dHP.psiSplit{15} = { {'bodyPart',{'HeadHP','TrunkHP'}},                   {'dir',{1}}  , {'rew',{1}}};
 dHP.psiSplit{16} = { {'bodyPart',{'HeadHP'}},                             {'dir',{1}}  , {'rew',{1}}}; 
-dHP.psiSplit{17} = { {'bodyPart',{'HandByChestHP'}} ,                     {'dir',{1}}  , {'rew',{1}}};
+dHP.psiSplit{17} = { {'bodyPart',{'TrunkHP','HandByChestHP'}} ,                     {'dir',{1}}  , {'rew',{1}}};
 dHP.psiSplit{18} = { {'bodyPart',{'TrunkHP','HandByChestPlusToolHP'}},    {'dir',{1}}  , {'rew',{1}}}; 
 dHP.psiSplit{19} = { {'bodyPart',{'TrunkHP','HandByChestTrackHP'}} ,      {'dir',{1}}  , {'rew',{1}}}; 
 dHP.psiSplit{20} = { {'bodyPart',{'TrunkHP','HandByChestTrackHP'}} ,      {'dir',{1}}  , {'rew',{1}}}; 
@@ -3389,6 +3389,12 @@ dNegDi.psi = cellfun(@(psi) -psi, dDi.psi, 'UniformOutput', false);
 % % % toc
 
 % $$$ HERE HERE
+%%
+for ii = 1:38 
+figure,plot(allQ.qVals{ii}(:),allQ.qVals{ii}(:));
+title(ii);
+end
+
 %% $$$ CHECK what's going wrong:
 
 
@@ -3645,9 +3651,9 @@ f.PREDVSREAL.f = figure('Position',[20 20 900 900]);
 
 % fType = 'EXP';
 % fType = 'LIN';
-fType = 'QUN';
+% fType = 'QUN';
 % fType = 'HP';
-% fType = 'Q';
+fType = 'Q';
 
 dFitFinal   = fitRes.(fType).dFitFinal;
 dToPlt      = fitRes.(fType).d;
@@ -3976,17 +3982,17 @@ allFields = fields(f);
 for iF = 1:length(allFields)
     cF = allFields{iF};
 
-% % %     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['C:\Users\Rory Bufacchi\OneDrive\Projects\DPPS\DefenseAgent\Documentation\Figures\Revision\RevisedMainTextFigures\BitsForEgocentricMap\' cF '.tif'] , 'tif')
+    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+%     saveas(f.(cF).f,['C:\Users\Rory Bufacchi\OneDrive\Projects\DPPS\DefenseAgent\Documentation\Figures\Revision\RevisedMainTextFigures\BitsForEgocentricMap\' cF '.tif'] , 'tif')
 %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf'] , 'pdf')
 %     
-%     print(f.(cF).f,'-vector','-dsvg',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.epsc']) % svg
+%     print(f.(cF).f,'-vector','-dsvg',['Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V5.eps']) % svg
 %     print(f.(cF).f,'-vector','-dsvg',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.svg']) % svg
-%     print(f.(cF).f,'-vector','-dpdf',['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V4.pdf']) % pdf
+%     print(f.(cF).f,'-vector','-dpdf',['Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V5.pdf']) % pdf
 
 
-%     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.eps'] , 'epsc')
-%     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V2.pdf'] , 'pdf')
+    saveas(f.(cF).f,['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V6.eps'] , 'epsc')
+    saveas(f.(cF).f,['C:\Users\Rory Bufacchi\Documents\Projects\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF 'V6.pdf'] , 'pdf')
 
 %     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\ModelEmpirical\BitsAndPieces\FromMatlab\' cF '.tif'] , 'tif')
 end

@@ -611,7 +611,7 @@ allQ.centerpos{23}   = sTrack.clc.nearPos; % x y z position of this plot in the 
 
 
 %% #################################################################
-% Make extra q with reward -2 for the more threatening situation for body as well
+% Make extra q with reward -1.25 for the more threatening situation for body as well
 allQ(24,:) = allQ(2,:);
 allQ.qVals{24} = 1.25 .* allQ.qVals{2};
 allQ.rew(24)   = 1.25 .* allQ.rew(24);
@@ -3111,7 +3111,7 @@ dQ.psiSplit{13} = { {'bodyPart',{'Head','Trunk'}},               {'dir',{1}}  , 
 dQ.psiSplit{14} = { {'bodyPart',{'Head','Trunk'}},               {'dir',{1}}  , {'rew',{1,-1}}};
 dQ.psiSplit{15} = { {'bodyPart',{'Head','Trunk'}},               {'dir',{1}}  , {'rew',{1,-1}}};
 dQ.psiSplit{16} = { {'bodyPart',{'Head'}},                       {'dir',{1}}  , {'rew',{1,-1}}}; 
-dQ.psiSplit{17} = { {'bodyPart',{'HandByChest'}} ,               {'dir',{1}}  , {'rew',{1,-1}}};
+dQ.psiSplit{17} = { {'bodyPart',{'Trunk','HandByChest'}} ,               {'dir',{1}}  , {'rew',{1,-1}}};
 dQ.psiSplit{18} = { {'bodyPart',{'Trunk','HandByChestPlusTool'}},{'dir',{1}}  , {'rew',{1,-1}}}; 
 dQ.psiSplit{19} = { {'bodyPart',{'Trunk','HandByChestTrack'}} ,  {'dir',{1}}  , {'rew',{1,-1}}}; 
 dQ.psiSplit{20} = { {'bodyPart',{'Trunk','HandByChestTrack'}} ,  {'dir',{1}}  , {'rew',{1,-1}}}; 
@@ -3156,7 +3156,7 @@ dUn.psiSplit{13} = { {'bodyPart',{'HeadUnc','TrunkUnc'}},                   {'di
 dUn.psiSplit{14} = { {'bodyPart',{'HeadUnc','TrunkUnc'}},                   {'dir',{1}}  , {'rew',{1,-1}}};
 dUn.psiSplit{15} = { {'bodyPart',{'HeadUnc','TrunkUnc'}},                   {'dir',{1}}  , {'rew',{1,-1}}};
 dUn.psiSplit{16} = { {'bodyPart',{'HeadUnc'}},                              {'dir',{1}}  , {'rew',{1,-1}}}; 
-dUn.psiSplit{17} = { {'bodyPart',{'HandByChestUnc'}} ,                      {'dir',{1}}  , {'rew',{1,-1}}};
+dUn.psiSplit{17} = { {'bodyPart',{'TrunkUnc','HandByChestUnc'}} ,                      {'dir',{1}}  , {'rew',{1,-1}}};
 dUn.psiSplit{18} = { {'bodyPart',{'TrunkUnc','HandByChestPlusToolUnc'}},    {'dir',{1}}  , {'rew',{1,-1}}}; 
 dUn.psiSplit{19} = { {'bodyPart',{'TrunkUnc','HandByChestTrack'}} ,      {'dir',{1}}  , {'rew',{1,-1}}}; 
 dUn.psiSplit{20} = { {'bodyPart',{'TrunkUnc','HandByChestTrack'}} ,      {'dir',{1}}  , {'rew',{1,-1}}}; 
@@ -3194,7 +3194,7 @@ dSr.psiSplit{13} = { {'bodyPart',{'HeadSARSA','TrunkSARSA'}},                   
 dSr.psiSplit{14} = { {'bodyPart',{'HeadSARSA','TrunkSARSA'}},                   {'dir',{1}}  , {'rew',{1,-1}}};
 dSr.psiSplit{15} = { {'bodyPart',{'HeadSARSA','TrunkSARSA'}},                   {'dir',{1}}  , {'rew',{1,-1}}};
 dSr.psiSplit{16} = { {'bodyPart',{'HeadSARSA'}},                              {'dir',{1}}  , {'rew',{1,-1}}}; 
-dSr.psiSplit{17} = { {'bodyPart',{'HandByChestSARSA'}} ,                      {'dir',{1}}  , {'rew',{1,-1}}};
+dSr.psiSplit{17} = { {'bodyPart',{'TrunkSARSA','HandByChestSARSA'}} ,                      {'dir',{1}}  , {'rew',{1,-1}}};
 dSr.psiSplit{18} = { {'bodyPart',{'TrunkSARSA','HandByChestPlusToolSARSA'}},    {'dir',{1}}  , {'rew',{1,-1}}}; 
 dSr.psiSplit{19} = { {'bodyPart',{'TrunkSARSA','HandByChestTrack'}} ,      {'dir',{1}}  , {'rew',{1,-1}}}; 
 dSr.psiSplit{20} = { {'bodyPart',{'TrunkSARSA','HandByChestTrack'}} ,      {'dir',{1}}  , {'rew',{1,-1}}}; 
@@ -3327,7 +3327,7 @@ dDi.psiSplit{32} = { {'bodyPart',{'RotatedHeadDist'}},                          
 
 
 %% #################################################################
-% Create 'successor representations'
+% Create 'egocentric maps'
 for iD = 1:size(d,1) 
     [dQ.psi{iD},  dQ.psiLines{iD},  dQ.psiLineDescr{iD}]  = MakePsi(allQ, dQ(iD,:));
     [dHP.psi{iD}, dHP.psiLines{iD}, dHP.psiLineDescr{iD}] = MakePsi(allQ, dHP(iD,:));
@@ -3389,6 +3389,12 @@ dNegDi.psi = cellfun(@(psi) -psi, dDi.psi, 'UniformOutput', false);
 % % % toc
 
 % $$$ HERE HERE
+%%
+for ii = 1:38 
+figure,plot(allQ.qVals{ii}(:),allQ.qVals{ii}(:));
+title(ii);
+end
+
 %% $$$ CHECK what's going wrong:
 
 

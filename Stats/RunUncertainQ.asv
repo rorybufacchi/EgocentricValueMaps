@@ -7,10 +7,10 @@ zSnsSpr = [-3:3];
 % Set uncertainties to Straka Noel Hoffmann values
 rSigma      = sqrt(2.5.^2 + 2.5.^2) ./ sBdyHP.clc.binW ./2;
 rSnsSprPr   = gaussmf(rSnsSpr,[rSigma 0]) ./ sum(gaussmf(rSnsSpr,[rSigma 0])); %sqrt(2.5.^2 + 30.^2)./s.clc.binW
-czSigma     = sqrt(1.^2 + 1.^2) ./ sBdyHP.clc.binW ./2;
+czSigma     = sqrt(2.5.^2 + 2.5.^2) ./ sBdyHP.clc.binW ./2;
 cSnsSprPr   = gaussmf(cSnsSpr,[czSigma 0]) ./ sum(gaussmf(cSnsSpr,[czSigma 0]));
 zSigma     = sqrt(2.5.^2 + 2.5.^2) ./ sBdyHP.clc.binW ./2;
-zSnsSprPr   = gaussmf(zSnsSpr,[zSigma 0]) ./ sum(gaussmf(zSnsSpr,[zSigma 0]));
+zSnsSprPr   = gaussmf(zSnsSpr,[czSigma 0]) ./ sum(gaussmf(zSnsSpr,[czSigma 0]));
 
 doubleUnc = 0;
 

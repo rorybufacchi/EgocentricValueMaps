@@ -1825,7 +1825,7 @@ end
 %% Convert to useable quantities
 
 
-load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_V2.mat');
+% load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_V2.mat');
 % load('Results\ForFigures\DimensionReduction\Similarities\SimilarityScores_BigNetworks.mat');
 
 TmpNrm  = @(x) squeeze(sqrt(sum(x.^2,1)));
@@ -2444,7 +2444,9 @@ end
 end
 toc
 
-[pValThr, pValcor, pValAdj] = fdr(pval(:));
+% pvalTmp = pval(:,1:15,:,:);
+pvalTmp = pval(:,1:15,1,1);
+[pValThr, pValcor, pValAdj] = fdr(pvalTmp(:));
 
 
 fprintf('%i out of %i networks show structure using this metric\n', sum(pValAdj(:) < 0.05), numel(pValAdj));
@@ -2939,13 +2941,15 @@ tmpSin = sin(acos(alldotProd(:)));
 fprintf('%i out of %i networks show structure using this metric\n', sum(pValPCAAdj(:) < 0.05), numel(pValPCAAdj));
 
 disp('mean rho')
-rad2deg(atan2(mean(tmpSin(:)) , mean(tmpCos(:))))
+rad2deg(atan2(mean(tmpSin(~isnan(tmpSin))) , mean(tmpCos(~isnan(tmpSin)))))
 disp('std rho')
-rad2deg(atan2(std(tmpSin(:)) , std(tmpCos(:))))
+rad2deg(atan2(std(tmpSin(~isnan(tmpSin))) , std(tmpCos(~isnan(tmpSin)))))
 
 
 tStatsStructureTmp = tStatsStructure(:,1:15,:,:,:);
 allPerfTmp         = allPerf(:,1:15,:,:,:);
+% % % tStatsStructureTmp = tStatsStructure(:,1:15,1,1,1);
+% % % allPerfTmp         = allPerf(:,1:15,1,1,1);
 disp('correlation between structure t-stat and network performance')
 [rhorho pvalpval] = corr(tStatsStructureTmp(:),allPerfTmp(:))
 
