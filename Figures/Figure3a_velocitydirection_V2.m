@@ -142,7 +142,7 @@ for iPl = 1:nPlts
         
         DisplActValsFun(sFP,w,qTemp); hold on
         yLims = ylim;
-        plot([0 0],yLims,'-.k')
+        plot([fig0 0],yLims,'-.k')
         caxis([0 2])
         colorbar off
         GridOverImage(fS,vAx{iPl});

@@ -14,6 +14,7 @@ maxV = max([abs(xLims) abs(yLims)]);
 
 xlim([-max(abs(maxV)) max(abs(maxV))]);
 ylim([-max(abs(maxV)) max(abs(maxV))]);
+zlim([-max(abs(maxV)) max(abs(maxV))]);
 
 
 end

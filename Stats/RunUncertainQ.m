@@ -24,10 +24,12 @@ s.clc.sensProb   = {rSnsSprPr cSnsSprPr zSnsSprPr};
 % (i.e. assuming that the agent has learned Q under less uncertainty, and
 % is now simply trying to apply that learned Q-value)
 
-baseQs = [1:20 27:38];
+% baseQs = [1:20 27:38 142 143];
+baseQs = [143];
 
 % indices of the table which will store the uncertain Qs
-uncQs = 78:109;
+% uncQs = [78:109 144 145];
+uncQs = [145];
 
 % First just copy the original data
 allQ(uncQs,:) = allQ(baseQs,:);
@@ -64,7 +66,8 @@ for iQ = 1:length(baseQs)
                 end
                 end
                 end
-                newQ(:,iSR,iSC,iSZ) = tmpQ;
+%                 % Divide by the number of blurred neighbours
+%                 newQ(:,iSR,iSC,iSZ) = tmpQ ./ ( (length(snsSprR)) .* length(snsSprC) .* length(snsSprZ) ) ;
 
             end
         end
@@ -76,7 +79,7 @@ for iQ = 1:length(baseQs)
     toc
 end
 
-% save('Data\NewWithHitProbs_MultSensInt_AndDist_AndUncertainQ_AndSARSA_FINAL_I_hope.mat','-v7.3')
+% % % save('Data\NewWithHitProbs_MultSensInt_AndDist_AndUncertainQ_AndSARSA_FINAL_I_hope_v4.mat','-v7.3')
 
 %% -------------------------------------------------------------------------
 % Use method of ab-initio calculation

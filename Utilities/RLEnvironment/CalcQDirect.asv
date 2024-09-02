@@ -80,7 +80,6 @@ oldQ = newQ;
 for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     iSR
 
-
     % reverse direction to get symmetric result if doing more than 1
     % repetition
     if mod(iIt,2) == 0
@@ -90,15 +89,6 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     end
     
     for iSC = colOrder
-
-
-        % DEBUGGING
-        if iSC == 15
-            disp('test')
-        end
-
-
-
         for iSZ = 1 + maxActDists(3) : s.wrld.size(3) - maxActDists(3)
 
 
@@ -171,10 +161,10 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                 for iAct = 1:nA
 
                     % DEBUGGING
-                    if iAct == 1 & ... & ...
-                            iSR == 76 & ... %47 & ...
-                            iSC == 20 & ... %11 & ... 11
-                            iSZ == 13 %15 %13
+                    if iAct == 12 & ... & ...
+                            iSR == 33 & ... %47 & ...
+                            iSC == 15 & ... %11 & ... 11
+                            iSZ == 2 %15 %13
 
 % %                                        any(s.clc.startSR - 1 == iSR) & ...
 % %                                        any(s.clc.startSC)     == iSC & ...
@@ -228,20 +218,17 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 zZ = zZ + iSZ;
                                 % And check the Q value at ANY of those
                                 % points is equal the starting reward: that
-                                % indicates that a collision has happened,
-                                % if 'interception' is rewarded, rather
-                                % than 'landing on', or 'teleporting
-                                % through'
+                                % indicates that a collision has happened
                                 tmpQ = NaN;
                                 if s.clc.rewardInterceptFl == 1
-                                    for iRR = 1:numel(rR)
-                                        if squeeze( max( checkCollision(:,...
-                                                rR(iRR) , ...
-                                                cC(iRR) , ...
-                                                zZ(iRR)  ) )) == 1
-                                            tmpQ = s.clc.startRew;
-                                        end
+                                for iRR = 1:numel(rR)
+                                    if squeeze( max( checkCollision(:,...
+                                        rR(iRR) , ...
+                                        cC(iRR) , ...
+                                        zZ(iRR)  ) )) == 1
+                                        tmpQ = s.clc.startRew;   
                                     end
+                                end
                                 end
 
                                 % SO if there is any possible collision,
