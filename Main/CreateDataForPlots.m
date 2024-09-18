@@ -18,14 +18,9 @@
 %    (Yes,this script is highly un-optimised in terms of runtime)
 % =========================================================================
 %
-%
+
 
 [basePath addedPaths] = SetPathEgocentricMaps();
-
-
-%% $$$ HERE HERE
-foldName(1:end-10)
-
 
 
 s.rp.maxActions = 2e6 ;
@@ -38,7 +33,7 @@ clear s rS ntRS rtRS ytRS olRS
 disp('Here 1')
 
 % THIS CREATES THE FILE BELOW:
-% load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Fig1_Results_v3.mat')
+% load('EgocentricValueMaps\GeneratedData\Figures\Fig1_Results.mat')
 
 % -------------------------------------------------------------------------
 % Base settings
