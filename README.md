@@ -4,7 +4,7 @@ This contains the scripts necessary to reproduce the simulations and analyses fo
 *NOTE: this repository is still in the process of being cleaned up*
 
 ## System Requirements
-All plots and analytses were performed on Matlab 2022b, but any version of Matlab from 2022a onward should do.
+All plots and analyses were performed on Matlab 2022b, but any version of Matlab from 2022a onward should do.
 
 The analyses require only a standard computer with enough RAM to support the in-memory operations.
 
