@@ -2,8 +2,10 @@
 
 addpath(genpath('Scripts\EgocentricValueMaps'))
 
-load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SARSA_WithUnbalanced_AndThreat.mat')
-% % % load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SARSA_WithUnbalanced.mat')
+load('Figures\SARSA_WithUnbalanced_AndThreat.mat')
+% load('Results\ForFigures\SARSA_WithUnbalanced_AndThreat.mat')
+% load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SARSA_WithUnbalanced_AndThreat.mat')
+% load('F:\Projects\DPPS\DefenseAgent\Results\ForFigures\SARSA_WithUnbalanced.mat')
 
 f.Policy.f = figure('Position',[20 20 1800 900]);
 
@@ -289,16 +291,16 @@ colorbar;
 caxis(fS.cAxes);
 colormap(flip(redbluecmapRory(11,5)))
 
-% Savefigure
-allFields = fields(f);
-for iF = 1:length(allFields)
-    cF = allFields{iF};
-  
-    set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\LearningAlgorithm\' cF '.eps'] , 'epsc')
-    saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\LearningAlgorithm\' cF '.pdf'] , 'pdf')
-
-end
+% % Savefigure
+% allFields = fields(f);
+% for iF = 1:length(allFields)
+%     cF = allFields{iF};
+%   
+%     set(f.(cF).f, 'Renderer', 'painters'); % default, opengl
+%     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\LearningAlgorithm\' cF '.eps'] , 'epsc')
+%     saveas(f.(cF).f,['F:\Projects\DPPS\DefenseAgent\Results\ForFigures\Revision\LearningAlgorithm\' cF '.pdf'] , 'pdf')
+% 
+% end
 
 
 %% Wasp scenario

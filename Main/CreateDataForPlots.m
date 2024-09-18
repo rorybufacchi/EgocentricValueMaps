@@ -27,7 +27,7 @@ s.rp.maxActions = 2e6 ;
 s.lp.minExp = 2e7;
 
 
-%% Data for Model 1: Artificial agents produce response fields anchored to the limb
+%% ANN Model1: Artificial agents produce response fields anchored to the limb
 clear s rS ntRS rtRS ytRS olRS
 
 disp('Here 1')
@@ -98,7 +98,7 @@ catch
     save(svNm,'rS')
 end
 
-%% Find performance of different network sizes for proximity and position dependence
+%% ANN Model 2: Find performance of different network sizes for proximity and position dependence
 clear s rS ntRS rtRS ytRS olRS
 
 disp('Here 2')
@@ -149,7 +149,7 @@ for iM = 1:length(netSizes)
     toc
 end
 
-%% Find performance of different network sizes for MULTIPLE LIMBS and proximity position dependence
+%% ANN Model 1B: Find performance of different network sizes for MULTIPLE LIMBS and proximity position dependence
 clear s rS ntRS rtRS ytRS olRS
 
 disp('Here 3')
@@ -204,7 +204,7 @@ for iM = 1:length(netSizes)
     
 end
 
-%% Data for plot $2$ about distance and position dependence, and corresponding stats
+%% ANN Model $$: Data for plot $2$ about distance and position dependence, and corresponding stats
 clear s rS ntRS rtRS ytRS olRS
 
 disp('Here 4')
@@ -254,7 +254,7 @@ for iM=1:length(netSizes)
     iM
 end
 
-%% Data for plot $2$, but with MULTIPLE LIMBS, about distance and position dependence, and corresponding stats
+%% ANN Model $: , but with MULTIPLE LIMBS, about distance and position dependence, and corresponding stats
 clear s rS ntRS rtRS ytRS olRS
 
 disp('Here 5')
@@ -697,7 +697,7 @@ end
 
 
 
-%% Data for plot $3$ about velocity and direction dependence, and corresponding stats
+%% ANN Model $: Data for plot $3$ about velocity and direction dependence, and corresponding stats
 clear s rS ntRS rtRS ytRS olRS
 
 disp('Here 9')
