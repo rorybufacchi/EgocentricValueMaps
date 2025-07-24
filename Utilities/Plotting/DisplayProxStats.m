@@ -72,7 +72,6 @@ if isfield(rS(iM),'pDistN')
     end
     
     opts.testType = 'lme';
-    % [figString rhoVal pVal] = CorrelationTitle(relLayDep(:),propCorrNeurPerLay(:),opts);
     [figString rhoVal pVal] = CorrelationTitle(relLayDep,propCorrNeurPerLay,opts);
     
     figure, plot (relLayDep, propCorrNeurPerLay,'-o','LineWidth',2);

@@ -7,16 +7,9 @@ function [Q,allNeurAct] = CalcNetOutput(s,w,net,extraInput)
 %   - Q             Action values. Dimensions:   Lmb Row, Lmb Col, Obj Row, Obj Col, layer, neuron
 %   - AllNeurAct    Neural activation Dimensions:Obj Row, Obj Col, LMb Row, Lmb Col, layer, neuron
 
-% addpath('D:\Old_D\DPPS\DefenseAgent\Scripts')
 addpath('Scripts')
 
 clear tempQ2
-
-% $$ Maybe also try making thrat a negative visibility value
-% handVisVal=60;
-% goalVisVal=200;
-% thrVisVal=-200;
-
 
 s = DefaultSettings(s);
 
@@ -46,8 +39,7 @@ for kRow=1:nOSV(1)
         
         if s.plt.meanOSVfl==0
             % other state variables - only used if s.plt.meanOSVfl is 0
-            inpOSV=s.plt.otherStateVars; % $$$ This should go into default settings, and then I can run this in a loop a bunch of times
-            % inpOSV=[4 4];
+            inpOSV=s.plt.otherStateVars;
         else
             inpOSV=[kRow kCol]+1
         end
@@ -71,18 +63,21 @@ for kRow=1:nOSV(1)
             tempQ2(:,:,:,kAct)=reshape(tempQ,[s.wrld.size(1) s.wrld.size(2) s.wrld.size(2)]);
         end
         
-        
-        
+        % Calculate activity of individual neurons
         [neurAct2] = CalcNeurAct(s,net,inpAll,w);
         
+        % Re-order neural activity and select the activity for the action
+        % defined under s.plAct
         for iLayer=1:size(neurAct2,4);
             for iNeur=1:size(neurAct2,5);
                 
                 tempNeurAct(:,:,:,:)=repmat(squeeze(neurAct2(:,:,:,iLayer,iNeur,:)),[1 1 1 size(tempQ2,4)]);
                 
-                % Not sure why this is correct but apparently % it is...
                 tempNeurAct2=permute(tempNeurAct,[5 2 1 3 4]);
                 if s.plt.plotThrFl==1 
+                    % Due to stupid decisions made in other functions (by me),
+                    % neural activity in response to threats is stored in
+                    % slightly different dimension order...
                     tempNeurAct2=permute(tempNeurAct2,[1 2 3 4 5]);
                 end
                 tempNeurAct2=repmat(tempNeurAct2,[size(w.world2D,1) 1 1 1 1]);
@@ -95,8 +90,7 @@ for kRow=1:nOSV(1)
                 
             end
         end
-        
-        % Not sure why this is correct but apparently % it is...
+       
         QQ=permute(tempQ2,[5 2 1 3 4]);
         if s.plt.plotThrFl==1 
             QQ=permute(QQ,[1 2 3 4 5]);
@@ -106,7 +100,6 @@ for kRow=1:nOSV(1)
         % Obj Row, Obj Column, Hand Row, Hand Column, layer, neuron
         % Replace all zero values with NaN
         allNeurAct(allNeurAct==0)=NaN;
-        
         
         
         if s.plt.meanOSVfl==0

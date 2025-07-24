@@ -1,4 +1,4 @@
-function c = coltocol(m, sC, fC)
+function c = coltocolthroughcol(m, sC, mC, fC)
 % c = whitetocol(m, fC, splitLocs)
 %  - m is number of divisions
 %  - sC is the starting colour
@@ -11,6 +11,6 @@ if ~exist('m','var')
     m=100;
 end
 
-c1 = coltowhite(round(m./2),sC);
-c2 = whitetocol(round(m./2),fC);
+c1 = coltocol(round(m./2),sC,mC);
+c2 = coltocol(round(m./2),mC,fC);
 c = [c1; c2];

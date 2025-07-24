@@ -1,9 +1,7 @@
-function [newQ] = CalcQDirect(s, varargin)
+function [newQ] = CalcHPDirect(s, varargin)
 % -------------------------------------------------------------------------
-% CalcQDirect(s)
-% Calculate Q values, or Hit probabilities
-
-s = DefaultSettings(s);
+% CalcHPDirect(s, newQ, altQ)
+% Calculate TABULAR Hit probabilities or Q-values
 
 nA = size(s.clc.actConsequence,1); % Number of actions
 
@@ -40,22 +38,28 @@ end
 % first initialise with the contact reward. Also behind the 'skin surface'
 % [hence the startSR:end in the 2nd dimension]
 for iVol = 1:length(s.clc.startSZ)
-    if numel(s.clc.startRew) == 1
-        if s.clc.thinLimbsFl == 1
-            newQ(:,s.clc.startSR(iVol),s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew;
-        else
+    if s.clc.RewardBehindSurfaceFl == 1
+        if numel(s.clc.startRew) == 1
             newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew;
+        else
+            % If there are multiple rewards, it is the hand sliding over the
+            % body situation, so I shouls split the rewards accordingly
+            for iSplitInd = 1:length(s.clc.rewSplitInd)
+            if iVol >= s.clc.rewSplitInd(iSplitInd) & iVol < s.clc.rewSplitInd(iSplitInd+1)
+                newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew(iSplitInd);
+            end
+            end
         end
     else
-        % If there are multiple rewards, it is the hand sliding over the
-        % body situation, so I shouls split the rewards accordingly
-        for iSplitInd = 1:length(s.clc.rewSplitInd)
+        if numel(s.clc.startRew) == 1
+            newQ(:,s.clc.startSR(iVol),s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew;
+        else
+            % If there are multiple rewards, it is the hand sliding over the
+            % body situation, so I shouls split the rewards accordingly
+            for iSplitInd = 1:length(s.clc.rewSplitInd)
             if iVol >= s.clc.rewSplitInd(iSplitInd) & iVol < s.clc.rewSplitInd(iSplitInd+1)
-                if s.clc.thinLimbsFl == 1
-                    newQ(:,s.clc.startSR(iVol),s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew(iSplitInd);
-                else
-                    newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew(iSplitInd);
-                end
+                newQ(:,s.clc.startSR(iVol),s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew(iSplitInd);
+            end
             end
         end
     end
@@ -96,7 +100,7 @@ for iSweeps = 1:s.clc.nSteps % this can be used to sweep through all values firs
 oldQ = newQ;
 for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
 
-    % reverse direction to get symmetric result if doing more than 1
+    % Reverse direction to get symmetric result if doing more than 1
     % repetition
     if mod(iIt,2) == 0
         colOrder = [(1 + maxActDists(2)) : (s.wrld.size(2) - maxActDists(2))];
@@ -105,15 +109,10 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     end
     
     for iSC = colOrder
-% % %         for iSZ = 1 + maxActDists(3) : s.wrld.size(3) - maxActDists(3)
-            for iSZ = 1 + (maxActDists(3)-1) : s.wrld.size(3) - (maxActDists(3)-1)
+        for iSZ = 1 + (maxActDists(3)-1) : s.wrld.size(3) - (maxActDists(3)-1)
 
             % Only update Q if it is not an 'originally rewarded' location
-            if s.clc.thinLimbsFl == 0
-                checkRows = all( [iSC iSZ]' == [s.clc.startSC ; s.clc.startSZ]);
-            else
-                checkRows = any(all( [iSR iSC iSZ]' == [s.clc.startSR ; s.clc.startSC ; s.clc.startSZ]));
-            end
+            checkRows = all( [iSC iSZ]' == [s.clc.startSC ; s.clc.startSZ]);
             if iSR >= s.clc.startSR(checkRows)
                 % Do nothing
                 calcFl = 0; % flag for calculating Q
@@ -140,8 +139,6 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                 sprPrC  = s.clc.spreadProb{2};
                 sprPrZ  = s.clc.spreadProb{3};
 
-
-                % Define sensory spread
                 snsSprR = s.clc.sensSpread{1};
                 snsSprC = s.clc.sensSpread{2};
                 snsSprZ = s.clc.sensSpread{3};
@@ -162,6 +159,10 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                         sprPrR  = 1;
                         sprPrC  = [.5 .5];
                         sprPrZ  = 1;
+                    end
+
+                    if all([iSR iSC iSZ] == s.clc.specialTraject(end-1,:))
+                        disp('test')
                     end
                 end
 
@@ -197,12 +198,14 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 for iSnsZ = 1:length(snsSprZ)
                                     nextZ = rndSprZ(iSprZ) + nextPos(3);
                                     nextZ = nextZ + snsSprZ(iSnsZ);
-             
+                                
                                 % add to possible future qs
                                 actNextR = nextR + s.clc.actConsequence(iAct,1);
                                 actNextC = nextC + s.clc.actConsequence(iAct,2);
                                 actNextZ = nextZ + s.clc.actConsequence(iAct,3);
 
+                                tmpQ = NaN;
+                                if s.clc.checkCollisionFl == 1
                                 % DO it with collision:
                                 % First calculate which blocks are in the line  
                                 dR = actNextR - iSR;
@@ -216,13 +219,9 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 zZ = zZ + iSZ;
                                 % And check the Q value at ANY of those
                                 % points is equal the starting reward: that
-                                % indicates that a collision has happened,
-                                % if 'interception' is rewarded, rather
-                                % than 'landing on', or 'teleporting
-                                % through'
-                                tmpQ = NaN;
-                                if s.clc.rewardInterceptFl == 1
-                                    for iRR = 1:numel(rR)
+                                % indicates that a collision has happened
+                                
+                                for iRR = 1:numel(rR)
                                     % Allow for using alternative policy
                                     if s.clc.useAltPolicyFl == 1
                                         [dmyQ, nextAct] = max( altQ(:,...
@@ -243,7 +242,7 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                             tmpQ = s.clc.startRew;
                                         end
                                     end 
-                                    end
+                                end
                                 end
 
                                 % SO if there is any possible collision,
@@ -253,24 +252,20 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 if isnan(tmpQ)
                                     % Allow for using alternative policy
                                     if s.clc.useAltPolicyFl == 1
-                                        [~, nextAct] = max( altQ(:,...
+                                        [dmyQ, nextAct] = max( altQ(:,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) );
+
+                                        tmpQ = squeeze( oldQ(nextAct,...
                                         actNextR , ...
                                         actNextC , ...
                                         actNextZ  ) );
                                     else
-                                        nextAct = 1:size(oldQ,1);
-                                    end
-                                    switch s.lp.alg
-                                        case 'Q'
-                                            tmpQ = squeeze( max( oldQ(nextAct,...
-                                                actNextR , ...
-                                                actNextC , ...
-                                                actNextZ  ) ));
-                                        case 'SARSA'
-                                            tmpQ = squeeze( mean( oldQ(nextAct,...
-                                                actNextR , ...
-                                                actNextC , ...
-                                                actNextZ  ) ));
+                                        tmpQ = squeeze( max( oldQ(:,...
+                                        actNextR , ...
+                                        actNextC , ...
+                                        actNextZ  ) ));
                                     end
                                 end
 
@@ -280,7 +275,8 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                     snsPrR(iSnsR) .* snsPrC(iSnsC) .* snsPrZ(iSnsZ) .* ...
                                     s.clc.gammaVal .* ...
                                     tmpQ];
- 
+
+
                             end
                             end
                         end
@@ -304,25 +300,21 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     end
 end
 end
-iIt
+% iIt
 end
 
 
 % Then set the value of the touch condition back to 0
 for iVol = 1:length(s.clc.startSZ)
-    if s.clc.thinLimbsFl
-        newQ(:,s.clc.startSR(iVol),s.clc.startSC(iVol),s.clc.startSZ(iVol)) = 0;
-    else
-        newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = 0;
-    end
+    newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = 0;
 end
 
 % Or set tool space to the slightly nearer position
 if isfield(s.clc,'toolSR')
-    for iVol = 1:length(s.clc.toolSR)
-        newQ(:,s.clc.toolSR(iVol),s.clc.toolSC(iVol),s.clc.toolSZ(iVol)) = ...
-            newQ(:,s.clc.toolSR(iVol)+1,s.clc.toolSC(iVol),s.clc.toolSZ(iVol));
-    end
+for iVol = 1:length(s.clc.toolSR)
+    newQ(:,s.clc.toolSR(iVol),s.clc.toolSC(iVol),s.clc.toolSZ(iVol)) = ...
+        newQ(:,s.clc.toolSR(iVol)+1,s.clc.toolSC(iVol),s.clc.toolSZ(iVol));
+end
 end
 
 

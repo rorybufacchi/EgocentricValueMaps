@@ -1,452 +1,305 @@
-% Demo of ANN Model1: Artificial agents produce response fields anchored to the limb
-% ==============================================
-%
-% USE:
-% 
-% Run this script to generate some demo data and make a simple figure.
-% 
-% SECTION 1 -----------------------------
-%
-% While the ANN is trained, you will see 'countActions' increase until it
-% hits 2 million. This is the data generation part.
-% To decrease the run time, set s.rp.maxActions to a smaller value
-%
-% Next, the network will be trained. Hence in this case the agent is
-% trained using state transitions from a uniform policy.
-%
-% Collecting data should take about 90 seconds, training the network should
-% take about 3 minutes
-%
-% After running and training, the trained network will be stored in the
-% base path specified in the pop-up box at the start
-% 
-%
-% SECTION 2 -----------------------------
-% This section just plots some of th
-%
-% $$$ I THINK IS SHOULD ALSO PUT THE DEMO OF THE NON-NETWORK FITTING -->
-% Maybe switch them around too?
+%% DEMO, showing how to create bodypart-centred receptive fields, using 
+% Tabular Q-learning (SECTION 1), and neural networks (SECTION 2)
 
-% -----
+% First make sure the path is set right though
+cFileName       = matlab.desktop.editor.getActiveFilename;
+basePath        = cFileName(1:end-12);
+addpath(genpath(basePath));
 
-
-%% Create ANN with bodypart-centred fields
-
-[basePath addedPaths] = SetPathEgocentricMaps();
-
-
-
-s.rp.maxActions = 2e6 ;
-s.lp.minExp = 2e7;
-
-clear s rS ntRS rtRS ytRS olRS
+%% SECTION 1 ==============================================================
+% Demonstrate effects of discount factor, dynamics, and action repertoire 
+% on bodypart centred fields, using ~TABULAR~ Q-learning
 
 % -------------------------------------------------------------------------
-% Base settings
-s.gol.alSpR = 1;
-s.gol.alSpC = [0 0];
-s.gol.randSpr = [0 0];
-s.rp.maxActions = 1e5; %200000; %2e6 ;
-s.lp.minExp = 2e7;
-% s.lp.minExp = 2e4;
-s.lp.b1Siz = 1e4;
-s.wrld.size = [14 15];
-s.wrld.resetType = 'BottomTop_InfLR';
-s.lp.epsilon = 0.3;
-s.lmb.startCol=8;
-s.fl.trainTable=1; s.fl.trainNet=1;
-s.rl.maxRetr=3;
+% Specify which (2) discount factors to plot
+allGammas       = [0.3, 0.7];
 
 % -------------------------------------------------------------------------
-% Expand these arrays/cells to make the demo run gor mutliple different
-% types of settings
-
-% Set gamma == 0.7. For multiple gammas just set e.g. gammas  = [0.7; 0.3];
-gammas=[0.7];
-
-% Add a cell with the movement options for each different run as e.g.:
-% actionNames={{'LEFT','STAY','RIGHT'}, '{STAY'}};
-% That will create an additional run in which the agent can only stay still
-actionNames={{'LEFT','STAY','RIGHT'}};
-
-% Add more rows to add additional goal dynamics. The first column indicates
-% how many additional possibly y-directions the object can move along, and
-% the second option indicates the number of additional possible
-% x-directions.
-goalDynamics=[[0 0]] ;
+% First run a quick dummy agent to get the world-structure 'w' 
+% (Needed for plotting later)
+s.rp.maxActions = 10; 
+s.wrld.size     = [14 15];
+s               = DefaultSettings(s);
+[~, w]          = RunRLfun(s);
 
 % -------------------------------------------------------------------------
-% Run each type of model
-for iM=1:length(gammas)
-    tic
-    
-    % Change to current model settings
-    s.lp.gamma = gammas(iM);
-    s.act.Name = actionNames{iM};
-    s.gol.randSpr = goalDynamics(iM,:);
-
-    % Run the model and learn Q (table)
-    [s w storedEps dmyNet Qtable] = RunRLfun(s);
-    toc
-    [net Qtable1] = RelearnNNFun(s,w,storedEps,dmyNet,Qtable);
-    toc
-
-    % Store results Structure
-    rS(iM).s=s; rS(iM).Qtable=Qtable1; rS(iM).w=w; rS(iM).net=net;
-end
-
-svNm=[basePath '\Demo_ANN_Results.mat'];
-try
-    save(svNm,'rS','-v7.3')
-catch
-    save(svNm,'rS')
-end
-
-
-%% $$$ Plot the bodypart-centred fields
-
-
-s    = DefaultSettings(rS(1).s);
-w    = rS(1).w;
-qTbl = rS(1).Qtable;
-
-s.plt.lmbCol       = 2:14;
-s.plt.meanLimbCols = 1;
-s.plt.rowLims      = [0.5, 14.5];
-
-[bestQ] = DisplActValsFun(s, w, qTbl);
-
-
-%% $$$ PUT THIS IN TOO
-
-[Q,allNeurAct] = CalcNetOutput(s,w,net,extraInput);
-
-% [neurAct2] = CalcNeurAct(s,net,inpAll,w)
-
-%% $$$ UPDATE THIS to make just one or two plots
-
-
-% $$$ NEXT is make model type 5 use the network for plotting :) $$$
-
-load('Results\ForFigures\Fig1_Results_v3')
-s=DefaultSettings(rS(end).s);
-w=rS(end).w;
-addpath(genpath('Scripts\EgocentricValueMaps'))
-
-
-% Make 2 plots, one with original gammas, and one with gamma == 1
-allGammas = [0.3 0.7 ; 0.3 1; 0.3 0.7]
-
-
-s.clc.startRew = -1;
-
-s.plt.colorLims = [0 0.7];
-
-
-% -------------------------------------------------------------------------
-
-% Data fitting variables
-
+% General settings for agent & environment
+s.wrld.size                 = [14 15 1]; % Rows, Columns, Height
+s.clc.startRew              = -1; % reward offered upon contact
 s.clc.RewardBehindSurfaceFl = 0;
 s.clc.checkCollisionFl      = 0;
-
-s.clc.startSR  = 12;
-s.clc.startSC  =  8;
-s.clc.startSZ  =  1;
-
-s.clc.nearPos = [s.wrld.size(1)-0 8 1]';
-s.clc.nReps = 1;
-
-s.clc.stepUpdateFl = 0; %; % Whether to update in timesteps - especially important for hitprob and multisens integration
-s.clc.nSteps = 1; %20;
-
-s.clc.baseVel    = [1 0 0];
+s.clc.startSR               = 12;
+s.clc.startSC               = 8;
+s.clc.startSZ               = 1;
+s.clc.nearPos               = [s.wrld.size(1)-0 8 1]';
+s.clc.nReps                 = 1;
+s.clc.stepUpdateFl          = 0; 
+s.clc.nSteps                = 1;
 
 % Random stimulus dynamics
-rSpr = 0;
-rSprPr = 1;
-cSpr = 0;
-cSprPr = 1;
-zSpr = 0; %%% zSpr = [ -1 0 1 ];
-zSprPr = 1;
+rSpr                = 0;
+rSprPr              = 1;
+cSpr                = 0;
+cSprPr              = 1;
+zSpr                = 0; 
+zSprPr              = 1;
+s.clc.baseVel       = [1 0 0];
 % x y z, Deterministic stimulus dynamics
-s.clc.stimDynams =     @(pos) pos + s.clc.baseVel; % For approaching, set speed positive
-s.clc.randSpread =     {rSpr cSpr zSpr}; % Put a little biit of x and z variability in? Kind of arbitrary
-s.clc.spreadProb =     {rSprPr cSprPr  zSprPr}; % x y z, probabilities of spread
+s.clc.stimDynams    = @(pos) pos + s.clc.baseVel; % For approaching, set speed positive
+s.clc.randSpread    = {rSpr cSpr zSpr}; % Put a little biit of x and z variability in? Kind of arbitrary
+s.clc.spreadProb    = {rSprPr cSprPr  zSprPr}; % x y z, probabilities of spread
 % Random sensory uncertainties
-s.clc.sensSpread = {[0] , [0] , [0]};
-s.clc.sensProb   = {[1] , [1] , [1]};
+s.clc.sensSpread    = {[0] , [0] , [0]};
+s.clc.sensProb      = {[1] , [1] , [1]};
+% Movement consequences (This below setting makes the agent stationary)
+s.clc.actConsequence= [0  0  0 ];
 
 
-s.clc.actConsequence = ...
-    [0  0  0 ];     % action 3 right
-
-
-s.wrld.size = [14 15 1];
-% -------------------------------------------------------------------------
-
-
-
-for iFig = 1:3
-
-% settings for plot
-sFP=s;
-sFP.plt.lmbRow = s.wrld.size(1)-2;
-sFP.plt.rowLims=[6.5 s.wrld.size(1)-1.5];
-sFP.plt.colLims=[3.5 s.wrld.size(2)-3.5];
-% % % sFP.plt.rowLims=[6.5 s.wrld.size(1)-1.5];
-% % % sFP.plt.colLims=[3.5 s.wrld.size(2)-3.5];
-sFP.plt.cBarFl=0;
-sFP.plt.meanLimbCols=1;
-sFP=DefaultSettings(sFP);
-sFP.plt.axesVis=0;
-            
+%  ------------------------------------------------------------------------
 % figure settings
-fS.w = 32; % Width (cm)
-fS.h = 15; % Height
-fS.x = 5; % x screen position
-fS.y = 5; % y screen position
+fS.w            = 32; % Width (cm)
+fS.h            = 15; % Height
+fS.x            = 5; % x screen position
+fS.y            = 5; % y screen position
+% fraction of width that's going to be filled
+fS.fillW        = .99; 
+% fraction of height that's going to be filled
+fS.fillH        = .99; 
+fS.sub.w        = [0.09 0.18 0.18 0.18 0.18]; % fraction of space that each subplot takes (width)
+fS.sub.h        = [0.07 0.35 0.35]; % fraction of space that each subplot takes (height)
+fS.gridXstart   = -4.5;
+fS.gridXstep    = 1;
+fS.gridYstart   = 3.5;
+fS.gridYstep    = 1;
+s.plt.colorLims = [0 0.7];
+nWpl            = length(fS.sub.w); % number of plots in width
+nHpl            = length(fS.sub.h); % number of plots in height
+wSpace          = (fS.fillW-sum(fS.sub.w))./(nWpl-1) ; % fraction of space between subplots (width)
+hSpace          = (fS.fillH-sum(fS.sub.h))./(nHpl-1) ; % space between subplots (height)
+% subplot positions
+spX             = MakeSubplotPos(fS.fillW, fS.sub.w, wSpace);
+spY             = flip(MakeSubplotPos(fS.fillH, flip(fS.sub.h), hSpace));
 
 
-fS.fillW = .99; % fraction of width that's going to be filled
-fS.fillH = .99; % fraction of height that's going to be filled
+% -------------------------------------------------------------------------
+% Make a separate figure for each combination of gamma values (rows;
+% by default in this demo there is only 1 row of allGammas)
+for iFig    = 1:size(allGammas,1)
+            
+fig{iFig}   = figure('Units', 'centimeters', 'Position', [fS.x fS.y fS.w fS.h ]);
 
-fS.sub.w = [0.09 0.18 0.18 0.18 0.18]; % fraction of space that each subplot takes (width)
-fS.sub.h = [0.07 0.35 0.35]; % fraction of space that each subplot takes (height)
+% SECTION 1(A) ------------------------------------------------------------
+% GENERATE DATA: Create tabular Q values for subplots;
+% Specific settings for each agent/environment
 
-% % fS.sub.w = [0.12 0.17 0.17 0.17 0.17]; % fraction of space that each subplot takes (width)
-% % fS.sub.h = [0.1 0.33 0.33]; % fraction of space that each subplot takes (height)
+% Data for Plot1
+allS{1}                     = DefaultSettings(s);
+allS{1}.clc.gammaVal        = allGammas(iFig,1);
+allS{1}.clc.randSpread      = {0 0 0}; % No random stimulus movement
+allS{1}.clc.spreadProb      = {1 1 1}; % 100% probability of no random stimulus movement
+allS{1}.clc.actConsequence  = [0 0 0]; % Only allow the agent to stay still for this plot
+allQ{1}                     = CalcHPDirect(allS{1}); % Generate data
+allQ{1}                     = repmat(permute(allQ{1},[4 5 2 3 1]),[14 15 1 1]); % Reshape data to make it work with plotting functions
 
-fS.gridXstart = -4.5;
-fS.gridXstep = 1;
-fS.gridYstart = 3.5;
-fS.gridYstep = 1;
+% Data for Plot2
+allS{2}                     = allS{1};
+allS{2}.clc.gammaVal        = allGammas(iFig,2);
+allQ{2}                     = CalcHPDirect(s);
+allQ{2}                     = repmat(permute(allQ{2},[4 5 2 3 1]),[14 15 1 1]);
 
+% Data for Plot3
+allS{3}                     = allS{2};
+allS{3}.clc.gammaVal        = allGammas(iFig,1);
+allS{3}.clc.actConsequence  = [0  0  0 ; ... % action 1 stay
+                               0  1  0 ; ... % action 2 left
+                               0 -1  0];     % action 3 right
+allQ{3}                     = CalcHPDirect(allS{3});
+allQ{3}                     = repmat(permute(allQ{3},[4 5 2 3 1]),[14 15 1 1]);
 
-nWpl = length(fS.sub.w); % number of plots in width
-nHpl = length(fS.sub.h); % number of plots in height
-wSpace = (fS.fillW-sum(fS.sub.w))./(nWpl-1) ; % fraction of space between subplots (width)
-hSpace = (fS.fillH-sum(fS.sub.h))./(nHpl-1) ; % space between subplots (height)
+% Data for Plot4
+allS{4}                     = allS{3};
+allS{4}.clc.gammaVal        = allGammas(iFig,2);
+allQ{4}                     = CalcHPDirect(allS{4});
+allQ{4}                     = repmat(permute(allQ{4},[4 5 2 3 1]),[14 15 1 1]);
 
-%subplot positions
-spX = MakeSubplotPos(fS.fillW, fS.sub.w, wSpace);
-spY = flip(MakeSubplotPos(fS.fillH, flip(fS.sub.h), hSpace));
+% Data for Plot5
+allS{5}                     = allS{4};
+allS{5}.clc.gammaVal        = allGammas(iFig,1);
+allS{5}.clc.randSpread      = {0,     [-1 0 1] , 0};
+allS{5}.clc.spreadProb      = {1, 1 ./[ 3 3 3] , 1};
+allS{5}.clc.actConsequence  = [0 0 0];
+allQ{5}                     = CalcHPDirect(allS{5});
+allQ{5}                     = repmat(permute(allQ{5},[4 5 2 3 1]),[14 15 1 1]);
 
-fig{iFig} = figure('Units', 'centimeters', 'Position', [fS.x fS.y fS.w fS.h ]);
+% Data for Plot6
+allS{6}                     = allS{5};
+allS{6}.clc.gammaVal        = allGammas(iFig,2);
+allQ{6}                     = CalcHPDirect(allS{6});
+allQ{6}                     = repmat(permute(allQ{6},[4 5 2 3 1]),[14 15 1 1]);
 
-%  ------------------------------------------------------------------------
-% Top 4 plots
-spl = subplot(40,1000,1);
-set(spl, 'Position', [spX(2) spY(2) fS.sub.w(2)+wSpace/4 fS.sub.h(2) ]);
-sFP.plt.plAct=1;
-sFP.plt.lmbCol=8;
+% Data for Plot7
+allS{7}                     = allS{6};
+allS{7}.clc.gammaVal        = allGammas(iFig,1);
+allS{7}.clc.actConsequence  = [0  0  0 ; ... % action 1 stay
+                               0  1  0 ; ... % action 2 left
+                               0 -1  0];     % action 3 right 
+allQ{7}                     = CalcHPDirect(allS{7});
+allQ{7}                     = repmat(permute(allQ{7},[4 5 2 3 1]),[14 15 1 1]);
 
-s.clc.gammaVal = allGammas(iFig,1);
-s.clc.randSpread =     {0 0 0};
-s.clc.spreadProb =     {1 1 1};
-s.clc.actConsequence = [0 0 0];
-newQ  = CalcHPDirect(s);
-newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
-GridOverImage(fS,spl);
-% % % cLims = caxis;
-% % % caxis(max(abs(cLims)) .* [-1, 1] );
-% % colorbar
-
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(3)-wSpace/4 spY(2) fS.sub.w(3)+wSpace/4 fS.sub.h(2) ]);
-s.clc.gammaVal = allGammas(iFig,2);
-newQ = CalcHPDirect(s);
-newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
-GridOverImage(fS,spl);
-% % % cLims = caxis;
-% % % caxis(max(abs(cLims)) .* [-1, 1] );
-% % colorbar
-
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(4) spY(2) fS.sub.w(4)+wSpace/4 fS.sub.h(2) ]);
-s.clc.gammaVal = allGammas(iFig,1);
-s.clc.actConsequence = [0  0  0 ; ... % action 1 stay
-                        0  1  0 ; ... % action 2 left
-                        0 -1  0];     % action 3 right
-newQ = CalcHPDirect(s);
-newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-% Create average value across actions
-if iFig == 3
-    newQ = nanmean(newQ,5);
-end
-DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
-GridOverImage(fS,spl);
-% cLims = caxis;
-% caxis(max(abs(cLims)) .* [-1, 1] );
-% % colorbar
-
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(5)-wSpace/4 spY(2) fS.sub.w(5)+wSpace/4 fS.sub.h(2) ]);
-
-s.clc.gammaVal = allGammas(iFig,2);
-newQ = CalcHPDirect(s);
-newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-% Create average value across actions
-if iFig == 3
-    newQ = nanmean(newQ,5);
-end
-DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
-GridOverImage(fS,spl);
-% % % cLims = caxis;
-% % % caxis(max(abs(cLims)) .* [-1, 1] );
-% % colorbar
-
-%%%  ------------------------------------------------------------------------
+% Data for Plot8
+allS{8}                     = allS{7};
+allS{8}.clc.gammaVal        = allGammas(iFig,2);
+allS{8}.clc.actConsequence  = [0  0  0 ; ... % action 1 stay
+                               0  1  0 ; ... % action 2 left
+                               0 -1  0];     % action 3 right
+allQ{8}                     = CalcHPDirect(allS{8});
+allQ{8}                     = repmat(permute(allQ{8},[4 5 2 3 1]),[14 15 1 1]);
 
 
 
-% Bottom 4 plots
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(2) spY(3) fS.sub.w(2)+wSpace/4 fS.sub.h(3) ]);
+% SECTION 1(B) ------------------------------------------------------------
+% DISPLAY DATA
 
-s.clc.gammaVal = allGammas(iFig,1);
-s.clc.randSpread =     {0,     [-1 0 1] , 0};
-s.clc.spreadProb =     {1, 1 ./[ 3 3 3] ,  1};
-s.clc.actConsequence = [0 0 0];
-newQ = CalcHPDirect(s);
-newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
-GridOverImage(fS,spl);
-% % % cLims = caxis;
-% % % caxis(max(abs(cLims)) .* [-1, 1] );
-% % colorbar
+% Display top 4 plots
 
+% General settings for plots
+sFP                     = s;
+sFP.plt.lmbRow          = s.wrld.size(1)-2;
+sFP.plt.rowLims         = [6.5 s.wrld.size(1)-1.5];
+sFP.plt.colLims         = [3.5 s.wrld.size(2)-3.5];
+sFP.plt.cBarFl          = 0;
+sFP.plt.meanLimbCols    = 1;
+sFP                     = DefaultSettings(sFP);
+sFP.plt.axesVis         = 0;
+sFP.plt.plAct           = 1;
+sFP.plt.lmbCol          = 8;
 
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(3)-wSpace/4 spY(3) fS.sub.w(3)+wSpace/4 fS.sub.h(2) ]);
-s.clc.gammaVal = allGammas(iFig,2);
-newQ = CalcHPDirect(s);
-newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
-GridOverImage(fS,spl);
-% % % cLims = caxis;
-% % % caxis(max(abs(cLims)) .* [-1, 1] );
-% % colorbar
+% Plot 1
+spl             = subplot(40,1000,1);
+set(              spl, 'Position', [spX(2) spY(2) fS.sub.w(2)+wSpace/4 fS.sub.h(2) ]);
+DisplActValsFun(  sFP,w, sign(allS{1}.clc.startRew) .* allQ{1}); hold on
+GridOverImage(    fS,spl);
 
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(4) spY(3) fS.sub.w(4)+wSpace/4 fS.sub.h(2) ]);
-s.clc.gammaVal = allGammas(iFig,1);
-s.clc.actConsequence = [0  0  0 ; ... % action 1 stay
-                        0  1  0 ; ... % action 2 left
-                        0 -1  0];     % action 3 right 
-newQ = CalcHPDirect(s);
-newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-% Create average value across actions
-if iFig == 3
-    newQ = nanmean(newQ,5);
-end
-DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
-GridOverImage(fS,spl);
-% % % cLims = caxis;
-% % % caxis(max(abs(cLims)) .* [-1, 1] );
-% % colorbar
+% Plot 2
+spl             = subplot(40,1000,1);
+set(              spl, 'Position', [spX(3)-wSpace/4 spY(2) fS.sub.w(3)+wSpace/4 fS.sub.h(2) ]);
+DisplActValsFun(  sFP,w, sign(allS{2}.clc.startRew) .* allQ{2}); hold on
+GridOverImage(    fS,spl);
 
+% Plot 3
+spl             = subplot(40,1000,1);
+set(              spl, 'Position', [spX(4) spY(2) fS.sub.w(4)+wSpace/4 fS.sub.h(2) ]);
+DisplActValsFun(  sFP,w, sign(allS{3}.clc.startRew) .* allQ{3}); hold on
+GridOverImage(    fS,spl);
 
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(5)-wSpace/4 spY(3) fS.sub.w(5)+wSpace/4 fS.sub.h(2) ]);
-s.clc.gammaVal = allGammas(iFig,2);
-s.clc.actConsequence = [0  0  0 ; ... % action 1 stay
-                        0  1  0 ; ... % action 2 left
-                        0 -1  0];     % action 3 right
-newQ = CalcHPDirect(s);
-newQ = repmat(permute(newQ,[4 5 2 3 1]),[14 15 1 1]);
-% Create average value across actions
-if iFig == 3
-    newQ = nanmean(newQ,5);
-end
-DisplActValsFun(sFP,w, sign(s.clc.startRew) .* newQ); hold on
-GridOverImage(fS,spl);
-% % % cLims = caxis;
-% % % caxis(max(abs(cLims)) .* [-1, 1] );
-% % colorbar
-
+% Plot 4
+spl             = subplot(40,1000,1);
+set(              spl, 'Position', [spX(5)-wSpace/4 spY(2) fS.sub.w(5)+wSpace/4 fS.sub.h(2) ]);
+DisplActValsFun(  sFP,w, sign(allS{4}.clc.startRew) .* allQ{4}); hold on
+GridOverImage(    fS,spl);
 
 %  ------------------------------------------------------------------------
-% gamma labels
-glPosx = [3 2 5 4 3 2 5 4]; % gamma label x-positions
-wST= (wSpace/4) .*[-1 0 -1 0 -1 0 -1 0]; % width shift temp
-glPosy = [2 2 2 2 3 3 3 3]; % gamma label y-positions
+% Display bottom 4 plots
+
+% Plot 5
+spl             = subplot(40,1000,1);
+set(              spl, 'Position', [spX(2) spY(3) fS.sub.w(2)+wSpace/4 fS.sub.h(3) ]);
+DisplActValsFun(  sFP,w, sign(allS{5}.clc.startRew) .* allQ{5}); hold on
+GridOverImage(    fS,spl);
+
+% Plot 6
+spl             = subplot(40,1000,1);
+set(              spl, 'Position', [spX(3)-wSpace/4 spY(3) fS.sub.w(3)+wSpace/4 fS.sub.h(2) ]);
+DisplActValsFun(  sFP,w, sign(s.clc.startRew) .* allQ{6}); hold on
+GridOverImage(    fS,spl);
+
+% Plot 7
+spl             = subplot(40,1000,1);
+set(              spl, 'Position', [spX(4) spY(3) fS.sub.w(4)+wSpace/4 fS.sub.h(2) ]);
+DisplActValsFun(  sFP,w, sign(allS{7}.clc.startRew) .* allQ{7}); hold on
+GridOverImage(    fS,spl);
+
+% Plot 8
+spl             = subplot(40,1000,1);
+set(              spl, 'Position', [spX(5)-wSpace/4 spY(3) fS.sub.w(5)+wSpace/4 fS.sub.h(2) ]);
+DisplActValsFun(  sFP,w, sign(allS{8}.clc.startRew) .* allQ{8}); hold on
+GridOverImage(    fS,spl);
+
+
+%  ------------------------------------------------------------------------
+% Add gamma labels
+glPosx  = [3 2 5 4 3 2 5 4]; % gamma label x-positions
+wST     = (wSpace/4) .*[-1 0 -1 0 -1 0 -1 0]; % width shift temp
+glPosy  = [2 2 2 2 3 3 3 3]; % gamma label y-positions
 for iGP = 1: length(glPosx)% gamma position
     
-    gm=rS(iGP).s.lp.gamma;
-    tmpH=(nHpl-2)./(nHpl-1); % extra space needed for the label
-    spl = subplot(40,1000,1)
-    set(spl, 'Position', [spX(glPosx(iGP))+wST(iGP) spY(glPosy(iGP))+fS.sub.h(glPosy(iGP))+hSpace.*.14 fS.sub.w(glPosx(iGP))+wSpace/4 fS.sub.h(1)/2 ]);
-    fill([-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
-    set(gca,'visible','off')
-    FNT = {'HorizontalAlignment', 'center', ...
-        'FontSize', 14, 'Color', 1.*[1 1 1], };
-    txt=text(spl,0, 0, ['\gamma = ' num2str(gm)],'VerticalAlignment', 'middle',  FNT{:});
+    gm      = allGammas(iFig,mod(iGP,2)+1); 
+    tmpH    = (nHpl-2)./(nHpl-1); % extra space needed for the label
+
+    spl     = subplot(40,1000,1);
+    set(      spl, 'Position', [spX(glPosx(iGP))+wST(iGP) spY(glPosy(iGP))+fS.sub.h(glPosy(iGP))+hSpace.*.14 fS.sub.w(glPosx(iGP))+wSpace/4 fS.sub.h(1)/2 ]);
+    fill(     [-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none');
+    set(      gca,'visible','off');
+    FNT     = {'HorizontalAlignment', 'center', ...
+               'FontSize', 14, 'Color', 1.*[1 1 1], };
+    txt     = text(spl,0, 0, ['\gamma = ' num2str(gm)],'VerticalAlignment', 'middle',  FNT{:});
 end
 
 %  ------------------------------------------------------------------------
-% Action group 1 label
+% Add Action group 1 label
 % extra space needed for the label
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(2) spY(1)-hSpace/3 fS.sub.w(2)+fS.sub.w(3)+wSpace fS.sub.h(1)+hSpace/3 ]);
-fill([-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
-set(gca,'visible','off')
-FNT = {'HorizontalAlignment', 'left', ...
-    'FontSize', 14, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
-% txt=text(spl,-.9, 0, 'Available actions:','VerticalAlignment', 'bottom',  FNT{:});
-txt=text(spl,-.9, 0, 'Stay','VerticalAlignment', 'middle',  FNT{:});
+spl         = subplot(40,1000,1);
+set(           spl, 'Position', [spX(2) spY(1)-hSpace/3 fS.sub.w(2)+fS.sub.w(3)+wSpace fS.sub.h(1)+hSpace/3 ]);
+fill(          [-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
+set(           gca,'visible','off')
+FNT         = {'HorizontalAlignment', 'left', ...
+               'FontSize', 14, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
+txt         = text(spl,-.9, 0, 'Stay','VerticalAlignment', 'middle',  FNT{:});
 
 
 %  ------------------------------------------------------------------------
-% Action group 2 label
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(4) spY(1)-hSpace/3 fS.sub.w(3)+fS.sub.w(4)+wSpace fS.sub.h(1)+hSpace/3 ]);
-fill([-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
-set(gca,'visible','off')
-FNT = {'HorizontalAlignment', 'left', ...
-    'FontSize', 14, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
-% txt=text(spl,-.9, 0, 'Available actions:','VerticalAlignment', 'bottom',  FNT{:});
-txt=text(spl,-.9, 0, 'Left, Stay, Right','VerticalAlignment', 'middle',  FNT{:});
+% Add Action group 2 label
+spl         = subplot(40,1000,1);
+set(          spl, 'Position', [spX(4) spY(1)-hSpace/3 fS.sub.w(3)+fS.sub.w(4)+wSpace fS.sub.h(1)+hSpace/3 ]);
+fill(         [-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
+set(          gca,'visible','off')
+FNT         = {'HorizontalAlignment', 'left', ...
+               'FontSize', 14, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
+txt         = text(spl,-.9, 0, 'Left, Stay, Right','VerticalAlignment', 'middle',  FNT{:});
 
 %  ------------------------------------------------------------------------
-% Dynamics group 1 label
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(1) spY(2) fS.sub.w(1)/3 fS.sub.h(2) ]);
-fill([-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
-set(gca,'visible','off')
-FNT = {'Rotation', 90, ...
-    'HorizontalAlignment', 'center', ...
-    'FontSize', 14, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
-txt=text(spl,0, 0, 'Deterministic','VerticalAlignment', 'middle',  FNT{:});
-
-
+% Add Dynamics group 1 label
+spl         = subplot(40,1000,1);
+set(          spl, 'Position', [spX(1) spY(2) fS.sub.w(1)/3 fS.sub.h(2) ]);
+fill(         [-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
+set(          gca,'visible','off')
+FNT         = {'Rotation', 90, ...
+               'HorizontalAlignment', 'center', ...
+               'FontSize', 14, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
+txt         = text(spl,0, 0, 'Deterministic','VerticalAlignment', 'middle',  FNT{:});
 
 
 %  ------------------------------------------------------------------------
-% Dynamics group 2 label
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(1) spY(3) fS.sub.w(1)/3 fS.sub.h(3) ]);
-fill([-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
-set(gca,'visible','off')
-FNT = {'Rotation', 90, ...
-    'HorizontalAlignment', 'center', ...
-    'FontSize', 14, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
-txt=text(spl,0, 0, 'Probabilistic','VerticalAlignment', 'middle',  FNT{:});
-
-
+% Add Dynamics group 2 label
+spl         = subplot(40,1000,1);
+set(          spl, 'Position', [spX(1) spY(3) fS.sub.w(1)/3 fS.sub.h(3) ]);
+fill(         [-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
+set(          gca,'visible','off')
+FNT         = {'Rotation', 90, ...
+               'HorizontalAlignment', 'center', ...
+               'FontSize', 14, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
+txt         = text(spl,0, 0, 'Probabilistic','VerticalAlignment', 'middle',  FNT{:});
 
 
 %  ------------------------------------------------------------------------
-% Rewards label
-spl = subplot(40,1000,1)
-set(spl, 'Position', [spX(1) spY(1)+(fS.sub.h(1)*(1/3))  fS.sub.w(1)+(wSpace*(3/4)) fS.sub.h(1)*(2/3) ]);
-fill([-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
-set(gca,'visible','off')
-FNT = {'HorizontalAlignment', 'center', ...
-    'FontSize', 12, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
-txt=text(spl,0, 0, 'Rewards','VerticalAlignment', 'middle',  FNT{:});
+% Add Rewards label
+spl         = subplot(40,1000,1);
+set(          spl, 'Position', [spX(1) spY(1)+(fS.sub.h(1)*(1/3))  fS.sub.w(1)+(wSpace*(3/4)) fS.sub.h(1)*(2/3) ]);
+fill(         [-1 1 1 -1],[-1 -1 1 1],0.5*[1 1 1],'EdgeColor','none')
+set(          gca,'visible','off')
+FNT         = {'HorizontalAlignment', 'center', ...
+               'FontSize', 12, 'FontWeight', 'bold','Color', 1.*[1 1 1], };
+txt         = text(spl,0, 0, 'Rewards','VerticalAlignment', 'middle',  FNT{:});
 
 
 if sign(s.clc.startRew) > 0
@@ -454,100 +307,174 @@ if sign(s.clc.startRew) > 0
 else
     colormap(whitetocol(100,[ 0.7 0   0   ]))
 end
-% colormap(redbluecmapRory)
 
 end
 
-%% Create line plots
 
-iFig = 4;
-fig{iFig} = figure('Units', 'centimeters', 'Position', [5 5 20 4 ]);
+%% SECTION 2(A, TRAINING) =================================================
+% Demonstrate how to create bodypart-centred receptive fields using simple
+% ~ARTIFICIAL NEURAL NETWORKS~ for Q-learning
+%
+% NOTES:
+%
+% - While the ANN is trained, you will see 'countActions' increase until it
+% hits 50,000. This is the data generation part.
+%
+% - Next, the network will be trained. In this case the agent is therefore
+% trained using state transitions from a uniform policy, over 35 batches 
+% of 7,000 stored transitions.
+%
+% - Collecting data should take about 45 seconds, training the network should
+% take about 1.5 minutes
+%
+% - After running and training, the trained network will be stored in the
+% base path specified in the pop-up box at the start
+%
+% You can also skip this step and go straight to SECTION 2(B), which will
+% use a pretrained network from the repository
 
+tic
+clear s rS ntRS rtRS ytRS olRS
 
-qMults    = [1./3 2./3 1];
-discFacts = [0.3 0.7 1];
+% -------------------------------------------------------------------------
+% Base settings
+s.gol.alSpR         = 1;
+s.gol.alSpC         = [0 0];
+s.gol.randSpr       = [0 0];
+s.rp.maxActions     = 5e4; 
+s.lp.minExp         = 2e7;
+s.lp.b1Siz          = 1e4;
+s.rl.maxRetr        = 35;
+s.lp.bSiz           = 7e3;
+s.wrld.size         = [14 15];
+s.wrld.resetType    = 'BottomTop_InfLR';
+s.lp.epsilon        = 0.3;
+s.lmb.startCol      = 8;
+s.fl.trainTable     = 1; 
+s.fl.trainNet       = 1;
+s.lp.netS           = [9 9 9 9];
 
+% -------------------------------------------------------------------------
+% Expand these arrays/cells to make the demo run for mutliple different
+% types of settings
 
-for iDiscFact = 1:numel(discFacts)
-    s.clc.gammaVal          = discFacts(iDiscFact);
-    s.clc.randSpread        = {0 0 0};
-    s.clc.spreadProb        = {1 1 1};
-    s.clc.actConsequence    = [0 0 0];
-    newQ                    = CalcHPDirect(s);
-    qForLine(:,iDiscFact,:) = repmat( newQ(1,3:11,8) , [1 1 numel(qMults)]) .* permute(qMults,[1 3 2]) ;
+% For multiple gammas just set e.g. gammas  = [0.7; 0.3];
+gammas              = [0.7];
+
+% Add a cell with the movement options for each different run as e.g.:
+% actionNames={{'LEFT','STAY','RIGHT'}, '{STAY'}};
+% That will create an additional run in which the agent can only stay still
+actionNames         = {{'LEFT','STAY','RIGHT'}};
+
+% Add more rows to add additional goal dynamics. The first column indicates
+% how many additional possibly y-directions the object can move along, and
+% the second option indicates the number of additional possible
+% x-directions.
+goalDynamics        = [0 0];
+
+% -------------------------------------------------------------------------
+% Run each type of model
+for iM              = 1:length(gammas)
+    
+    % Change to current model settings
+    s.lp.gamma      = gammas(iM);
+    s.act.Name      = actionNames{iM};
+    s.gol.randSpr   = goalDynamics(iM,:);
+
+    % Run the model and learn Q (table)
+    disp(           'Generating data');
+    [s w storedEps dmyNet Qtable] = RunRLfun(s);
+    toc
+    disp(           'Training ANN')
+    [net Qtable1]   = RelearnNNFun(s,w,storedEps,dmyNet,Qtable);
+    toc
+
+    % Store results Structure (Not used here, but common in main analyses)
+    rS(iM).s        = s; 
+    rS(iM).Qtable   = Qtable1; 
+    rS(iM).w        = w; 
+    rS(iM).net      = net;
 end
 
-for iQMult = 1:numel(qMults)
-    subplot(1, numel(qMults), iQMult);
-    plot(9:-1:1, qForLine(:,:,iQMult),'-o'); hold on
-
-    bar(flipud(qForLine(:,:,iQMult)));
-
-    ylim([0 1.1]);
-    xlim([0.5 5.5]);
+svNm                = 'Demo_ANN_Results.mat';
+try
+    save(           svNm,'rS','-v7.3')
+catch
+    save(           svNm,'rS')
 end
 
-%% Save figures
+%% SECTION 2(B, VISUALISING) ==============================================
+% Demonstrate how to PLOT bodypart-centred receptive fields output by an
+% artificial neural network, as well as activity of individual 
+% artificial neurons
+
+load(               'Demo_ANN_Results.mat');
+
+% -------------------------------------------------------------------------
+% Plot a bodypart-centred Q-field (output by the ANN agent)
+
+% plot settings
+s.plt.plAct         = 2; % Plot value for the 'stay still' action
+s.plt.lmbCol        = 2:14; % Average over all possible limb positions
+s.plt.meanLimbCols  = 1; % Average over all possible limb positions
+s.plt.rowLims       = [1.5 13.5]; % Plot limits
+s.plt.colLims       = [3 12]; % Plot limits
+s.plt.cBarFl        = 1; % Turn colour bars on
+s.plt.titleFl       = 1; % Turn Title on
+fS.gridXstart       = -4.5; % Settings for grid on top of image
+fS.gridXstep        = 1;
+fS.gridYstart       = 2.5;
+fS.gridYstep        = 1;
+
+% Find the Output Q-values and the neural activities
+[Q,allNeurAct]      = CalcNetOutput(s,w,net);
+
+% [neurAct2] = CalcNeurAct(s,net,inpAll,w); % $
+
+% Create the image
+figure;
+DisplActValsFun(    s, w, Q); hold on;
+xlabel(             'Stimulus x-position')
+ylabel(             'Stimulus y-position')
+GridOverImage(      fS,gca);
+scatter(            0,12,400,'MarkerFaceColor',[1 1 1], 'MarkerEdgeColor',[0 0 0],'LineWidth',2);
+axis                square;
+colormap(           whitetocol(256,[0 0 0.7]));
 
 
-% % % for iF = 1:length(fig)
-% % %     set(fig{iF}, 'Renderer', 'painters'); % default, opengl
-% % %     saveas(fig{iF},['Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '_startRew' num2str(s.clc.startRew) '.eps'] , 'epsc')
-% % %     saveas(fig{iF},['Results\ForFigures\TheoreticalFig\BitsAndPieces\FromMatlab\BasePlots_DirectCalc' num2str(iF) '_startRew' num2str(s.clc.startRew) '.pdf'] , 'pdf')
-% % % end
+% -------------------------------------------------------------------------
+% Plot the activity of each individual neuron
+
+figure(             'Position',[50 50 1200 600]);
+s.plt.cBarFl        = 0;
+s.plt.titleFl       = 0;
+s.plt.plAct         = 1;
+nR                  = numel(s.lp.netS);
+nC                  = max(s.lp.netS);
+iPl                 = 1;
+for iR              = 1:nR
+    for iC              = 1:nC
+        subplot(            nR, nC, iPl);
+        DisplActValsFun(    s, w, permute(allNeurAct(:,:,:,:,iR,iC) , [3 4 1 2]) );
+        hold                on;
+        scatter(            0,12,50,'o','MarkerFaceColor',[1 1 1], 'MarkerEdgeColor',[0 0 0],'LineWidth',2);
+        set(                gca,'XTick',[]);
+        set(                gca,'YTick',[])
+        title(              ['Neur ' num2str(iC) ', Layer ' num2str(iR)]);
+        iPl                 = iPl + 1;
+    end
+end
+colormap(coltocol(  100,[0.7 0 0],[0 0 0.7]));
+
+
+toc
 
 %% FUNCTIONS
 
-function plotPos = MakeSubplotPos(fillSize, subSize, subSpace)
-plotPos=(1-fillSize)./2;
-for iX=2:length(subSize)
-    plotPos = [plotPos plotPos(end)+subSize(iX-1) + subSpace] ;
+function plotPos    = MakeSubplotPos(fillSize, subSize, subSpace)
+plotPos             = (1-fillSize)./2;
+for iX              = 2 : length(subSize)
+    plotPos             = [plotPos plotPos(end)+subSize(iX-1) + subSpace] ;
 end
 end
-
-
-function [newQ optQ] = CalcQDirect(s)
-newQ = zeros([s.wrld.size s.wrld.size]);
-optQ = zeros([s.wrld.size s.wrld.size]);
-
-% first initialise with the contact reward
-for iLC = 1:length(newQ)
-    newQ(:,iLC,s.clc.startSC,iLC) = s.clc.startRew;
-    optQ(:,iLC,s.clc.startSC,iLC) = s.clc.startRew;
-end
-
-% next, loop through rows backwards and add sums
-for iLC = 3:length(newQ)-2
-    for iSR = s.clc.startSC - 1 : -1 : 1
-        
-        for iSC = 3:size(newQ,4) - 2
-            colsBelow = iSC + s.clc.randSpread;
-            
-            % For each action, take the maximum expected value that it could lead
-            % to (i.e. accounting for random spread after action is taken)
-            newQ(:,iLC,iSR,iSC) = s.clc.gammaVal .* ...
-                    sum(s.clc.spreadProb .* ...
-                    squeeze(optQ(:,iLC,iSR + 1,colsBelow )),2);
-                
-            for iAct = 1:length(s.clc.actConsequence)
-                optQ(:,iLC,iSR,iSC) = max(optQ(:,iLC,iSR,iSC), s.clc.gammaVal .* ...
-                    sum(s.clc.spreadProb .* ...
-                    squeeze(optQ(:,iLC,iSR + 1,colsBelow + s.clc.actConsequence(iAct) )),2));
-            end
-                
-        end
-        
-    end
-end
-
-% Then set the value of the touch condition back to 0
-for iLC = 1:length(newQ)
-    newQ(:,iLC,s.clc.startSC,iLC) = 0;
-end
-
-end
-    
-
-
-
 

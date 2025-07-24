@@ -55,36 +55,6 @@ for iL=1:length(s.lp.netS)
     covVal(iL,s.lp.netS(iL)+1:end)=NaN;
 end
 
-% % % %[TBD: add this back in, from here]
-% % % %% Plot action values for multiple hand positions
-% % % % $$$$$ This needs to go into the actual displactvalsfun, I think?
-% % %
-% % % s.plt.vidFl=0;
-% % % s.plt.plotThrFl=0;
-% % % plAction=1;
-% % %
-% % % if s.plt.vidFl==1
-% % % v = VideoWriter(s.plt.vidFileName);
-% % % v.FrameRate=s.plt.vidFR;
-% % % open(v)
-% % % end
-% % %
-% % % for handCol= 5 %2:12
-% % % DisplActValsFun(s,w,Q);
-% % % hold on
-% % % scatter(handCol,handRow,'gx','LineWidth',20);
-% % % scatter(s.bdy.pos,handRow+1,'go','LineWidth',20);
-% % % hold off;
-% % % title(['Q(' s.act.Name{plAction} ')'])
-% % % if s.plt.vidFl==1
-% % % frame=getframe(gcf)
-% % % writeVideo(v,frame)
-% % % end
-% % % end
-% % % if s.plt.vidFl==1
-% % % close(v)
-% % % end
-% % % %[TBD: add this back in, to here]
 
 
     function [ r2 p2 covVal nA cD rD aD ] = MultNeurPlotFun(s,w,allNeurAct,handRow,cHC)
@@ -195,7 +165,7 @@ end
 
                 end
 
-                % [TBD: Sort this out at some point]
+                % [TBD: Sort this out]
                 try
                     nAtemp=nA(s.plt.stimRow,s.plt.stimCol,:);
                 catch
@@ -204,7 +174,7 @@ end
                 try
                     [r1,p1,rL,rU] = corrcoef(distanceVals(:),nAtemp(:));
                     cov1 = nancov(distanceVals(:),nAtemp(:));
-                    covVal(cL,cN)=cov1(2); % $$$ HERE covariance
+                    covVal(cL,cN)=cov1(2);
                     r2(cL,cN)=r1(2);
                     p2(cL,cN)=p1(2);
                 catch

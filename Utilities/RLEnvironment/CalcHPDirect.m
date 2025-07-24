@@ -1,7 +1,9 @@
-function [newQ, optQ] = CalcHPDirect(s, varargin)
+function [newQ] = CalcHPDirect(s, varargin)
 % -------------------------------------------------------------------------
 % CalcHPDirect(s, newQ, altQ)
-% Calculate Hit probabilities, using the method of CalcQDirect
+% Calculate TABULAR Hit probabilities or Q-values
+
+s = DefaultSettings(s);
 
 nA = size(s.clc.actConsequence,1); % Number of actions
 
@@ -45,9 +47,9 @@ for iVol = 1:length(s.clc.startSZ)
             % If there are multiple rewards, it is the hand sliding over the
             % body situation, so I shouls split the rewards accordingly
             for iSplitInd = 1:length(s.clc.rewSplitInd)
-            if iVol >= s.clc.rewSplitInd(iSplitInd) & iVol < s.clc.rewSplitInd(iSplitInd+1)
-                newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew(iSplitInd);
-            end
+                if iVol >= s.clc.rewSplitInd(iSplitInd) & iVol < s.clc.rewSplitInd(iSplitInd+1)
+                    newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew(iSplitInd);
+                end
             end
         end
     else
@@ -95,14 +97,12 @@ maxActDists = maxActDists + cellfun(@(dim) max(abs(dim)), s.clc.randSpread);
 maxActDists = maxActDists + cellfun(@(dim) max(abs(dim)), s.clc.sensSpread);
 
 % next, loop through rows backwards and add sums
-% % % for iSR = max(s.clc.startSR) - 1 : -1 : maxActDists(1)
 for iIt    = 1:s.clc.nReps
 for iSweeps = 1:s.clc.nSteps % this can be used to sweep through all values first, before using the updates values to continue Q-value calculation
 oldQ = newQ;
 for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
-%     iSR
 
-    % reverse direction to get symmetric result if doing more than 1
+    % Reverse direction to get symmetric result if doing more than 1
     % repetition
     if mod(iIt,2) == 0
         colOrder = [(1 + maxActDists(2)) : (s.wrld.size(2) - maxActDists(2))];
@@ -113,12 +113,7 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     for iSC = colOrder
         for iSZ = 1 + (maxActDists(3)-1) : s.wrld.size(3) - (maxActDists(3)-1)
 
-
             % Only update Q if it is not an 'originally rewarded' location
-            % StartLocs = 
-% % %             if any(all( ...
-% % %                     [iSR iSC iSZ]' == ...
-% % %                     [s.clc.startSR; s.clc.startSC ; s.clc.startSZ]))
             checkRows = all( [iSC iSZ]' == [s.clc.startSC ; s.clc.startSZ]);
             if iSR >= s.clc.startSR(checkRows)
                 % Do nothing
@@ -146,17 +141,9 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                 sprPrC  = s.clc.spreadProb{2};
                 sprPrZ  = s.clc.spreadProb{3};
 
-
-% % %                 % Define sensory spread
-% % %                 if s.clc.sensSpreadPostFl == 1
-% % %                     snsSprR = 0;
-% % %                     snsSprC = 0;
-% % %                     snsSprZ = 0;
-% % %                 else
-                    snsSprR = s.clc.sensSpread{1};
-                    snsSprC = s.clc.sensSpread{2};
-                    snsSprZ = s.clc.sensSpread{3};
-% % %                 end
+                snsSprR = s.clc.sensSpread{1};
+                snsSprC = s.clc.sensSpread{2};
+                snsSprZ = s.clc.sensSpread{3};
 
                 snsPrR  = s.clc.sensProb{1};
                 snsPrC  = s.clc.sensProb{2};
@@ -185,16 +172,16 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                 for iAct = 1:nA
 
                     % DEBUGGING
-                    if iAct == 2 & ...
-                            iSR == 12 & ... 11 & ...
-                            iSC == 7 & ... 11
-                            iSZ == 1 %13
+                    if iAct == 2 ...
+                        % & ...
+                        %    iSR == 12 & ... 11 & ...
+                        %    iSC == 7 & ... 11
+                        %    iSZ == 1 %13
+                        % any(s.clc.startSR - 1 == iSR) & ...
+                        %    any(s.clc.startSC)     == iSC & ...
+                        %    any(s.clc.startSZ)     == iSZ,
 
-% %                                        any(s.clc.startSR - 1 == iSR) & ...
-% %                                        any(s.clc.startSC)     == iSC & ...
-% %                                        any(s.clc.startSZ)     == iSZ,
-
-                        disp('test')
+                        % disp('test')
                     end
 
                     % Find expected value across future possible states: loop
@@ -214,17 +201,7 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                     nextZ = rndSprZ(iSprZ) + nextPos(3);
                                     nextZ = nextZ + snsSprZ(iSnsZ);
                                 
-
-                                
                                 % add to possible future qs
-                                % % %                                 nextQ = [nextQ ; ...
-% % %                                     sprPrR(iSprR) .* sprPrC(iSprC) .* sprPrZ(iSprZ) .* ...
-% % %                                     s.clc.gammaVal .* ...
-% % %                                     squeeze( max( newQ(:,...
-% % %                                     nextR + s.clc.actConsequence(iAct,1) , ...
-% % %                                     nextC + s.clc.actConsequence(iAct,2) , ...
-% % %                                     nextZ + s.clc.actConsequence(iAct,3)  ) ))];
-
                                 actNextR = nextR + s.clc.actConsequence(iAct,1);
                                 actNextC = nextC + s.clc.actConsequence(iAct,2);
                                 actNextZ = nextZ + s.clc.actConsequence(iAct,3);
@@ -256,14 +233,14 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                         if squeeze( checkCollision(nextAct,...
                                                 rR(iRR) , ...
                                                 cC(iRR) , ...
-                                                zZ(iRR)  ) ) == 1,
+                                                zZ(iRR)  ) ) == 1
                                             tmpQ = s.clc.startRew;
                                         end
                                     else
                                         if squeeze( max( checkCollision(:,...
                                                 rR(iRR) , ...
                                                 cC(iRR) , ...
-                                                zZ(iRR)  ) )) == 1,
+                                                zZ(iRR)  ) )) == 1
                                             tmpQ = s.clc.startRew;
                                         end
                                     end 
@@ -327,27 +304,6 @@ end
 end
 % iIt
 end
-
-% % % % Do sensory/uncertainty blurring after calculation, if the appropriate flag has
-% % % % been set
-% % % if s.clc.sensSpreadPostFl == 1
-% % %     snsSprR = s.clc.sensSpread{1};
-% % %     snsSprC = s.clc.sensSpread{2};
-% % %     snsSprZ = s.clc.sensSpread{3};
-% % % 
-% % %     % Initialise 'noise matrix', which is then added to 'real' Q values
-% % % 
-% % %     for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
-% % %         for iSC = colOrder
-% % %             for iSZ = 1 + (maxActDists(3)-1) : s.wrld.size(3) - (maxActDists(3)-1)
-% % %             end
-% % %         end
-% % %     end
-% % % 
-% % % end
-
-
-
 
 
 % Then set the value of the touch condition back to 0

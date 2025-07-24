@@ -31,7 +31,7 @@ global world2D;
 global tempworld2D;
 
 % =========================================================================
-% Make any changes to the default settings
+% Complete the settings using defaults
 s=DefaultSettings(s);
 % If the body can move, add body movement actions: add  1 'action' for 
 % each possible combination of action (not the most realisitic but is simple)
@@ -102,7 +102,7 @@ w.world2D=world2D;
 rFl=0;
 
 % -------------------------------------------------------------------------
-% Initialise any possible tool
+% Initialise tool
 w.lmb.ToolRows=s.lmb.ToolRows;
 if max(w.lmb.ToolRows~=0)
     w.lmb.ToolPresent=1;
@@ -191,7 +191,6 @@ w.rtTask.percieveTouch=0; % The touch value for the RT task
 % position of the stimulus. For now I will only give x position
 if s.fl.newTable==1
     Q = zeros(size(world2D,1),size(world2D,2),size(world2D,1),size(world2D,2),s.act.numA);
-    % Q = rand(size(world2D,1),size(world2D,1),size(world2D,1),size(world2D,1),s.act.numA);
     Qtable=Q;
 %     firstPass=1;
 else
@@ -275,7 +274,6 @@ for i=1:s.rp.numIter
     status = -1;
     actionsWithinRun =0;
     
-    tic
     while actionsWithinRun < s.rp.maxActions %status ~= GOAL
         
         % -----------------------------------------------------------------
@@ -594,7 +592,6 @@ for i=1:s.rp.numIter
         
         actionsWithinRun=actionsWithinRun+1;
     end
-    toc
     
     iterationCount(i,1) = countActions;
     

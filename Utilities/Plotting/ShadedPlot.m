@@ -25,7 +25,7 @@ patch(x,y,opts.c,'EdgeColor','None','FaceAlpha',opts.FaceAlpha,'HandleVisibility
 
 switch opts.PlotMean
     case 1
-        plot(xVals,yValsMean,'LineWidth',2)
+        plot(xVals,yValsMean,'LineWidth',2,'Color', opts.c)
 end
 
 end

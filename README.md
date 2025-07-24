@@ -17,7 +17,7 @@ addpath(genpath('chosen_filepath\EgocentricValueMaps'));
 ## Usage Examples
 
 ### Run analyses for figures and stats
-The scripts necessary to create each figure and the corresponding stats are in the 'Figures' and 'Stats' folders. 
+The scripts necessary to create each figure and the corresponding stats are in the 'Figures' and 'Stats' folders. $$$ NO MORE STATS --> all in figures $$$
 
 ### Generate data
 To generate the simulated data for both ANN and tabular simulations, run CreateDataForPlots.m

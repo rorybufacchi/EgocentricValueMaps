@@ -1,4 +1,4 @@
-function [newQ] = CalcQDirect(s, varargin)
+function [newQ, optQ] = CalcQDirect(s, varargin)
 % -------------------------------------------------------------------------
 % CalcQDirect(s)
 % Calculate Q values, or Hit probabilities
@@ -8,11 +8,6 @@ s = DefaultSettings(s);
 nA = size(s.clc.actConsequence,1); % Number of actions
 
 if isempty(varargin)
-    varargin = {[],[]};
-end
-
-% Allow loading of previously calculated Q values
-if isempty(varargin{1})
     newQ = zeros([nA s.wrld.size]);
 else
     newQ = varargin{1};
@@ -21,19 +16,6 @@ else
     if size(newQ,1) < nA
         actDiff = nA - size(newQ,1);
         newQ(end+ [1 : actDiff],:,:,:) = zeros([actDiff size(newQ,[2 3 4]) ] );
-    end
-end
-
-
-% Provide alternative Q values for following a different policy
-if isempty(varargin{2})
-    altQ = zeros([nA s.wrld.size]);
-else
-    altQ = varargin{2};
-    % Take into account the possibility of adding actions
-    if size(altQ,1) < nA
-        actDiff = nA - size(altQ,1);
-        altQ(end+ [1 : actDiff],:,:,:) = zeros([actDiff size(altQ,[2 3 4]) ] );
     end
 end
 
@@ -46,7 +28,7 @@ for iVol = 1:length(s.clc.startSZ)
         else
             newQ(:,s.clc.startSR(iVol):end,s.clc.startSC(iVol),s.clc.startSZ(iVol)) = s.clc.startRew;
         end
-    else
+        else
         % If there are multiple rewards, it is the hand sliding over the
         % body situation, so I shouls split the rewards accordingly
         for iSplitInd = 1:length(s.clc.rewSplitInd)
@@ -91,10 +73,13 @@ maxActDists = maxActDists + cellfun(@(dim) max(abs(dim)), s.clc.randSpread);
 maxActDists = maxActDists + cellfun(@(dim) max(abs(dim)), s.clc.sensSpread);
 
 % next, loop through rows backwards and add sums
+% % % for iSR = max(s.clc.startSR) - 1 : -1 : maxActDists(1)
 for iIt    = 1:s.clc.nReps
 for iSweeps = 1:s.clc.nSteps % this can be used to sweep through all values first, before using the updates values to continue Q-value calculation
 oldQ = newQ;
 for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
+    iSR
+
 
     % reverse direction to get symmetric result if doing more than 1
     % repetition
@@ -105,10 +90,23 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
     end
     
     for iSC = colOrder
-% % %         for iSZ = 1 + maxActDists(3) : s.wrld.size(3) - maxActDists(3)
-            for iSZ = 1 + (maxActDists(3)-1) : s.wrld.size(3) - (maxActDists(3)-1)
+
+
+        % DEBUGGING
+        if iSC == 15
+            disp('test')
+        end
+
+
+
+        for iSZ = 1 + maxActDists(3) : s.wrld.size(3) - maxActDists(3)
+
 
             % Only update Q if it is not an 'originally rewarded' location
+            % StartLocs = 
+% % %             if any(all( ...
+% % %                     [iSR iSC iSZ]' == ...
+% % %                     [s.clc.startSR; s.clc.startSC ; s.clc.startSZ]))
             if s.clc.thinLimbsFl == 0
                 checkRows = all( [iSC iSZ]' == [s.clc.startSC ; s.clc.startSZ]);
             else
@@ -163,22 +161,26 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                         sprPrC  = [.5 .5];
                         sprPrZ  = 1;
                     end
+
+                    if all([iSR iSC iSZ] == s.clc.specialTraject(end-1,:))
+                        disp('test')
+                    end
                 end
 
 
                 for iAct = 1:nA
 
                     % DEBUGGING
-                    if iAct == 2 ...
-                        % & ...
-                        %    iSR == 12 & ... 11 & ...
-                        %    iSC == 7 & ... 11
-                        %    iSZ == 1 %13
-                        % any(s.clc.startSR - 1 == iSR) & ...
-                        %    any(s.clc.startSC)     == iSC & ...
-                        %    any(s.clc.startSZ)     == iSZ,
+                    if iAct == 1 & ... & ...
+                            iSR == 76 & ... %47 & ...
+                            iSC == 20 & ... %11 & ... 11
+                            iSZ == 13 %15 %13
 
-                        % disp('test')
+% %                                        any(s.clc.startSR - 1 == iSR) & ...
+% %                                        any(s.clc.startSC)     == iSC & ...
+% %                                        any(s.clc.startSZ)     == iSZ,
+
+                        disp('test')
                     end
 
                     % Find expected value across future possible states: loop
@@ -197,8 +199,18 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 for iSnsZ = 1:length(snsSprZ)
                                     nextZ = rndSprZ(iSprZ) + nextPos(3);
                                     nextZ = nextZ + snsSprZ(iSnsZ);
-             
+                                
+
+                                
                                 % add to possible future qs
+                                % % %                                 nextQ = [nextQ ; ...
+% % %                                     sprPrR(iSprR) .* sprPrC(iSprC) .* sprPrZ(iSprZ) .* ...
+% % %                                     s.clc.gammaVal .* ...
+% % %                                     squeeze( max( newQ(:,...
+% % %                                     nextR + s.clc.actConsequence(iAct,1) , ...
+% % %                                     nextC + s.clc.actConsequence(iAct,2) , ...
+% % %                                     nextZ + s.clc.actConsequence(iAct,3)  ) ))];
+
                                 actNextR = nextR + s.clc.actConsequence(iAct,1);
                                 actNextC = nextC + s.clc.actConsequence(iAct,2);
                                 actNextZ = nextZ + s.clc.actConsequence(iAct,3);
@@ -223,26 +235,12 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 tmpQ = NaN;
                                 if s.clc.rewardInterceptFl == 1
                                     for iRR = 1:numel(rR)
-                                    % Allow for using alternative policy
-                                    if s.clc.useAltPolicyFl == 1
-                                        [dmyQ, nextAct] = max( altQ(:,...
-                                        actNextR , ...
-                                        actNextC , ...
-                                        actNextZ  ) );
-                                        if squeeze( checkCollision(nextAct,...
-                                                rR(iRR) , ...
-                                                cC(iRR) , ...
-                                                zZ(iRR)  ) ) == 1
-                                            tmpQ = s.clc.startRew;
-                                        end
-                                    else
                                         if squeeze( max( checkCollision(:,...
                                                 rR(iRR) , ...
                                                 cC(iRR) , ...
                                                 zZ(iRR)  ) )) == 1
                                             tmpQ = s.clc.startRew;
                                         end
-                                    end 
                                     end
                                 end
 
@@ -251,27 +249,19 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                 % q-value of the place the stimulus ends up
                                 % in
                                 if isnan(tmpQ)
-                                    % Allow for using alternative policy
-                                    if s.clc.useAltPolicyFl == 1
-                                        [~, nextAct] = max( altQ(:,...
-                                        actNextR , ...
-                                        actNextC , ...
-                                        actNextZ  ) );
-                                    else
-                                        nextAct = 1:size(oldQ,1);
-                                    end
                                     switch s.lp.alg
                                         case 'Q'
-                                            tmpQ = squeeze( max( oldQ(nextAct,...
+                                            tmpQ = squeeze( max( oldQ(:,...
                                                 actNextR , ...
                                                 actNextC , ...
                                                 actNextZ  ) ));
                                         case 'SARSA'
-                                            tmpQ = squeeze( mean( oldQ(nextAct,...
+                                            tmpQ = squeeze( mean( oldQ(:,...
                                                 actNextR , ...
                                                 actNextC , ...
                                                 actNextZ  ) ));
                                     end
+                                   
                                 end
 
                                 % Then update the next possible Q value
@@ -280,7 +270,8 @@ for iSR     = s.wrld.size(1) - maxActDists(1) : -1 : maxActDists(1) +1
                                     snsPrR(iSnsR) .* snsPrC(iSnsC) .* snsPrZ(iSnsZ) .* ...
                                     s.clc.gammaVal .* ...
                                     tmpQ];
- 
+
+
                             end
                             end
                         end
@@ -307,6 +298,10 @@ end
 iIt
 end
 
+
+% $$$
+% !!!!!!!!!!!!!!!!!!!!!!!! THIS NEEDS TO BE CHANGED BACK !!!!!!!!!!!!!!!!!!
+% $$$
 
 % Then set the value of the touch condition back to 0
 for iVol = 1:length(s.clc.startSZ)

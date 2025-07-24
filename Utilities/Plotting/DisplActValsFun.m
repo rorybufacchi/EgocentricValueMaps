@@ -1,4 +1,12 @@
-function [bestQ squishQs rDist pDist] = DisplActValsFun(s,w,Q)
+function [bestQ squishQs] = DisplActValsFun(s,w,Q)
+%[bestQ squishQs] = DisplActValsFun(s,w,Q) 
+% Plots the action values Q 
+%       in the world w
+% Plot style is defined by settings s
+%   Options: s.plt.pltType can be 'Imagesc' for a 2D plot, or'Binned' for a
+%            1D plot. If using 'Binned' the x-axis can be changed by
+%            setting 's.plt.distanceType' to 'Absolute', 'Row', 'Column', 
+%            'AbsRow', or 'AbsColumn'.
 
 s = DefaultSettings(s);
 
@@ -9,36 +17,6 @@ if isempty(s.plt.lmbRow)
 else
     handRow=s.plt.lmbRow;
 end
-
-
-% % % -------------------------------------------------------------------------
-% % % Calulculate distance correlations
-% % [cD,rD,aD] = CalcDist1D(s,w,s.plt.lmbCol,handRow);
-% %
-% % switch s.plt.distanceType
-% %     case 'Absolute'
-% %         distanceVals=aD;
-% %     case 'Row'
-% %         distanceVals=rD;
-% %     case 'Column'
-% %         distanceVals=cD;
-% %     case 'AbsRow'
-% %         distanceVals=abs(rD);
-% %     case 'AbsColumn'
-% %         distanceVals=abs(cD);
-% % end
-% % distanceVals=distanceVals(s.plt.stimRow,s.plt.stimCol,:);
-% %
-% % for iAct = 1:s.act.numA
-% %     qTmp = squeeze(Q(handRow,s.plt.lmbCol,s.plt.stimRow,s.plt.stimCol,iAct));
-% %
-% %     [rTmp,pTmp,rLTmp,rUTmp] = corrcoef(distanceVals(:),qTmp(:));
-% %
-% %     rDist(iAct)=rTmp(2);
-% %     pDist(iAct)=pTmp(2);
-% % end
-
-
 
 
 % -------------------------------------------------------------------------
@@ -90,7 +68,9 @@ switch s.plt.pltType
                     end
                     % caxis([-1 1])
                     %     title(['Q(' s.act.Name{kAction} '), NN'])
-                    title(['Q(' s.act.Name{kAction} ')'])
+                    if s.plt.titleFl == 1
+                        title(['Q(' s.act.Name{kAction} ')'])
+                    end
                     ylim(s.plt.rowLims);
                     if s.plt.meanLimbCols==1
                         xlim(colVal(1)+s.plt.colLims+[0 -1]);
@@ -136,11 +116,6 @@ switch s.plt.pltType
                 Qstay=squeeze(Q(handRow,handCol,:,:,2))>QmaxTemp;
                 bestQ(Qstay)=0;
                 
-                % % %         [maxVal bestQ]=max(Q(handRow,handCol,:,:,:),[],5);
-                % % %         bestQ=squeeze(bestQ);
-                % % % % %
-                % % % % %         axis xy
-                
                 if s.plt.ON==1
                     imagesc(bestQ); axis xy; hold on
                     
@@ -155,12 +130,7 @@ switch s.plt.pltType
                     
                     view(180,90);
                 end
-                
-                
-                
             end
-            
-            
         end
         
         
@@ -188,90 +158,6 @@ switch s.plt.pltType
         distanceVals=distanceVals(s.plt.stimRow,s.plt.stimCol,:);
         
         BinPlot(distanceVals,Qtemp,s.plt.fS,s.plt.varargs{:})
-        % %             BINPLOT HERE
-        % % %     % THIS IS OLD, keep FOR LEGACY PURPOSES. Remove later
-        % % %     else
-        % % %
-        % % %         %     set(0,'CurrentFigure',hActVal)
-        % % %         % figure,
-        % % %         for kAction=1:s.act.numA
-        % % %
-        % % %             try
-        % % %                 subplot(2,s.act.numA*2,kAction)
-        % % %                 ImagescInterp(squeeze(Qtable(handRow,handCol,:,:,kAction)),s.plt.intrpFact); if s.plt.cBarFl==1, colorbar; end
-        % % %                 % caxis([-1 1])
-        % % %                 title(['Q(' s.act.Name{kAction} '), table'])
-        % % %                 ylim(rowLims);
-        % % %                 drawnow
-        % % %             end
-        % % %
-        % % %             subplot(2,s.act.numA*2,s.act.numA + kAction )
-        % % %             ImagescInterp(squeeze(Q(handRow,handCol,:,:,kAction)),s.plt.intrpFact); if s.plt.cBarFl==1, colorbar; end
-        % % %             % caxis([-1 1])
-        % % %             title(['Q(' s.act.Name{kAction} '), NN'])
-        % % %             ylim(rowLims);
-        % % %             drawnow
-        % % %
-        % % %         end
-        % % %
-        % % %         try
-        % % %             subplot(2,s.act.numA*2,s.act.numA*2 + 2)
-        % % %             pickRight=Qtable(:,:,:,:,rVal)-Qtable(:,:,:,:,lVal);
-        % % %             ImagescInterp(squeeze(pickRight(handRow,handCol,:,:,1)),s.plt.intrpFact); if s.plt.cBarFl==1, colorbar; end
-        % % %             caxis([-1 1])
-        % % %             title('TABLE: RIGHT = 1, LEFT = 0.');
-        % % %             colLims=max(abs(caxis));
-        % % %             caxis([-colLims colLims]);
-        % % %             ylim(rowLims);
-        % % %             drawnow
-        % % %         end
-        % % %
-        % % %         subplot(2,s.act.numA*2,s.act.numA*4 - 2)
-        % % %         pickRight=Q(:,:,:,:,rVal)-Q(:,:,:,:,lVal);
-        % % %         ImagescInterp(squeeze(pickRight(handRow,handCol,:,:,1)),s.plt.intrpFact); if s.plt.cBarFl==1, colorbar; end
-        % % %         colLims=max(abs(caxis));
-        % % %         caxis([-colLims colLims]);
-        % % %         ylim(rowLims);
-        % % %         title('NN: RIGHT +ve, LEFT -ve ');
-        % % %         colormap jet
-        % % %         drawnow
-        % % %
-        % % %         subplot(2,s.act.numA*2,s.act.numA*4-1)
-        % % %         pickRight=Q(:,:,:,:,rVal)>Q(:,:,:,:,lVal);
-        % % %         ImagescInterp(squeeze(pickRight(handRow,handCol,:,:,1)),s.plt.intrpFact); if s.plt.cBarFl==1, colorbar; end
-        % % %         colLims=max(abs(caxis));
-        % % %         caxis([-colLims colLims]);
-        % % %         ylim(rowLims);
-        % % %         title('NN: RIGHT = 1, LEFT = 0.');
-        % % %         colormap jet
-        % % %         drawnow
-        % % %
-        % % %         subplot(2,s.act.numA*2,s.act.numA*4)
-        % % %         [maxValue maxAction]=max(Q(:,:,:,:,:),[],5);
-        % % %         ImagescInterp(squeeze(maxAction(handRow,handCol,:,:,1)),s.plt.intrpFact); if s.plt.cBarFl==1, colorbar; end
-        % % %         caxis([1 s.act.numA]);
-        % % %         ylim(rowLims);
-        % % %         title(['NN: LEFT = 1, STAY = 2, RIGHT =3 ']);
-        % % %         colormap jet
-        % % %         drawnow
-        % % %
-        % % %         subplot(2,s.act.numA*2,s.act.numA*2 + 1)
-        % % %         handPoss=zeros(size(w.world2D));
-        % % %         handPoss(handRow,handCol)=1;
-        % % %         ImagescInterp(handPoss,s.plt.intrpFact);
-        % % %         caxis([-1 1]);
-        % % %         ylim(rowLims);
-        % % %         %     title(['Hand Position, actionNum=' num2str(countActions)]);
-        % % %         title(['Hand Position']);
-        % % %         if s.plt.cBarFl==1, colorbar; end
-        % % %         drawnow
-        % % %
-        % % %     end
+
 end
 
-
-%%
-
-% $$$ OK THIS IS A PROBLEM that its' been putting things onto handrow 19
-% even though that's wrong --> find out why
-% ImagescInterp(squeeze(nanmean(Qtable(14,9,:,:,1),[5 2])),s.plt.intrpFact); if s.plt.cBarFl==1, colorbar; end;

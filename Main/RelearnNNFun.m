@@ -30,8 +30,6 @@ function [net, Qtable, perf] = RelearnNNFun(s,w,storedEps,net,Qtable,extraInput)
 %
 
 
-tic
-
 if ~exist('extraInput','var')
     extraInput = [];
 end
@@ -182,7 +180,7 @@ for kBatch=1:s.rl.maxRetr
             %     net.trainFcn = 'traingd';
             net.trainFcn = 'trainlm';
             net.trainParam.showWindow = 0;
-            net.trainParam.epochs=retrEps; %net.trainParam.epochs=10;
+            net.trainParam.epochs=retrEps;
             
             % Make it able to learn a bit better for vision, which is much
             % tougher (I think)
@@ -303,7 +301,6 @@ for kBatch=1:s.rl.maxRetr
     end
     
 end
-toc
 
 end
 
