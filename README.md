@@ -1,7 +1,9 @@
 # Egocentric Value maps
 This contains the scripts necessary to reproduce the simulations and analyses for the Egocentric Value maps manuscript
 
-*For any questions, you can contact me rory.bufacchi@gmail.com*
+(Bufacchi et al., Nat Neurosci 28, 1336–1347 (2025). https://doi.org/10.1038/s41593-025-01958-7)
+
+*For any questions, you can contact me at rory.bufacchi@gmail.com*
 
 ## System Requirements
 All plots and analyses were performed on Matlab 2022b, but any version of Matlab from 2022a onward should do.
