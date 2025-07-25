@@ -1,7 +1,9 @@
 # Egocentric Value maps
 This contains the scripts necessary to reproduce the simulations and analyses for the Egocentric Value maps manuscript
 
-*NOTE: this repository is still in the process of being cleaned up*
+(Bufacchi et al., Nat Neurosci 28, 1336–1347 (2025). https://doi.org/10.1038/s41593-025-01958-7)
+
+*For any questions, you can contact me at rory.bufacchi@gmail.com*
 
 ## System Requirements
 All plots and analyses were performed on Matlab 2022b, but any version of Matlab from 2022a onward should do.
@@ -16,24 +18,28 @@ addpath(genpath('chosen_filepath\EgocentricValueMaps'));
 
 ## Usage Examples
 
+### Demo
+Demo.m shows how to generate and visualise bodypart-centred Q-fields using tabular learning (SECTION 1), and simple neural networks (SECTION 2).
+
 ### Run analyses for figures and stats
-The scripts necessary to create each figure and the corresponding stats are in the 'Figures' and 'Stats' folders. $$$ NO MORE STATS --> all in figures $$$
+The scripts necessary to create each figure and the corresponding stats are in the 'Figures' folder. If you donwload the precomputed data from https://doi.org/10.5281/zenodo.16408688, you will be able to run all the "*Figures*" .m files directly. Just change the line
+```
+dataPath                    = '';
+```
+at the top of the .m file to be whatever folder you have unzipper the 'Results' folder into. Alternatively, select the appropriate folder when prompted by the pop-up. 
 
 ### Generate data
-To generate the simulated data for both ANN and tabular simulations, run CreateDataForPlots.m
+To generate the simulated data for both ANN and tabular simulations, run (sections of) *CreateDataForPlots_Final.m*
 
 *! ----------------WARNING:-----------------!*
 
-This will take VERY long to run. It is recommended to either run sub-sections of this file independently, or better yet just load the the files from the online Matlab Workspaces (also shown below), while running the scripts in the 'Figures' folder. 
+This will take VERY long to run. I *highly recommend* downloading the precomputed data from https://doi.org/10.5281/zenodo.16408688. If you want to follow the full analyses step by step, I  recommended running the sub-sections of *CreateDataForPlots_Final.m* individually, rather than just running the whole .m file as that willtake forever.
 
 
 ### MATLAB Workspaces
-The necessary MATLAB workspaces for this project can be downloaded from the following link(s):
+The necessary MATLAB workspaces for this project can be downloaded from the following link:
 
-*----------------WORK IN PROGRESS----------------*
+https://doi.org/10.5281/zenodo.16408688
 
-- [Workspace 1](https://zenodo.org/record/XXXX) (Hosted on Zenodo)
-- [Workspace 2](https://figshare.com/articles/dataset/YYYY) (Hosted on Figshare)
-
-*----------------WORK IN PROGRESS----------------*
-
+- For recreating figures and stats, the appropriate workspace for each Figure is loaded at the top of the corresponding .m file.
+- In CreateDataForPlots_Final.m, the appropriate workspace is loaded at the top of each sub-section of the .m file.
