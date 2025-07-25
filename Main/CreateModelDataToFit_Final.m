@@ -8,14 +8,17 @@
 % =========================================================================
 %                              !!! WARNING !!!
 % =========================================================================
-% Running this whole script uo to a day to run
+% Running this whole script multiple days to run
 % It is !!! HIGHLY RECOMMENDED !!! to either: 
-%       --------------------------   
+%
+%       
 % A) Skip using this script, and instead just load the pre-computed 
-%    outputs , which are available $$$ in the 'GeneratedData' sub-directory
-% OR      -------------
-% B) Run each section separately:
-%    some sections can take a long time to run
+%    outputs , which are available at 
+%    ~~~~~~~~~~~~~ https://doi.org/10.5281/zenodo.16408688 ~~~~~~~~~~~~~
+%
+% OR      
+% B) Run each section separately, jsut for the figure you are trying to recreate 
+%
 % =========================================================================
 %
 
@@ -24,6 +27,11 @@ cFileName       = matlab.desktop.editor.getActiveFilename;
 codePath        = cFileName(1:end-33);
 addpath(        genpath(codePath));
 
+
+warning(sprintf([' \n \n I highly recommend downloading the precomputed results at \n ' ...
+    '~~~~~~~~~~~~~ https://doi.org/10.5281/zenodo.16408688 ~~~~~~~~~~~~~ \n ' ...
+    'If you just want to reproduce a figure. \n The code in this file contains ' ...
+    'all performed analyses and is quite slow. \n \n']));
 
 %% -------------------------------------------------------------------------
 % Set base settings

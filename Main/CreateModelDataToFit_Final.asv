@@ -10,9 +10,12 @@
 % =========================================================================
 % Running this whole script uo to a day to run
 % It is !!! HIGHLY RECOMMENDED !!! to either: 
+%
 %       --------------------------   
 % A) Skip using this script, and instead just load the pre-computed 
-%    outputs , which are available $$$ in the 'GeneratedData' sub-directory
+%    outputs , which are available at 
+%    ~~~~~~~~~~~~~ https://doi.org/10.5281/zenodo.16408688 ==============
+%
 % OR      -------------
 % B) Run each section separately:
 %    some sections can take a long time to run

@@ -1506,7 +1506,7 @@ for iTyp = 1:length(neurTypes) % Neuron type
         % Prepare base files for loading
         cFiles = dir([bFld '*' regTypes{iReg} '*_' neurTypes{iTyp} '*' netSize '*.mat']);
         for iRun = 1:length(cFiles)
-            load([bFold cFiles(iRun).name]);
+            load([bFld cFiles(iRun).name]);
             rSall(1:numel(rS),iRun,iTyp,iReg) = rS(:);
 
             for iM = 1:numel(rS)
